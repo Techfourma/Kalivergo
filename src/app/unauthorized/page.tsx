@@ -21,7 +21,7 @@ export default async function UnauthorizedPage() {
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-purple-600/20 via-pink-500/20 to-red-500/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-80 h-80 bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* Header / Navbar dengan Logo Techfourma */}
+      {/* Header / Navbar dengan Logo Kalivergo */}
       <div className="relative z-20">
         <NavbarWrapper user={session?.user || null} />
       </div>
@@ -93,7 +93,7 @@ export default async function UnauthorizedPage() {
             {/* Bottom Info Tag */}
             <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-center gap-2 text-xs text-gray-500">
               <Lock className="w-3.5 h-3.5 text-gray-400" />
-              <span>Techfourma Security Protocol &bull; Safe &amp; Stable</span>
+              <span>Kalivergo Security Protocol &bull; Safe &amp; Stable</span>
             </div>
           </div>
         </div>
@@ -101,7 +101,7 @@ export default async function UnauthorizedPage() {
 
       {/* Footer */}
       <footer className="relative z-10 py-4 text-center text-xs text-gray-500 border-t border-white/5">
-        Techfourma &copy; {new Date().getFullYear()} - Class Management System
+        Kalivergo &copy; {new Date().getFullYear()} - Class Management System
       </footer>
     </div>
   );

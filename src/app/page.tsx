@@ -163,12 +163,12 @@ export default function PlatformLandingPage() {
             <button
               onClick={() => router.push("/")}
               className="flex items-center gap-3 cursor-pointer"
-              aria-label="Beranda Techfourma"
+              aria-label="Beranda Kalivergo"
             >
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 shadow-lg shadow-primary-500/30 overflow-hidden">
                 <Image
                   src="/logo.jpg"
-                  alt="Techfourma Logo"
+                  alt="Kalivergo Logo"
                   width={36}
                   height={36}
                   className="object-cover"
@@ -176,7 +176,7 @@ export default function PlatformLandingPage() {
                 />
               </div>
               <span className="text-xl font-bold font-display">
-                Techfourma
+                Kalivergo
               </span>
             </button>
 
@@ -396,7 +396,7 @@ export default function PlatformLandingPage() {
           <section id="keunggulan" className="py-20">
             <div className="text-center max-w-2xl mx-auto mb-14">
               <p className="text-sm font-semibold text-green-400 mb-2">
-                MENGAPA TECHFOURMA
+                MENGAPA KALIVERGO
               </p>
               <h2 className="text-3xl sm:text-4xl font-bold font-display">
                 Dibangun untuk Skala dan Keamanan
@@ -438,7 +438,7 @@ export default function PlatformLandingPage() {
                 Siap Membawa Kelasmu ke Era Digital?
               </h2>
               <p className="relative mt-4 text-gray-300 max-w-xl mx-auto">
-                Bergabunglah dengan Techfourma dan rasakan kemudahan mengelola
+                Bergabunglah dengan Kalivergo dan rasakan kemudahan mengelola
                 tugas, keuangan, dan kegiatan kelas dalam satu platform.
               </p>
               <button
@@ -459,7 +459,7 @@ export default function PlatformLandingPage() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-center md:text-left">
               <p className="text-sm text-gray-400">
-                Techfourma © {new Date().getFullYear()} — Platform Manajemen Kelas Terpadu
+                Kalivergo © {new Date().getFullYear()} — Platform Manajemen Kelas Terpadu
               </p>
             </div>
             <div className="flex items-center gap-6">

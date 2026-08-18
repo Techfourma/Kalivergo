@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 shadow-lg overflow-hidden">
               <Image
                 src="/logo.jpg"
-                alt="Techfourma Logo"
+                alt="Kalivergo Logo"
                 width={64}
                 height={64}
                 className="object-cover"

@@ -77,10 +77,10 @@ export default function LoginPage() {
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 shadow-lg overflow-hidden">
-                <Image src="/logo.jpg" alt="Techfourma Logo" width={64} height={64} className="object-cover" priority />
+                <Image src="/logo.jpg" alt="Kalivergo Logo" width={64} height={64} className="object-cover" priority />
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-dark-900 font-display">Selamat Datang di Techfourma</h1>
+            <h1 className="text-2xl font-bold text-dark-900 font-display">Selamat Datang di Kalivergo </h1>
             <p className="text-dark-500 mt-2">Masuk untuk mengelola tugas, keuangan, dan kegiatan kelas</p>
           </div>
 

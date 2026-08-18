@@ -77,7 +77,7 @@ export default function TermsPage() {
               </div>
               <div>
                 <h1 className="text-4xl font-bold font-display text-white">Syarat dan Ketentuan</h1>
-                <p className="text-white/70 mt-1">Aturan penggunaan platform Techfourma</p>
+                <p className="text-white/70 mt-1">Aturan penggunaan platform Kalivergo </p>
               </div>
             </div>
             <p className="text-white/70 mt-6 max-w-2xl">
@@ -170,11 +170,11 @@ export default function TermsPage() {
                   </div>
                   <div className="prose prose-invert max-w-none text-gray-300 leading-relaxed space-y-4">
                     <p>
-                      Dengan mengakses atau menggunakan platform Techfourma, Anda menyatakan telah membaca, memahami, dan menyetujui untuk terikat dengan Syarat dan Ketentuan ini. Jika Anda tidak menyetujui syarat ini, mohon untuk tidak menggunakan layanan kami.
+                      Dengan mengakses atau menggunakan platform Kalivergo, Anda menyatakan telah membaca, memahami, dan menyetujui untuk terikat dengan Syarat dan Ketentuan ini. Jika Anda tidak menyetujui syarat ini, mohon untuk tidak menggunakan layanan kami.
                     </p>
                     <div className="bg-amber-500/10 border-l-4 border-amber-500/50 p-4 rounded-r-lg">
                       <p className="text-amber-200 text-sm">
-                        <strong>Penting:</strong> Syarat ini merupakan perjanjian hukum yang mengikat antara Anda dan Techfourma.
+                        <strong>Penting:</strong> Syarat ini merupakan perjanjian hukum yang mengikat antara Anda dan Kalivergo.
                       </p>
                     </div>
                   </div>
@@ -195,7 +195,7 @@ export default function TermsPage() {
                     <p className="mb-4">Layanan ini hanya tersedia untuk:</p>
                     <div className="space-y-3">
                       {[
-                        { title: "Anggota Terdaftar", desc: "Hanya anggota kelas Techfourma yang terdaftar" },
+                        { title: "Anggota Terdaftar", desc: "Hanya anggota kelas Kalivergo yang terdaftar" },
                         { title: "Usia Minimal", desc: "Berusia minimal 17 tahun atau memiliki izin orang tua/wali" },
                         { title: "Akun Google Valid", desc: "Memiliki akun Google yang aktif dan valid" },
                         { title: "Informasi Akurat", desc: "Memberikan data yang benar saat pendaftaran" },
@@ -329,13 +329,13 @@ export default function TermsPage() {
                       <div className="border-l-4 border-primary-500/50 pl-4">
                         <h3 className="font-semibold text-white mb-2">Kepemilikan Platform</h3>
                         <p className="text-sm text-gray-300">
-                          Semua konten, fitur, desain, dan kode platform Techfourma adalah milik Techfourma dan dilindungi oleh hukum hak cipta serta kekayaan intelektual.
+                          Semua konten, fitur, desain, dan kode platform Kalivergo adalah milik Kalivergo dan dilindungi oleh hukum hak cipta serta kekayaan intelektual.
                         </p>
                       </div>
                       <div className="border-l-4 border-accent-500/50 pl-4">
                         <h3 className="font-semibold text-white mb-2">Konten Pengguna</h3>
                         <p className="text-sm text-gray-300">
-                          Anda tetap memiliki hak atas konten yang Anda posting, namun memberikan lisensi kepada Techfourma untuk menampilkan dan mendistribusikan konten tersebut dalam platform.
+                          Anda tetap memiliki hak atas konten yang Anda posting, namun memberikan lisensi kepada Kalivergo untuk menampilkan dan mendistribusikan konten tersebut dalam platform.
                         </p>
                       </div>
                       <div className="border-l-4 border-green-500/50 pl-4">
@@ -397,7 +397,7 @@ export default function TermsPage() {
                   <div className="text-gray-300 leading-relaxed">
                     <div className="space-y-4">
                       <div className="border-l-4 border-red-500/50 pl-4">
-                        <h3 className="font-semibold text-white mb-2">Oleh Techfourma</h3>
+                        <h3 className="font-semibold text-white mb-2">Oleh Kalivergo</h3>
                         <p className="text-sm text-gray-300">
                           Kami dapat menangguhkan atau mengakhiri akun Anda jika melanggar syarat ini, dengan atau tanpa pemberitahuan terlebih dahulu.
                         </p>

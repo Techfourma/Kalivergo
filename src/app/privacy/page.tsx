@@ -169,11 +169,11 @@ export default function PrivacyPage() {
                   </div>
                   <div className="prose prose-invert max-w-none text-gray-300 leading-relaxed space-y-4">
                     <p>
-                      Selamat datang di Techfourma. Kami menghargai kepercayaan Anda dan berkomitmen untuk melindungi privasi data pribadi Anda. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi Anda saat menggunakan platform kami.
+                      Selamat datang di Kalivergo. Kami menghargai kepercayaan Anda dan berkomitmen untuk melindungi privasi data pribadi Anda. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi Anda saat menggunakan platform kami.
                     </p>
                     <div className="bg-amber-500/10 border-l-4 border-amber-500/50 p-4 rounded-r-lg">
                       <p className="text-amber-200 text-sm">
-                        <strong>Penting:</strong> Dengan menggunakan Techfourma, Anda menyetujui pengumpulan dan penggunaan informasi sesuai dengan kebijakan ini.
+                        <strong>Penting:</strong> Dengan menggunakan Kalivergo, Anda menyetujui pengumpulan dan penggunaan informasi sesuai dengan kebijakan ini.
                       </p>
                     </div>
                   </div>
@@ -267,7 +267,7 @@ export default function PrivacyPage() {
                         <div className="w-5 h-5 bg-primary-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                           <div className="w-2 h-2 bg-primary-400 rounded-full" />
                         </div>
-                        <span>Anggota kelas Techfourma untuk keperluan akademik</span>
+                        <span>Anggota kelas Kalivergo untuk keperluan akademik</span>
                       </li>
                       <li className="flex items-start gap-3">
                         <div className="w-5 h-5 bg-primary-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">

@@ -17,21 +17,21 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Techfourma - Class Management System",
-  description: "Platform manajemen kelas Techfourma untuk tracking tugas, keuangan, dan kegiatan kelas",
+  title: "Kalivergo - Class Management System",
+  description: "Platform manajemen kelas Kalivergo untuk tracking tugas, keuangan, dan kegiatan kelas",
   icons: {
     icon: "/favicon.ico",
     apple: "/logo.jpg", 
   },
   openGraph: {
-    title: "Techfourma - Class Management System",
-    description: "Platform manajemen kelas Techfourma untuk tracking tugas, keuangan, dan kegiatan kelas",
+    title: "Kalivergo - Class Management System",
+    description: "Platform manajemen kelas Kalivergo untuk tracking tugas, keuangan, dan kegiatan kelas",
     images: [
       {
         url: "/logo.jpg",
         width: 1200,
         height: 630,
-        alt: "Techfourma Logo",
+        alt: "Kalivergo Logo",
       },
     ],
   },

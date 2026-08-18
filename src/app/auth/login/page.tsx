@@ -15,10 +15,10 @@ export default function LoginPage() {
       <Card className="relative w-full max-w-md !p-8 bg-white/95 backdrop-blur-xl">
         <div className="text-center mb-8">
           <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 text-white text-2xl font-bold shadow-xl shadow-primary-500/25 mb-4">
-            T4
+            K4
           </div>
           <h1 className="text-2xl font-bold text-dark-900 font-display">
-            Techfourma Demo
+          Kalivergo Demo
           </h1>
           <p className="text-sm text-dark-500 mt-2">
             Login lokal tanpa autentikasi eksternal untuk preview UI.
