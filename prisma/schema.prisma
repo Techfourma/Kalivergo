@@ -54,13 +54,12 @@ model User {
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 
-  // Multi-tenant relations
   tenantMemberships TenantMembership[]
   ownerApplications OwnerApplication[]
 
-  // Existing relations
   cashPayments    CashPayment[]
   submissions     Submission[]
+  seminarSubmissions SeminarSubmission[]
 
   @@map("users")
 }
@@ -72,7 +71,6 @@ enum KycAdminStatus {
   SUSPENDED
 }
 
-// Tenant Hierarchy
 model University {
   id        String         @id @default(cuid())
   name      String
@@ -146,8 +144,6 @@ model TenantMembership {
   @@map("tenant_memberships")
 }
 
-// Owner Application
-
 enum OwnerApplicationStatus {
   PENDING_EMAIL
   PENDING_KYC
@@ -196,8 +192,6 @@ model KycReview {
 
   @@map("kyc_reviews")
 }
-
-// Audit Logging
 
 model AuditLog {
   id          String   @id @default(cuid())
@@ -257,18 +251,33 @@ model CashPayment {
 }
 
 model Seminar {
-  id          String   @id @default(cuid())
+  id          String             @id @default(cuid())
   tenantId    String
   title       String
   description String?
   date        DateTime
   location    String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime           @default(now())
 
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant      Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  submissions SeminarSubmission[]
 
   @@index([tenantId])
   @@map("seminars")
+}
+
+model SeminarSubmission {
+  id          String   @id @default(cuid())
+  seminarId   String
+  userId      String
+  status      String   @default("SUBMITTED")
+  submittedAt DateTime @default(now())
+
+  seminar     Seminar @relation(fields: [seminarId], references: [id], onDelete: Cascade)
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([seminarId, userId])
+  @@map("seminar_submissions")
 }
 
 model Schedule {
