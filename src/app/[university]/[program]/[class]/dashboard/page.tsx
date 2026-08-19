@@ -25,7 +25,6 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   const cookieStore = await cookies();
   const userCookie = cookieStore.get('kalivergo_user')?.value;
 
-  // Get current tenant context for data isolation
   const tenantContext = await getCurrentTenant();
   const tenantId = tenantContext?.tenantId;
 
@@ -34,8 +33,6 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   let users: any[] = [];
 
   try {
-    // Muat user dari DB + gabung role tenant aktif dari sesi cookie
-    // (sehingga navbar tahu user ini OWNER / pemegang CmsRole / MEMBER).
     currentUser = await loadCurrentUser(userCookie, tenantId);
 
     if (!currentUser) {
@@ -46,7 +43,6 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       };
     }
 
-    // Build query filters based on tenant context
     const transactionWhere = tenantId ? { tenantId } : {};
     const uangKasScheduleWhere = tenantId ? { tenantId } : {};
     const cashPaymentWhere = tenantId ? { tenantId } : {};
@@ -204,7 +200,6 @@ return {
       paymentByDate,
       schedules: finalExpectedPaymentDates,
       unpaidMonths: unpaidDateDetails.map(d => d.formattedDate),
-      // Fields consumed by ArrearsList
       unpaidDates: unpaidDateDetails.map(d => d.formattedDate),
       unpaidCount: unpaidDateDetails.length,
       totalExpectedCount: finalExpectedPaymentDates.length,
@@ -231,7 +226,7 @@ const finalMembers = members.length > 0 ? members : [
       allPaymentDates: finalExpectedPaymentDates.length > 0 ? finalExpectedPaymentDates : fallbackUnpaidDetail,
       paymentByDate: {},
       schedules: finalExpectedPaymentDates.length > 0 ? finalExpectedPaymentDates : fallbackUnpaidDetail,
-      // Fields consumed by ArrearsList
+
       unpaidDates: fallbackDates,
       unpaidCount: fallbackDates.length,
       totalExpectedCount: finalExpectedPaymentDates.length || 1,
@@ -239,9 +234,6 @@ const finalMembers = members.length > 0 ? members : [
     }
   ];
 
-  // Resolve tenant path DIRECTLY from route params (authoritative).
-  // Ini memastikan navbar selalu menautkan ke tenant-nya sendiri
-  // (mis. /universitas/prodi/kelas/dashboard), bukan route global (/dashboard).
   const tenantPath = `/${params.university}/${params.program}/${params.class}`;
 
   return (
