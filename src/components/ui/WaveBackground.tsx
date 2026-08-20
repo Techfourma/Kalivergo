@@ -101,7 +101,6 @@ export default function WaveBackground() {
       ctx.strokeStyle = gradient;
       ctx.lineWidth = lineWidth;
       ctx.lineCap = "round";
-      
       if (!isMobile) {
         ctx.shadowColor = `hsla(${hue}, 80%, 60%, 0.4)`;
         ctx.shadowBlur = 8;
