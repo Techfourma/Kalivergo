@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteTask } from "@/actions/cms";
+import { deleteTaskAction } from "@/features/task/actions/task.action";
 
 export default function DeleteTaskButton({ 
   id, 
@@ -11,7 +11,7 @@ export default function DeleteTaskButton({
 }) {
   const handleDelete = async () => {
     if (confirm(`Yakin ingin menghapus tugas "${title}"?`)) {
-      await deleteTask(id);
+      await deleteTaskAction(id);
     }
   };
 
