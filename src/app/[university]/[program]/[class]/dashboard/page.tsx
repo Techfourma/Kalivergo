@@ -7,31 +7,34 @@ import ArrearsList from "@/components/dashboard/ArrearsList";
 import WaveBackground from "@/components/ui/WaveBackground";
 import CacheGuard from "@/components/security/CacheGuard";
 import { cookies } from "next/headers";
-import { getCurrentTenant } from "@/lib/tenant-context";
+import { resolveTenantFromRoute } from "@/lib/tenant";
 import { loadCurrentUser } from "@/lib/user-session";
 
 export const dynamic = 'force-dynamic';
 
 type DashboardPageProps = {
-  params: {
+  params: Promise<{
     university: string;
     program: string;
     class: string;
-  };
+  }>;
 };
 
 export default async function DashboardPage({ params }: DashboardPageProps) {
+  const routeParams = await params;
   noStore();
   const cookieStore = await cookies();
   const userCookie = cookieStore.get('kalivergo_user')?.value;
 
-  const tenantContext = await getCurrentTenant();
+  const tenantContext = await resolveTenantFromRoute(routeParams);
   const tenantId = tenantContext?.tenantId;
 
   let currentUser: any = null;
   let dbTransactions: any[] = [];
   let users: any[] = [];
+  let tenantInfo: any = null;
 
+  
   try {
     currentUser = await loadCurrentUser(userCookie, tenantId);
 
@@ -46,6 +49,16 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     const transactionWhere = tenantId ? { tenantId } : {};
     const uangKasScheduleWhere = tenantId ? { tenantId } : {};
     const cashPaymentWhere = tenantId ? { tenantId } : {};
+
+    tenantInfo = tenantId
+    ? await prisma.tenant.findUnique({
+        where: { id: tenantId },
+        include: {
+          university: true,
+          program: true,
+          },
+        })
+      : null;
 
     [dbTransactions, users] = await Promise.all([
       prisma.transaction.findMany({
@@ -70,70 +83,15 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     console.error("DashboardPage: DB error (non-fatal):", err);
   }
 
-const defaultKasAmount = 10000;
-
   let uangKasScheduleDates: {
-  id: string;
-  date: string;
-  formattedDate: string;
-  amount: number;
-  description: string | null;
-}[] = [];
+    id: string;
+    date: string;
+    formattedDate: string;
+    amount: number;
+    description: string | null;
+  }[] = [];
 
-  const uangKasDateLabels = [
-    "05 September",
-    "12 September",
-    "19 September",
-    "26 September",
-    "03 Oktober",
-    "10 Oktober",
-    "17 Oktober",
-    "24 Oktober",
-    "31 Oktober",
-    "07 November",
-    "14 November",
-    "21 November",
-    "28 November",
-    "05 Desember",
-    "12 Desember",
-    "19 Desember",
-  ];
-
-  const monthMap: Record<string, string> = {
-    januari: '01',
-    februari: '02',
-    maret: '03',
-    april: '04',
-    mei: '05',
-    juni: '06',
-    juli: '07',
-    agustus: '08',
-    september: '09',
-    oktober: '10',
-    november: '11',
-    desember: '12',
-  };
-
-  const currentYear = new Date().getFullYear();
-
-const fallbackPaymentDates = uangKasDateLabels.map((label) => {
-    const parts = label.split(' ');
-    const day = parts[0].padStart(2, '0');
-    const monthName = (parts[1] || '').toLowerCase();
-    const month = monthMap[monthName] || '01';
-    const iso = `${currentYear}-${month}-${day}`;
-    return {
-      id: `fallback-${iso}`,
-      date: iso,
-      formattedDate: label,
-      amount: defaultKasAmount,
-      description: null,
-    };
-  });
-
-  const finalExpectedPaymentDates = uangKasScheduleDates.length > 0
-    ? uangKasScheduleDates
-    : fallbackPaymentDates;
+  const finalExpectedPaymentDates = uangKasScheduleDates;
 
 const members = users.map((user) => {
 
@@ -207,34 +165,9 @@ return {
     };
   });
 
-const fallbackUnpaidDetail = [{ date: new Date().toISOString().split('T')[0], formattedDate: "Hari Ini", amount: 10000 }];
-  const fallbackTotalExpected = finalExpectedPaymentDates.reduce((sum, i) => sum + i.amount, 0) || defaultKasAmount;
-  const fallbackDates = finalExpectedPaymentDates.length > 0
-    ? finalExpectedPaymentDates.map(d => d.formattedDate)
-    : ["Hari Ini"];
+  const finalMembers = members;
 
-const finalMembers = members.length > 0 ? members : [
-    {
-      userId: "1",
-      userName: "Jundi Lesmana",
-      userEmail: "jundi@kalivergo.id",
-      totalPaid: 0,
-      totalExpected: fallbackTotalExpected,
-      arrears: fallbackTotalExpected,
-      unpaidMonths: ["Bulan Ini"],
-      unpaidDateDetails: finalExpectedPaymentDates.length > 0 ? finalExpectedPaymentDates : fallbackUnpaidDetail,
-      allPaymentDates: finalExpectedPaymentDates.length > 0 ? finalExpectedPaymentDates : fallbackUnpaidDetail,
-      paymentByDate: {},
-      schedules: finalExpectedPaymentDates.length > 0 ? finalExpectedPaymentDates : fallbackUnpaidDetail,
-
-      unpaidDates: fallbackDates,
-      unpaidCount: fallbackDates.length,
-      totalExpectedCount: finalExpectedPaymentDates.length || 1,
-      isFullyPaid: false,
-    }
-  ];
-
-  const tenantPath = `/${params.university}/${params.program}/${params.class}`;
+  const tenantPath = `/${routeParams.university}/${routeParams.program}/${routeParams.class}`;
 
   return (
   <>
@@ -244,16 +177,15 @@ const finalMembers = members.length > 0 ? members : [
 
     <div className="fixed inset-0 z-0 bg-gradient-to-b from-transparent via-[#0a0a14]/50 to-[#0a0a14] pointer-events-none" />
 
-    {/* TENANT NAVBAR - ISOLATED TO THIS TENANT ONLY */}
     <div className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a14]/80 backdrop-blur-md border-b border-white/10">
       <TenantNavbar user={currentUser} tenantPath={tenantPath} />
     </div>
 
-    {/* CONTENT */}
+  
     <main className="relative z-10 pt-[120px] pb-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-        {/* HEADER */}
+       
         <div className="mb-8">
           <div className="flex items-center gap-3">
 
@@ -269,17 +201,21 @@ const finalMembers = members.length > 0 ? members : [
               </h1>
 
               <p className="text-gray-300 mt-1">
-                Monitoring uang kas kelas Kalivergo
+                Monitoring uang kas kelas kalivergo
               </p>
             </div>
 
           </div>
         </div>
 
-        {/* DASHBOARD CONTENT */}
+        
         <div className="space-y-6">
           <CashFlowChart
             transactions={dbTransactions as any}
+            universityName={tenantInfo?.university.name || "Universitas"}
+            programName={tenantInfo?.program.name || "Program"}
+            className={tenantInfo?.name || "Kelas"}
+            members={users.map(u => ({ userId: u.id, userName: u.name }))}
           />
 
           <ArrearsList
