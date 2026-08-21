@@ -18,15 +18,6 @@ type TenantCmsLayoutProps = {
   }>;
 };
 
-/**
- * Isolated per-tenant CMS layout.
- *
- * The tenant is resolved server-side from the URL route (authoritative).
- * Access is granted ONLY to users who are OWNER of this exact tenant or
- * hold one of the CMS roles (PRESIDENT, VICE_PRESIDENT, TREASURER,
- * VICE_TREASURER, SECRETARY) in this exact tenant — verified against the
- * database, never from a client-controllable cookie.
- */
 export default async function TenantCmsLayout({
   children,
   params,

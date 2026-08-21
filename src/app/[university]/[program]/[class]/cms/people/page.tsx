@@ -57,7 +57,6 @@ export default async function PeoplePage({ params }: TenantCmsPeoplePageProps) {
         <p className="text-dark-500 mt-1">Tambah atau kelola anggota kelas</p>
       </div>
 
-      {/* Form Tambah User */}
       <div className="bg-white rounded-xl shadow-sm border border-dark-100 p-6">
         <h2 className="text-lg font-semibold text-dark-900 mb-4">Tambah Anggota Baru</h2>
 
@@ -126,7 +125,6 @@ export default async function PeoplePage({ params }: TenantCmsPeoplePageProps) {
         </ActionFeedback>
       </div>
 
-      {/* Daftar User */}
       <div className="bg-white rounded-xl shadow-sm border border-dark-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-dark-100">

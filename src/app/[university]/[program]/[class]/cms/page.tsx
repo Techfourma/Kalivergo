@@ -40,7 +40,6 @@ export default async function CMSOverviewPage({
   const tenantId = tenant.tenantId;
   const tenantPath = `/${routeParams.university}/${routeParams.program}/${routeParams.class}`;
 
-  // CRITICAL: every query MUST be scoped to this tenant — no fallback to {}.
   const taskWhere = { tenantId };
   const transactionWhere = { tenantId };
   const seminarWhere = { tenantId };
@@ -53,7 +52,6 @@ export default async function CMSOverviewPage({
     prisma.user.count({ where: memberWhere }),
   ]);
 
-  // Calculate income and expense with tenant isolation
   const totalIncome = transactions
     .filter(t => t.type === 'INCOME')
     .reduce((sum, t) => sum + Number(t.amount), 0);
@@ -66,7 +64,6 @@ export default async function CMSOverviewPage({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-lg">
           <Shield className="h-7 w-7" />
@@ -81,7 +78,6 @@ export default async function CMSOverviewPage({
         </div>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center gap-3">
@@ -132,7 +128,6 @@ export default async function CMSOverviewPage({
         </div>
       </div>
 
-      {/* Input Tugas Section */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -158,7 +153,6 @@ export default async function CMSOverviewPage({
         </div>
       </div>
 
-      {/* Input Transaksi Section */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">

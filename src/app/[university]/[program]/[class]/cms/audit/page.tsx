@@ -44,7 +44,6 @@ export default async function AuditPage({
         </p>
       </div>
 
-      {/* Filter Section */}
       <div className="bg-white rounded-xl shadow-sm border border-dark-100 p-6">
         <h2 className="text-lg font-semibold mb-4">Filter Audit Log</h2>
         <form className="grid grid-cols-1 md:grid-cols-4 gap-4">

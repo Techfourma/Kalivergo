@@ -44,7 +44,6 @@ export default async function TasksPage({ params }: TenantCmsTasksPageProps) {
         </div>
       </div>
 
-      {/* Form Tambah Tugas */}
       <div className="bg-white rounded-xl shadow-sm border border-dark-100 p-4 md:p-6">
         <h2 className="text-lg font-semibold mb-4">Buat Tugas Baru</h2>
         <ActionFeedback actionType="task" className="space-y-4">
@@ -94,7 +93,6 @@ export default async function TasksPage({ params }: TenantCmsTasksPageProps) {
         </ActionFeedback>
       </div>
 
-      {/* List Tugas */}
       <div className="bg-white rounded-xl shadow-sm border border-dark-100 overflow-hidden">
         <div className="p-4 md:p-6 border-b border-dark-100">
           <h2 className="text-lg font-semibold">
@@ -133,7 +131,6 @@ export default async function TasksPage({ params }: TenantCmsTasksPageProps) {
                       })}
                     </p>
                   </div>
-                  {/* Action Buttons */}
                   <div className="flex flex-row items-center justify-between md:justify-end gap-3 w-full md:w-auto pt-2 md:pt-0 border-t md:border-0 border-dark-100">
                     <TaskSubmissionManager
                       taskId={task.id}

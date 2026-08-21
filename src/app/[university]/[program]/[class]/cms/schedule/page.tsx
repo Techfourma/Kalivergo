@@ -44,7 +44,6 @@ export default async function SchedulePage({
         <p className="text-dark-500 mt-1">Kelola jadwal kegiatan kelas</p>
       </div>
 
-      {/* Form Tambah Jadwal */}
       <div className="bg-white rounded-xl shadow-sm border border-dark-100 p-6">
         <h2 className="text-lg font-semibold mb-4">Tambah Jadwal</h2>
         <ActionFeedback actionType="schedule" className="space-y-4">
@@ -119,7 +118,6 @@ export default async function SchedulePage({
         </ActionFeedback>
       </div>
 
-      {/* List Jadwal */}
       <div className="bg-white rounded-xl shadow-sm border border-dark-100">
         <div className="p-6 border-b border-dark-100">
           <h2 className="text-lg font-semibold">Daftar Jadwal ({schedules.length})</h2>
@@ -150,7 +148,6 @@ export default async function SchedulePage({
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  {/* ✅ Menggunakan Client Component untuk menangani confirm() dengan aman */}
                   <DeleteScheduleButton
                     id={schedule.id}
                     title={schedule.title}

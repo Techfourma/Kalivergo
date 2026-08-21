@@ -41,7 +41,6 @@ export default async function SeminarPage({
         <p className="text-dark-500 mt-1">Kelola seminar dan kegiatan kelas</p>
       </div>
 
-      {/* Form Tambah Seminar */}
       <div className="bg-white rounded-xl shadow-sm border border-dark-100 p-6">
         <h2 className="text-lg font-semibold mb-4">Tambah Seminar</h2>
         <ActionFeedback actionType="seminar" className="space-y-4">
@@ -103,7 +102,6 @@ export default async function SeminarPage({
         </ActionFeedback>
       </div>
 
-      {/* List Seminar */}
       <div className="bg-white rounded-xl shadow-sm border border-dark-100">
         <div className="p-6 border-b border-dark-100">
           <h2 className="text-lg font-semibold">Daftar Seminar ({seminars.length})</h2>
