@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useMemo } from "react";
-import { updateTaskSubmissions } from "@/actions/cms";
+import { updateTaskSubmissionsAction } from "@/features/task/actions/task.action";
 import { Users, X, Search, CheckCircle2, Circle, Save, Loader2 } from "lucide-react";
 
 interface User {
@@ -59,13 +59,13 @@ export default function TaskSubmissionManager({
 
   const handleSave = () => {
     startTransition(async () => {
-      const result = await updateTaskSubmissions(taskId, Array.from(selected));
-      if (result.success) {
+      const result = await updateTaskSubmissionsAction(taskId, Array.from(selected));
+      if ("error" in result && result.error) {
+        showToast("error", result.error);
+      } else {
         setSavedCount(selected.size);
         showToast("success", "Submission berhasil disimpan!");
         setIsOpen(false);
-      } else {
-        showToast("error", result.error || "Gagal menyimpan submission");
       }
     });
   };
@@ -170,7 +170,6 @@ export default function TaskSubmissionManager({
               </div>
             </div>
 
-         
             <div className="flex-1 overflow-y-auto px-4 py-2">
               {filtered.length === 0 ? (
                 <div className="text-center py-10 text-dark-400 text-sm">
@@ -224,7 +223,6 @@ export default function TaskSubmissionManager({
                 </div>
               )}
             </div>
-
 
             <div className="px-6 py-4 border-t border-dark-100 shrink-0 flex items-center justify-between bg-dark-50/50">
               <p className="text-xs text-dark-500">

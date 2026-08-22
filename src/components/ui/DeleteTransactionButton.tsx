@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { deleteTransaction } from "@/actions/cms";
+import { deleteTransaction } from "@/features/finance";
 import ActionFeedback from "@/components/cms/ActionFeedback";
 
 export default function DeleteTransactionButton({
