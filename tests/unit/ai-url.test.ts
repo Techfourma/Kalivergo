@@ -28,7 +28,6 @@ test("buildAssistantUrl normalizes every supported AI_ASSISTANT_URL shape", () =
     buildAssistantUrl("https://academic-ai-assistant-seven.vercel.app/api/assistant/"),
     "https://academic-ai-assistant-seven.vercel.app/api/assistant"
   );
-  // Local defaults
   assert.equal(buildAssistantUrl("http://localhost:3000"), "http://localhost:3000/api/assistant");
   assert.equal(buildAssistantUrl("http://localhost:4000/"), "http://localhost:4000/api/assistant");
   assert.equal(buildAssistantUrl(""), "/api/assistant");
