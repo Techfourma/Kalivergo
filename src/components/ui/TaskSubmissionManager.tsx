@@ -77,7 +77,6 @@ export default function TaskSubmissionManager({
 
   return (
     <>
-
       <button
         type="button"
         onClick={() => {
@@ -120,7 +119,6 @@ export default function TaskSubmissionManager({
             className="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col max-h-[85vh] overflow-hidden"
             style={{ animation: "modalIn 0.2s cubic-bezier(0.34,1.56,0.64,1)" }}
           >
-
             <div className="flex items-center justify-between px-6 py-4 border-b border-dark-100 shrink-0">
               <div>
                 <h2 className="text-lg font-bold text-dark-900">Kelola Submission</h2>
