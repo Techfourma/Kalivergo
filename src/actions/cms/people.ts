@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { CLASS_ROLES, readSessionUser, resolveTenantId, hasCmsAccess } from './role-model';
 import { createAuditLog } from './audit';
+import { deleteKtmFromKYC, deleteSelfieFromKYC } from '@/features/kyc/services/kyc-storage.service';
 import { CmsRole } from '@prisma/client';
 
 export async function addUser(formData: FormData) {
@@ -68,24 +69,32 @@ export async function addUser(formData: FormData) {
   }
 }
 
-export async function acceptUser(userId: string) {
+export async function acceptUser(formData: FormData) {
   try {
+    const userId = formData.get('userId') as string;
+    if (!userId) return;
+
     const tenantId = await resolveTenantId();
-    if (!tenantId) return { error: 'Konteks kelas tidak ditemukan.' };
+    if (!tenantId) return;
 
     const session = await readSessionUser();
     if (!session?.id || !(await hasCmsAccess(session.id, tenantId))) {
-      return { error: 'Akses ditolak: hanya OWNER atau role CMS yang dapat menerima anggota.' };
+      return;
     }
 
     const membership = await prisma.tenantMembership.findFirst({ where: { userId, tenantId } });
-    if (!membership) return { error: 'Anggota tidak ditemukan dalam kelas ini.' };
+    if (!membership) return;
 
     await prisma.user.update({ where: { id: userId }, data: { isVerified: true } });
 
     await prisma.tenantMembership.update({
       where: { id: membership.id },
       data: { cmsRole: null },
+    });
+
+    await prisma.memberApplication.updateMany({
+      where: { userId, tenantId, status: 'PENDING_APPROVAL' },
+      data: { status: 'APPROVED', reviewedAt: new Date(), reviewedBy: session.id },
     });
 
     await createAuditLog(
@@ -97,28 +106,47 @@ export async function acceptUser(userId: string) {
     );
 
     revalidatePath('/cms/people');
-    return { success: 'User diterima' };
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error accepting user:', error);
-    return { error: error.message || 'Gagal menerima user' };
   }
 }
 
-export async function rejectUser(userId: string) {
+export async function rejectUser(formData: FormData) {
   try {
+    const userId = formData.get('userId') as string;
+    if (!userId) return;
+
     const tenantId = await resolveTenantId();
-    if (!tenantId) return { error: 'Konteks kelas tidak ditemukan.' };
+    if (!tenantId) return;
 
     const session = await readSessionUser();
     if (!session?.id || !(await hasCmsAccess(session.id, tenantId))) {
-      return { error: 'Akses ditolak: hanya OWNER atau role CMS yang dapat menolak anggota.' };
+      return;
     }
 
     const membership = await prisma.tenantMembership.findFirst({ where: { userId, tenantId } });
-    if (!membership) return { error: 'Anggota tidak ditemukan dalam kelas ini.' };
+    if (!membership) return;
+
+    const application = await prisma.memberApplication.findFirst({
+      where: { userId, tenantId },
+      select: {
+        id: true,
+        profilePhotoStorageKey: true,
+        ktmPhotoStorageKey: true,
+      },
+    });
+
+    if (application) {
+      await prisma.memberApplication.delete({ where: { id: application.id } });
+    }
 
     await prisma.tenantMembership.delete({ where: { id: membership.id } });
     await prisma.user.delete({ where: { id: userId } });
+
+    if (application) {
+      await deleteSelfieFromKYC(application.profilePhotoStorageKey);
+      await deleteKtmFromKYC(application.ktmPhotoStorageKey);
+    }
 
     await createAuditLog(
       'PEOPLE',
@@ -129,10 +157,8 @@ export async function rejectUser(userId: string) {
     );
 
     revalidatePath('/cms/people');
-    return { success: 'User ditolak' };
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error rejecting user:', error);
-    return { error: error.message || 'Gagal menolak user' };
   }
 }
 
@@ -142,28 +168,31 @@ export async function updateUserRole(formData: FormData) {
     const role = formData.get('role') as string;
 
     if (!userId || !role) {
-      return { error: 'Data tidak lengkap' };
+      return;
     }
 
     const tenantId = await resolveTenantId();
-    if (!tenantId) return { error: 'Konteks kelas tidak ditemukan.' };
+    if (!tenantId) return;
 
     const session = await readSessionUser();
     if (!session?.id || !(await hasCmsAccess(session.id, tenantId))) {
-      return { error: 'Akses ditolak: hanya OWNER atau role CMS yang dapat mengubah jabatan.' };
+      return;
     }
 
     const membership = await prisma.tenantMembership.findFirst({
       where: { userId, tenantId },
       include: { user: true }
     });
-    if (!membership) return { error: 'Anggota tidak ditemukan dalam kelas ini.' };
+    if (!membership) return;
 
-    const cmsRole = CLASS_ROLES.includes(role) && role !== 'MEMBER' ? role : null;
+    const cmsRole: CmsRole | null =
+      (CLASS_ROLES as readonly string[]).includes(role) && role !== 'MEMBER'
+        ? (role as CmsRole)
+        : null;
 
     await prisma.tenantMembership.update({
       where: { id: membership.id },
-      data: { cmsRole: cmsRole as any },
+      data: { cmsRole },
     });
 
     await createAuditLog(
@@ -175,9 +204,7 @@ export async function updateUserRole(formData: FormData) {
     );
 
     revalidatePath('/cms/people');
-    return { success: 'Jabatan berhasil diubah' };
   } catch (error) {
     console.error('Error updating user role:', error);
-    return { error: 'Gagal mengubah jabatan' };
   }
 }
