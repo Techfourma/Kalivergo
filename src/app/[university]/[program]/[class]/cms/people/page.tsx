@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db';
-import ActionFeedback from '@/components/cms/ActionFeedback';
 import { resolveTenantFromRoute } from '@/lib/tenant';
 import { notFound } from 'next/navigation';
+import { acceptUser, rejectUser, updateUserRole } from '@/actions/cms/people';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,81 +48,24 @@ export default async function PeoplePage({ params }: TenantCmsPeoplePageProps) {
     ...membership.user,
     tenantRole: membership.role,
     cmsRole: membership.cmsRole,
+    membershipId: membership.id,
   }));
+
+  const roleLabels: Record<string, string> = {
+    PRESIDENT: 'Ketua Kelas',
+    VICE_PRESIDENT: 'Wakil Ketua',
+    TREASURER: 'Bendahara',
+    VICE_TREASURER: 'Wakil Bendahara',
+    SECRETARY: 'Sekretaris',
+    MEMBER: 'Anggota',
+    OWNER: 'Owner Kelas',
+  };
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-dark-900 font-display">People Management</h1>
-        <p className="text-dark-500 mt-1">Tambah atau kelola anggota kelas</p>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-sm border border-dark-100 p-6">
-        <h2 className="text-lg font-semibold text-dark-900 mb-4">Tambah Anggota Baru</h2>
-
-        <ActionFeedback actionType="people" className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1">
-              Nama Lengkap
-            </label>
-            <input
-              type="text"
-              name="name"
-              required
-              className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="Masukkan nama lengkap"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1">
-              NIM
-            </label>
-            <input
-              type="text"
-              name="nim"
-              required
-              className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="Masukkan NIM"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              required
-              className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="email@example.com"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1">
-              Jabatan
-            </label>
-            <select
-              name="role"
-              required
-              className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="MEMBER">Anggota</option>
-              <option value="PRESIDENT">Ketua Kelas</option>
-              <option value="VICE_PRESIDENT">Wakil Ketua</option>
-              <option value="TREASURER">Bendahara</option>
-              <option value="VICE_TREASURER">Wakil Bendahara</option>
-              <option value="SECRETARY">Sekretaris</option>
-            </select>
-          </div>
-          <div className="md:col-span-2">
-            <button
-              type="submit"
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-            >
-              Tambah Anggota
-            </button>
-          </div>
-        </ActionFeedback>
+        <p className="text-dark-500 mt-1">Kelola anggota kelas - Approve/Reject dan ubah jabatan</p>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-dark-100 overflow-hidden">
@@ -145,30 +88,27 @@ export default async function PeoplePage({ params }: TenantCmsPeoplePageProps) {
                 <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
                   Status
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
+                  Aksi
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-dark-100">
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-dark-500">
+                  <td colSpan={6} className="px-6 py-8 text-center text-dark-500">
                     Belum ada data anggota
                   </td>
                 </tr>
               ) : (
                 users.map((user: any) => {
-                  const roleLabels: Record<string, string> = {
-                    PRESIDENT: 'Ketua Kelas',
-                    VICE_PRESIDENT: 'Wakil Ketua',
-                    TREASURER: 'Bendahara',
-                    VICE_TREASURER: 'Wakil Bendahara',
-                    SECRETARY: 'Sekretaris',
-                    MEMBER: 'Anggota',
-                    OWNER: 'Owner Kelas',
-                  };
-                  
                   const displayRole = (user.tenantRole === 'MEMBER' && user.cmsRole)
                     ? user.cmsRole
                     : (user.tenantRole || user.role || 'MEMBER');
+
+                  const isPending = !user.isVerified;
+                  const isOwner = user.tenantRole === 'OWNER';
+
                   return (
                     <tr key={user.id} className="hover:bg-dark-50 transition-colors">
                       <td className="px-6 py-4">
@@ -183,19 +123,75 @@ export default async function PeoplePage({ params }: TenantCmsPeoplePageProps) {
                         <span className="text-sm text-dark-500">{user.email}</span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-700">
-                          {roleLabels[displayRole] || displayRole}
-                        </span>
+                        {!isOwner ? (
+                          <form action={updateUserRole} className="flex items-center gap-2">
+                            <input type="hidden" name="userId" value={user.id} />
+                            <select
+                              name="role"
+                              defaultValue={user.cmsRole || 'MEMBER'}
+                              disabled={isPending}
+                              className="px-3 py-1.5 text-sm border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+                            >
+                              <option value="MEMBER">Anggota</option>
+                              <option value="PRESIDENT">Ketua Kelas</option>
+                              <option value="VICE_PRESIDENT">Wakil Ketua</option>
+                              <option value="TREASURER">Bendahara</option>
+                              <option value="VICE_TREASURER">Wakil Bendahara</option>
+                              <option value="SECRETARY">Sekretaris</option>
+                            </select>
+                            <button
+                              type="submit"
+                              disabled={isPending}
+                              className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+                            >
+                              Ubah
+                            </button>
+                          </form>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">
+                            {roleLabels[displayRole] || displayRole}
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4">
-                        {user.isVerified ? (
+                        {isPending ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700">
+                            Menunggu Approval
+                          </span>
+                        ) : (
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">
                             Aktif
                           </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700">
-                            Menunggu
-                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        {!isOwner && (
+                          <div className="flex items-center gap-2">
+                            {isPending ? (
+                              <>
+                                <form action={acceptUser}>
+                                  <input type="hidden" name="userId" value={user.id} />
+                                  <button
+                                    type="submit"
+                                    className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                  >
+                                    Approve
+                                  </button>
+                                </form>
+                                <form action={rejectUser}>
+                                  <input type="hidden" name="userId" value={user.id} />
+                                  <button
+                                    type="submit"
+                                    className="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                                  >
+                                    Reject
+                                  </button>
+                                </form>
+                              </>
+                            ) : (
+                              <span className="text-xs text-dark-400">-</span>
+                            )}
+                          </div>
                         )}
                       </td>
                     </tr>

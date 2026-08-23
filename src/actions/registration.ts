@@ -311,6 +311,8 @@ export async function registerMember(formData: FormData) {
   const universitySlug = (formData.get("university")?.toString() || "").trim();
   const programSlug = (formData.get("program")?.toString() || "").trim();
   const classSlug = (formData.get("class")?.toString() || "").trim();
+  const fullName = (formData.get("fullName")?.toString() || "").trim();
+  const nim = (formData.get("nim")?.toString() || "").trim();
 
   if (!universitySlug || !programSlug || !classSlug) {
     return {
@@ -341,36 +343,127 @@ export async function registerMember(formData: FormData) {
     };
   }
 
-  const base = await resolveAndCompleteRegistration(formData);
-  if (base.error) return { error: base.error, field: base.field };
+  const email = (formData.get("email")?.toString() || "").trim().toLowerCase();
+  const password = (formData.get("password")?.toString() || "") as string;
+  const confirmPassword = formData.get("confirmPassword")?.toString() || "";
+
+  if (password !== confirmPassword)
+    return { error: "Password tidak cocok", field: "confirmPassword" };
+  if (password.length < 6)
+    return { error: "Password minimal 6 karakter", field: "password" };
+
+  const verifiedUser = await prisma.user.findFirst({
+    where: { isVerified: true, email: email },
+  });
+  if (verifiedUser) {
+    return {
+      error: "Email ini sudah terdaftar dan terverifikasi. Silakan login atau gunakan email lain.",
+      field: "email",
+    };
+  }
+
+  const profilePhotoFile = formData.get("profilePhoto") as File | null;
+  const ktmPhotoFile = formData.get("ktmPhoto") as File | null;
+
+  if (!profilePhotoFile || profilePhotoFile.size === 0) {
+    return { error: "Foto profil wajib diunggah.", field: "profilePhoto" };
+  }
+  if (!ktmPhotoFile || ktmPhotoFile.size === 0) {
+    return { error: "Foto KTM wajib diunggah.", field: "ktmPhoto" };
+  }
 
   try {
-    await finalizeUserAccount(base);
+    const hashedPassword = await hash(password, 12);
+
+    let user = await prisma.user.findFirst({
+      where: { email: email },
+    });
+
+    if (user) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          name: fullName,
+          nim: nim,
+          password: hashedPassword,
+          isVerified: false,
+        },
+      });
+    } else {
+      user = await prisma.user.create({
+        data: {
+          name: fullName,
+          nim: nim,
+          email: email,
+          password: hashedPassword,
+          isVerified: false,
+        },
+      });
+    }
+
+    const profileBuffer = Buffer.from(await profilePhotoFile.arrayBuffer());
+    const ktmBuffer = Buffer.from(await ktmPhotoFile.arrayBuffer());
+
+    const profileUpload = await uploadSelfieForKYC(profileBuffer, profilePhotoFile.name);
+    if (!profileUpload.success || !profileUpload.publicId) {
+      return { error: profileUpload.error || "Gagal mengunggah foto profil.", field: "profilePhoto" };
+    }
+
+    const ktmUpload = await uploadKtmForKYC(ktmBuffer, ktmPhotoFile.name);
+    if (!ktmUpload.success || !ktmUpload.publicId) {
+      await deleteSelfieFromKYC(profileUpload.publicId);
+      return { error: ktmUpload.error || "Gagal mengunggah foto KTM.", field: "ktmPhoto" };
+    }
+
+    await prisma.memberApplication.create({
+      data: {
+        userId: user.id,
+        tenantId: tenant.id,
+        fullName: fullName,
+        nim: nim,
+        email: email,
+        profilePhotoStorageKey: profileUpload.publicId,
+        ktmPhotoStorageKey: ktmUpload.publicId,
+        status: "PENDING_APPROVAL",
+      },
+    });
+
+    const plainToken = generateVerificationToken();
+    const tokenHash = hashToken(plainToken);
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    await prisma.verificationToken.deleteMany({ where: { email: email } });
+    await prisma.verificationToken.create({
+      data: { tokenHash, email: email, expiresAt },
+    });
+
+    await sendVerificationEmail(email, fullName, plainToken);
 
     await prisma.tenantMembership.upsert({
       where: {
-        userId_tenantId: { userId: base.user!.id, tenantId: tenant.id },
+        userId_tenantId: { userId: user.id, tenantId: tenant.id },
       },
       update: { role: "MEMBER" },
-      create: { userId: base.user!.id, tenantId: tenant.id, role: "MEMBER" },
+      create: { userId: user.id, tenantId: tenant.id, role: "MEMBER" },
     });
 
     await createAuditLog(
       "MEMBER_REGISTRATION",
       "JOIN",
-      `Anggota bergabung ke kelas ${tenant.name}`,
-      base.user!.id,
+      `Anggota bergabung ke kelas ${tenant.name} (menunggu persetujuan)`,
+      user.id,
       {
         tenantId: tenant.id,
         universityName: tenant.university.name,
         programName: tenant.program.name,
         className: tenant.name,
         role: "MEMBER",
+        status: "PENDING_APPROVAL",
       }
     );
 
     return {
-      success: "Pendaftaran berhasil! Silakan verifikasi email Anda untuk mulai login.",
+      success: "Pendaftaran berhasil! Silakan verifikasi email Anda dan tunggu persetujuan dari admin/owner kelas.",
       tenantId: tenant.id,
       className: tenant.name,
     };
@@ -417,18 +510,6 @@ export async function getRegistrationData(): Promise<RegistrationUniversity[]> {
                 id: true,
                 name: true,
                 slug: true,
-                memberships: {
-                  where: { role: "MEMBER" },
-                  include: {
-                    user: {
-                      select: {
-                        id: true,
-                        name: true,
-                        nim: true,
-                      }
-                    }
-                  }
-                }
               },
               orderBy: { name: "asc" },
             },
@@ -449,11 +530,6 @@ export async function getRegistrationData(): Promise<RegistrationUniversity[]> {
           id: t.id,
           name: t.name,
           slug: t.slug,
-          members: t.memberships.map((m) => ({
-            id: m.user.id,
-            name: m.user.name,
-            nim: m.user.nim,
-          }))
         })),
       })),
     }));
