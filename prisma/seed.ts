@@ -10,7 +10,7 @@ async function main() {
   const adminKycPassword = await hash('adminkyc123', 12);
 
   const superAdminKyc = await prisma.user.upsert({
-    where: { email: 'superadmin@techfourma.id' },
+    where: { email: 'superadmin@kalivergo.id' },
     update: {
       name: 'Super Admin KYC',
       nim: '0000000000',
@@ -22,7 +22,7 @@ async function main() {
       phone: '081234567890',
     },
     create: {
-      email: 'superadmin@techfourma.id',
+      email: 'superadmin@kalivergo.id',
       name: 'Super Admin KYC',
       nim: '0000000000',
       platformRole: 'SUPER_ADMIN_KYC',
@@ -36,7 +36,7 @@ async function main() {
   console.log(' Super Admin KYC dibuat:', superAdminKyc.name);
 
   const adminKycPending = await prisma.user.upsert({
-    where: { email: 'adminkyc@techfourma.id' },
+    where: { email: 'adminkyc@kalivergo.id' },
     update: {
       name: 'Admin KYC Pending',
       nim: '0000000002',
@@ -48,7 +48,7 @@ async function main() {
       phone: '081234567891',
     },
     create: {
-      email: 'adminkyc@techfourma.id',
+      email: 'adminkyc@kalivergo.id',
       name: 'Admin KYC Pending',
       nim: '0000000002',
       platformRole: 'ADMIN_KYC',
@@ -62,8 +62,8 @@ async function main() {
   console.log('Admin KYC (Pending) dibuat:', adminKycPending.name);
 
   console.log('Seeding database berhasil!');
-  console.log('Login SUPER_ADMIN_KYC: superadmin@techfourma.id / superadmin123');
-  console.log('Login ADMIN_KYC (pending): adminkyc@techfourma.id / adminkyc123');
+  console.log('Login SUPER_ADMIN_KYC: superadmin@kalivergo.id / superadmin123');
+  console.log('Login ADMIN_KYC (pending): adminkyc@kalivergo.id / adminkyc123');
   console.log('Tidak ada tenant demo. Owner membuat kelas via signup & KYC approval.');
 }
 
