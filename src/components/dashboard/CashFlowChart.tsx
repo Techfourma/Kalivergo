@@ -233,7 +233,6 @@ export default function CashFlowChart({
   const hasFilter = Boolean(startDate || endDate);
   return (
     <div className="space-y-6">
-      {}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200">
           <div className="flex items-center gap-3">
@@ -278,7 +277,6 @@ export default function CashFlowChart({
         </Card>
       </div>
 
-      {}
       <Card padding="md">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex items-center gap-3">
@@ -358,7 +356,6 @@ export default function CashFlowChart({
         )}
       </Card>
 
-      {}
       <Card padding="lg">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-bold text-dark-900">Arus Kas</h3>
@@ -445,9 +442,7 @@ export default function CashFlowChart({
         </div>
       </Card>
 
-      {}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {}
         <Card padding="lg">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
@@ -500,7 +495,6 @@ export default function CashFlowChart({
           )}
         </Card>
 
-        {}
         <Card padding="lg">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100 text-red-600">

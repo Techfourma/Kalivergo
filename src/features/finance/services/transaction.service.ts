@@ -11,7 +11,7 @@ import {
   createCashPayment,
   deleteCashPaymentsByUserIdAndDate,
 } from "../repositories/cash-payment.repository";
-import { isUangKasName, UANG_KAS_AMOUNT } from "../validators/finance.utils";
+import { isUangKasName } from "../validators/finance.utils";
 import { findCategoryById } from "@/features/cms/repositories/category.repository";
 
 export async function getTransactionsWithSummary(tenantId: string) {
@@ -48,15 +48,23 @@ export async function createTransactionService(input: {
   createdBy: string;
   categoryId: string | null;
 }) {
-    
   let finalAmount = input.amount;
   let isUangKas = false;
 
   if (input.type === "INCOME" && input.categoryId) {
-    const category = await findCategoryById(input.categoryId);
+    const category = await findCategoryById(input.categoryId, input.tenantId);
     if (category && isUangKasName(category.name)) {
       isUangKas = true;
-      finalAmount = UANG_KAS_AMOUNT;
+      const schedules = await import("../repositories/uang-kas-schedule.repository").then(({ findUangKasSchedulesByTenantId }) =>
+        findUangKasSchedulesByTenantId(input.tenantId)
+      );
+      const selectedDate = input.date.toISOString().split("T")[0];
+      const activeSchedule = schedules.find(
+        (schedule) => schedule.date.toISOString().split("T")[0] === selectedDate
+      );
+      if (!activeSchedule) throw new Error("Pilih tanggal tagihan yang sudah didata pada Uang Kelas.");
+      finalAmount = Number(activeSchedule.amount);
+      input.date = activeSchedule.date;
     }
   }
 
@@ -86,7 +94,7 @@ export async function deleteTransactionService(
   id: string,
   tenantId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const transaction = await findTransactionById(id);
+  const transaction = await findTransactionById(id, tenantId);
   if (!transaction) {
     return { success: false, error: "Transaksi tidak ditemukan" };
   }
@@ -99,17 +107,17 @@ export async function deleteTransactionService(
   }
 
   if (transaction.userId && transaction.type === "INCOME" && transaction.categoryId) {
-    const category = await findCategoryById(transaction.categoryId);
+    const category = await findCategoryById(transaction.categoryId, tenantId);
     if (category && isUangKasName(category.name)) {
       try {
-        await deleteCashPaymentsByUserIdAndDate(transaction.userId, transaction.date);
+        await deleteCashPaymentsByUserIdAndDate(transaction.userId, tenantId, transaction.date);
       } catch (e) {
         console.error("Error deleting cash payment for uang kas:", e);
       }
     }
   }
 
-  await deleteTransactionById(id);
+  await deleteTransactionById(id, tenantId);
   return { success: true };
 }
 

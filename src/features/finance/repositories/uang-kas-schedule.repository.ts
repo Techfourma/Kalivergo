@@ -13,9 +13,10 @@ export async function findUangKasSchedulesByTenantId(
 }
 
 export async function findUangKasScheduleById(
-  id: string
+  id: string,
+  tenantId: string
 ): Promise<UangKasSchedule | null> {
-  return prisma.uangKasSchedule.findUnique({ where: { id } });
+  return prisma.uangKasSchedule.findFirst({ where: { id, tenantId } });
 }
 
 export async function findDuplicateUangKasSchedule(
@@ -38,8 +39,8 @@ export async function createUangKasSchedule(input: {
   });
 }
 
-export async function deleteUangKasScheduleById(id: string): Promise<UangKasSchedule> {
-  return prisma.uangKasSchedule.delete({
-    where: { id },
+export async function deleteUangKasScheduleById(id: string, tenantId: string): Promise<{ count: number }> {
+  return prisma.uangKasSchedule.deleteMany({
+    where: { id, tenantId },
   });
 }

@@ -2,8 +2,8 @@ import "server-only";
 
 import { prisma } from "@/server/db/prisma";
 
-export function findCategoryById(id: string) {
-  return prisma.category.findUnique({ where: { id } });
+export function findCategoryById(id: string, tenantId: string) {
+  return prisma.category.findFirst({ where: { id, tenantId } });
 }
 
 export function findDuplicateCategory(
@@ -21,14 +21,14 @@ export function createCategory(data: { tenantId: string; name: string; type: str
   return prisma.category.create({ data });
 }
 
-export function updateCategory(id: string, data: { name: string; type: string }) {
-  return prisma.category.update({ where: { id }, data });
+export function updateCategory(id: string, tenantId: string, data: { name: string; type: string }) {
+  return prisma.category.updateMany({ where: { id, tenantId }, data });
 }
 
-export function countCategoryTransactions(categoryId: string) {
-  return prisma.transaction.count({ where: { categoryId } });
+export function countCategoryTransactions(categoryId: string, tenantId: string) {
+  return prisma.transaction.count({ where: { categoryId, tenantId } });
 }
 
-export function deleteCategoryById(id: string) {
-  return prisma.category.delete({ where: { id } });
+export function deleteCategoryById(id: string, tenantId: string) {
+  return prisma.category.deleteMany({ where: { id, tenantId } });
 }
