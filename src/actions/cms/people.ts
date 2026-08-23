@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { CLASS_ROLES, readSessionUser, resolveTenantId, hasCmsAccess } from './role-model';
 import { createAuditLog } from './audit';
+import { CmsRole } from '@prisma/client';
 
 export async function addUser(formData: FormData) {
   try {
@@ -26,7 +27,7 @@ export async function addUser(formData: FormData) {
       return { error: 'Akses ditolak: hanya OWNER atau role CMS yang dapat menambah anggota.' };
     }
 
-    const cmsRole = CLASS_ROLES.includes(role as any) && role !== 'MEMBER' ? (role as any) : null;
+    const cmsRole: CmsRole | null = CLASS_ROLES.includes(role as any) && role !== 'MEMBER' ? (role as CmsRole) : null;
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
