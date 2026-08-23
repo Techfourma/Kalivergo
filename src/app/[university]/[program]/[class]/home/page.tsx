@@ -8,7 +8,7 @@ import TenantNavbar from "@/components/layout/TenantNavbar";
 import WaveBackground from "@/components/ui/WaveBackground";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { resolveTenantFromRoute } from "@/lib/tenant";
+import { requireTenantPageAccess, resolveTenantFromRoute } from "@/lib/tenant";
 import { loadCurrentUser } from "@/lib/user-session";
 import { notFound } from "next/navigation";
 import { findTasksForTenant } from "@/features/task/services/task.service";
@@ -26,7 +26,7 @@ type TenantHomePageProps = {
 export default async function TenantHomePage({ params }: TenantHomePageProps) {
   const routeParams = await params;
   const cookieStore = await cookies();
-  const userCookie = cookieStore.get('kalivergo_user')?.value;
+  const userCookie = cookieStore.get('techfourma_user')?.value;
   let currentUser: any = null;
 
   const tenantContext = await resolveTenantFromRoute(routeParams);
@@ -35,6 +35,8 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
   if (!tenantId) {
     notFound();
   }
+
+  await requireTenantPageAccess(tenantId);
 
   try {
    

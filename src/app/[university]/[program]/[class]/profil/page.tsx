@@ -5,8 +5,9 @@ import WaveBackground from "@/components/ui/WaveBackground";
 import ProfileForm from "./ProfileForm";
 import CacheGuard from "@/components/security/CacheGuard";
 import { cookies } from "next/headers";
-import { resolveTenantFromRoute } from "@/lib/tenant";
+import { requireTenantPageAccess, resolveTenantFromRoute } from "@/lib/tenant";
 import { loadCurrentUser } from "@/lib/user-session";
+import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -24,10 +25,15 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const userCookie = cookieStore.get("kalivergo_user")?.value;
   let currentUser: any = null;
 
-  
   const { university, program, class: className } = await params;
   const tenantContext = await resolveTenantFromRoute({ university, program, class: className });
   const tenantId = tenantContext?.tenantId;
+
+  if (!tenantId) {
+    notFound();
+  }
+
+  await requireTenantPageAccess(tenantId);
 
   try {
     currentUser = await loadCurrentUser(userCookie, tenantId);

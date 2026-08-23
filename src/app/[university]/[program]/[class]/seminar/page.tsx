@@ -3,8 +3,9 @@ import SeminarUnsubmittedList from "@/features/seminar/components/SeminarUnsubmi
 import TenantNavbar from "@/components/layout/TenantNavbar";
 import WaveBackground from "@/components/ui/WaveBackground";
 import { cookies } from "next/headers";
-import { resolveTenantFromRoute } from "@/lib/tenant";
+import { requireTenantPageAccess, resolveTenantFromRoute } from "@/lib/tenant";
 import { loadCurrentUser } from "@/lib/user-session";
+import { notFound } from "next/navigation";
 import { listSeminarsWithSubmissions } from "@/features/seminar/services/list-seminars.service";
 import { prisma } from "@/lib/db";
 
@@ -25,6 +26,12 @@ export default async function SeminarPage({ params }: SeminarPageProps) {
 
   const tenantContext = await resolveTenantFromRoute(routeParams);
   const tenantId = tenantContext?.tenantId;
+
+  if (!tenantId) {
+    notFound();
+  }
+
+  await requireTenantPageAccess(tenantId);
 
   let currentUser: any = null;
 

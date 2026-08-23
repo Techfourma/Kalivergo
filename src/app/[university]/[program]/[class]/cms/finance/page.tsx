@@ -1,9 +1,12 @@
 import { prisma } from "@/lib/db";
 import DeleteTransactionButton from "@/components/ui/DeleteTransactionButton";
 import FinanceInput from "@/components/cms/FinanceInput";
+import CategoryManager from "@/components/cms/CategoryManager";
 import { resolveTenantFromRoute } from "@/lib/tenant";
+import { getCurrentSessionUser } from "@/server/auth/session";
 import { getTransactionsWithSummary } from "@/features/finance/services/transaction.service";
 import { getUangKasSchedules } from "@/features/finance/services/uang-kas.service";
+import UangKasSettingsCard from "@/components/cms/UangKasSettingsCard";
 
 export const dynamic = "force-dynamic";
 
@@ -63,7 +66,19 @@ export default async function FinancePage({
     orderBy: { name: "asc" },
   });
 
+  const session = await getCurrentSessionUser();
+  const isOwner =
+    !!session?.id &&
+    (await prisma.tenantMembership.findFirst({
+      where: { userId: session.id, tenantId, role: "OWNER" },
+      select: { id: true },
+    })) !== null;
+
+  const allCategoriesEmpty =
+    incomeCategories.length === 0 && expenseCategories.length === 0;
+
   const uangKasSchedule = await getUangKasSchedules(tenantId);
+  const uangKasSettings = uangKasSchedule[0];
 
   const uangKasDates = uangKasSchedule.map((s) => ({
     label: new Date(s.date).toLocaleDateString("id-ID", {
@@ -114,11 +129,42 @@ export default async function FinancePage({
         </div>
       </div>
 
-<FinanceInput
+      <UangKasSettingsCard
+        dates={uangKasSchedule.map((schedule) => new Date(schedule.date).toISOString().split("T")[0])}
+        amount={uangKasSettings ? Number(uangKasSettings.amount) : undefined}
+      />
+
+      {allCategoriesEmpty && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+          <p className="text-sm font-medium text-amber-800">
+            Silakan untuk menambahkan kategori sebelum melakukan input transaksi.
+          </p>
+        </div>
+      )}
+
+      {isOwner && (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-bold text-dark-900 font-display">
+              Kelola Kategori Kas
+            </h2>
+            <p className="text-dark-500 text-sm mt-0.5">
+              Atur kategori pemasukan dan pengeluaran uang kas kelas Anda
+            </p>
+          </div>
+          <CategoryManager
+            incomeCategories={incomeCategories}
+            expenseCategories={expenseCategories}
+          />
+        </div>
+      )}
+
+      <FinanceInput
         users={users}
         incomeCategories={incomeCategories}
         expenseCategories={expenseCategories}
         uangKasDates={uangKasDates}
+        uangKasAmount={uangKasSettings ? Number(uangKasSettings.amount) : undefined}
       />
 
       <div className="bg-white rounded-xl shadow-sm border border-dark-100">

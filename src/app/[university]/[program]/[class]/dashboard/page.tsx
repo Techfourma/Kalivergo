@@ -7,8 +7,9 @@ import ArrearsList from "@/components/dashboard/ArrearsList";
 import WaveBackground from "@/components/ui/WaveBackground";
 import CacheGuard from "@/components/security/CacheGuard";
 import { cookies } from "next/headers";
-import { resolveTenantFromRoute } from "@/lib/tenant";
+import { requireTenantPageAccess, resolveTenantFromRoute } from "@/lib/tenant";
 import { loadCurrentUser } from "@/lib/user-session";
+import { notFound } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
 
@@ -29,10 +30,23 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   const tenantContext = await resolveTenantFromRoute(routeParams);
   const tenantId = tenantContext?.tenantId;
 
+  if (!tenantId) {
+    notFound();
+  }
+
+  await requireTenantPageAccess(tenantId);
+
   let currentUser: any = null;
   let dbTransactions: any[] = [];
   let users: any[] = [];
   let tenantInfo: any = null;
+  let uangKasScheduleDates: {
+    id: string;
+    date: string;
+    formattedDate: string;
+    amount: number;
+    description: string | null;
+  }[] = [];
 
   
   try {
@@ -60,7 +74,8 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
         })
       : null;
 
-    [dbTransactions, users] = await Promise.all([
+    let schedules: any[] = [];
+    [dbTransactions, users, schedules] = await Promise.all([
       prisma.transaction.findMany({
         where: transactionWhere,
         orderBy: { date: "asc" },
@@ -78,18 +93,26 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           }
         }
       }).then(memberships => memberships.map(m => m.user)),
+      prisma.uangKasSchedule.findMany({
+        where: { tenantId: tenantId! },
+        orderBy: { date: "asc" },
+      }),
     ]);
+
+    uangKasScheduleDates = schedules.map((schedule) => ({
+      id: schedule.id,
+      date: new Date(schedule.date).toISOString().split("T")[0],
+      formattedDate: new Date(schedule.date).toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }),
+      amount: Number(schedule.amount),
+      description: schedule.description,
+    }));
   } catch (err) {
     console.error("DashboardPage: DB error (non-fatal):", err);
   }
-
-  let uangKasScheduleDates: {
-    id: string;
-    date: string;
-    formattedDate: string;
-    amount: number;
-    description: string | null;
-  }[] = [];
 
   const finalExpectedPaymentDates = uangKasScheduleDates;
 
@@ -208,7 +231,6 @@ return {
           </div>
         </div>
 
-        
         <div className="space-y-6">
           <CashFlowChart
             transactions={dbTransactions as any}
@@ -220,6 +242,7 @@ return {
 
           <ArrearsList
             members={finalMembers as any}
+            hasUangKasSettings={finalExpectedPaymentDates.length > 0}
           />
         </div>
 
