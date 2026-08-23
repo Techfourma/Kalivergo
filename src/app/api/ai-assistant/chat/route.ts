@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
       {
         message: trimmedMessage,
         userId,
-        conversationId: conversationId || undefined,
+        conversationId: typeof conversationId === "string" ? conversationId : "",
       },
       aiSecret
     );

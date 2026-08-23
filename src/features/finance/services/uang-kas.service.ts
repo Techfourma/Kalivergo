@@ -8,9 +8,34 @@ import {
   findUangKasScheduleById,
   findUangKasSchedulesByTenantId,
 } from "../repositories/uang-kas-schedule.repository";
+import { prisma } from "@/lib/db";
 
 export async function getUangKasSchedules(tenantId: string) {
   return findUangKasSchedulesByTenantId(tenantId);
+}
+
+export async function saveUangKasSettings(input: {
+  tenantId: string;
+  dates: Date[];
+  amount: number;
+}) {
+  const schedules = await prisma.$transaction(async (tx) => {
+    await tx.uangKasSchedule.deleteMany({ where: { tenantId: input.tenantId } });
+    return Promise.all(input.dates.map((date) => tx.uangKasSchedule.create({
+      data: { tenantId: input.tenantId, date, amount: input.amount, description: "Uang kas" },
+    })));
+  });
+
+  const category = await prisma.category.findFirst({
+    where: { tenantId: input.tenantId, type: "INCOME", name: "Uang kas" },
+  });
+  if (!category) {
+    await prisma.category.create({
+      data: { tenantId: input.tenantId, type: "INCOME", name: "Uang kas" },
+    });
+  }
+
+  return schedules;
 }
 
 export async function createUangKasScheduleService(input: {
@@ -50,19 +75,12 @@ export async function deleteUangKasScheduleService(
   id: string,
   tenantId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const schedule = await findUangKasScheduleById(id);
+  const schedule = await findUangKasScheduleById(id, tenantId);
   if (!schedule) {
     return { success: false, error: "Jadwal uang kas tidak ditemukan" };
   }
 
-  if (schedule.tenantId !== tenantId) {
-    return {
-      success: false,
-      error: "Akses ditolak: Jadwal uang kas bukan milik kelas Anda",
-    };
-  }
-
-  await deleteUangKasScheduleById(id);
+  await deleteUangKasScheduleById(id, tenantId);
 
   await createAuditLog(
     "FINANCE",

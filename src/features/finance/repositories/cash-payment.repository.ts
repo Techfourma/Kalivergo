@@ -26,10 +26,11 @@ export async function createCashPayment(input: {
 
 export async function deleteCashPaymentsByUserIdAndDate(
   userId: string,
+  tenantId: string,
   date: Date
 ): Promise<number> {
   const result = await prisma.cashPayment.deleteMany({
-    where: { userId, date },
+    where: { userId, tenantId, date },
   });
   return result.count;
 }

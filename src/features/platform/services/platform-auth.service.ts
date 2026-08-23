@@ -49,7 +49,7 @@ export async function authenticatePlatformAdmin(
 
   if (user.kycStatus !== "APPROVED") {
     return {
-      error: "Akun belum disetujui oleh SUPER_ADMIN_KYC. Harap tunggu verifikasi.",
+      error: "Akun belum disetujui oleh Platform. Harap tunggu verifikasi.",
     };
   }
 

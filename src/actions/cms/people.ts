@@ -21,7 +21,7 @@ export async function addUser(formData: FormData) {
       return { error: 'Konteks kelas tidak ditemukan. Silakan buka kelas melalui URL /[universitas]/[prodi]/[kelas].' };
     }
 
-    const session = readSessionUser();
+    const session = await readSessionUser();
     if (!session?.id || !(await hasCmsAccess(session.id, tenantId))) {
       return { error: 'Akses ditolak: hanya OWNER atau role CMS yang dapat menambah anggota.' };
     }
@@ -72,7 +72,7 @@ export async function acceptUser(userId: string) {
     const tenantId = await resolveTenantId();
     if (!tenantId) return { error: 'Konteks kelas tidak ditemukan.' };
 
-    const session = readSessionUser();
+    const session = await readSessionUser();
     if (!session?.id || !(await hasCmsAccess(session.id, tenantId))) {
       return { error: 'Akses ditolak: hanya OWNER atau role CMS yang dapat menerima anggota.' };
     }
@@ -94,7 +94,7 @@ export async function rejectUser(userId: string) {
     const tenantId = await resolveTenantId();
     if (!tenantId) return { error: 'Konteks kelas tidak ditemukan.' };
 
-    const session = readSessionUser();
+    const session = await readSessionUser();
     if (!session?.id || !(await hasCmsAccess(session.id, tenantId))) {
       return { error: 'Akses ditolak: hanya OWNER atau role CMS yang dapat menolak anggota.' };
     }

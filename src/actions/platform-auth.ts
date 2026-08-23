@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { generateVerificationToken, hashToken } from "@/lib/auth";
-import { sendVerificationEmail } from "@/server/email";
+import { sendVerificationEmail } from "@/lib/email";
 import { env } from "@/config/env";
 import { requireSuperAdminKyc } from "@/lib/tenant";
 import {

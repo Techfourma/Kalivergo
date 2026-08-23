@@ -25,6 +25,7 @@ interface FinanceInputProps {
   incomeCategories: Category[];
   expenseCategories: Category[];
   uangKasDates?: { label: string; value: string }[];
+  uangKasAmount?: number;
 }
 
 export default function FinanceInput({
@@ -32,6 +33,7 @@ export default function FinanceInput({
   incomeCategories,
   expenseCategories,
   uangKasDates = [],
+  uangKasAmount = 10000,
 }: FinanceInputProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -145,12 +147,12 @@ export default function FinanceInput({
           <div>
             <label className="block text-sm font-medium text-dark-700 mb-1.5">Nominal</label>
             {isUangKasIncome ? (
-              <input type="number" name="amount" value={10000} readOnly required className="w-full rounded-xl border border-dark-200 bg-dark-50 px-4 py-2.5 text-sm text-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-not-allowed" />
+              <input type="number" name="amount" value={uangKasAmount} readOnly required className="w-full rounded-xl border border-dark-200 bg-dark-50 px-4 py-2.5 text-sm text-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-not-allowed" />
             ) : (
               <input type="number" name="amount" min="0" step="0.01" required className="w-full rounded-xl border border-dark-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             )}
             {isUangKasIncome && (
-              <p className="text-xs text-dark-500 mt-1">Nominal uang kas ditetapkan Rp 10.000.</p>
+              <p className="text-xs text-dark-500 mt-1">Nominal mengikuti pengaturan Uang Kelas.</p>
             )}
           </div>
 

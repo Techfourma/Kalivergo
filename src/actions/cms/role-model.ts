@@ -1,9 +1,7 @@
-'use server';
-
 import { prisma } from '@/lib/db';
 import { cookies } from 'next/headers';
 import { CMS_ROLES } from '@/types';
-import { getCurrentTenant } from '@/lib/tenant-context';
+import { getCurrentTenantForUser } from '@/lib/tenant-context';
 
 export const PLATFORM_ROLES = ['SUPER_ADMIN_KYC', 'ADMIN_KYC'] as const;
 export const CLASS_ROLES = [
@@ -26,9 +24,10 @@ export interface SessionUser {
   memberships?: Array<{ tenantId: string; role: string; cmsRole?: string | null }>;
 }
 
-export function readSessionUser(): SessionUser | null {
+export async function readSessionUser(): Promise<SessionUser | null> {
   try {
-    const raw = cookies().get('kalivergo_user')?.value;
+    const cookieStore = await cookies();
+    const raw = cookieStore.get('kalivergo_user')?.value;
     if (!raw) return null;
     return JSON.parse(raw) as SessionUser;
   } catch (e) {
@@ -38,7 +37,7 @@ export function readSessionUser(): SessionUser | null {
 
 export async function resolveTenantId(): Promise<string | null> {
   try {
-    const tenant = await getCurrentTenant();
+    const tenant = await getCurrentTenantForUser();
     return tenant?.tenantId ?? null;
   } catch (error) {
     console.error('Error resolving tenant context:', error);
@@ -65,13 +64,13 @@ export async function isOwner(userId: string, tenantId: string): Promise<boolean
 }
 
 export async function requireCmsActor(tenantId: string): Promise<string | null> {
-  const session = readSessionUser();
+  const session = await readSessionUser();
   if (!session?.id || !(await hasCmsAccess(session.id, tenantId))) return null;
   return session.id;
 }
 
 export async function requireOwner(tenantId: string): Promise<string | null> {
-  const session = readSessionUser();
+  const session = await readSessionUser();
   if (!session?.id || !(await isOwner(session.id, tenantId))) return null;
   return session.id;
 }

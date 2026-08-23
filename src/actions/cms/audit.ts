@@ -14,7 +14,7 @@ export async function createAuditLog(
   try {
     let resolvedUserName = userName;
     if (!resolvedUserName || resolvedUserName === 'System') {
-      const session = readSessionUser();
+      const session = await readSessionUser();
       if (session?.name) resolvedUserName = session.name;
     }
     if (!resolvedUserName) resolvedUserName = 'System';

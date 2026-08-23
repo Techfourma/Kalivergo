@@ -23,9 +23,10 @@ interface MemberArrears {
 
 interface ArrearsListProps {
   members: MemberArrears[];
+  hasUangKasSettings?: boolean;
 }
 
-export default function ArrearsList({ members }: ArrearsListProps) {
+export default function ArrearsList({ members, hasUangKasSettings = true }: ArrearsListProps) {
   const [selectedMember, setSelectedMember] = useState<string>("all");
 
   const allMemberNames = useMemo(() => {
@@ -61,7 +62,15 @@ export default function ArrearsList({ members }: ArrearsListProps) {
           </Badge>
         </div>
 
-        {}
+        {!hasUangKasSettings ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-center">
+            <AlertCircle className="mx-auto mb-2 h-8 w-8 text-amber-600" />
+            <p className="font-medium text-amber-900">Silakan lakukan pendataan Uang Kelas terlebih dahulu.</p>
+            <p className="mt-1 text-sm text-amber-700">Tanggal tagihan dan nominal uang kas belum ditentukan oleh pengelola kelas.</p>
+          </div>
+        ) : (
+        <>
+        {/* Filter Nama */}
         <div className="mb-4 flex flex-wrap gap-2 items-center">
           <label className="text-sm text-dark-500">Filter Nama:</label>
           <div className="relative">
@@ -130,6 +139,8 @@ export default function ArrearsList({ members }: ArrearsListProps) {
             ))
           )}
         </div>
+        </>
+        )}
       </Card>
     );
   }
@@ -156,7 +167,7 @@ export default function ArrearsList({ members }: ArrearsListProps) {
           </div>
         </div>
 
-        {}
+        {/* Pindah filter nama tetap tersedia */}
         <div className="mb-4 flex flex-wrap gap-2 items-center">
           <label className="text-sm text-dark-500">Filter Nama:</label>
           <div className="relative">

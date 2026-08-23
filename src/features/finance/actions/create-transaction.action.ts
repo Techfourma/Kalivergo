@@ -93,7 +93,7 @@ export async function deleteTransaction(id: string) {
     }
 
     const { prisma } = await import("@/lib/db");
-    const transaction = await prisma.transaction.findUnique({ where: { id } });
+    const transaction = await prisma.transaction.findFirst({ where: { id, tenantId } });
 
     let transactionOwnerName: string | undefined;
     if (transaction?.userId) {

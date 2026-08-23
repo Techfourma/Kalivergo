@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { resolveTenantFromRoute } from "@/lib/tenant";
+import {
+  requireTenantMembership,
+  resolveTenantFromRoute,
+} from "@/lib/tenant";
+import { getCurrentSessionUser } from "@/server/auth/session";
 import TenantLanding from "@/components/landing/TenantLanding";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +30,16 @@ export default async function TenantLandingPage({
 
   if (!tenant) {
     notFound();
+  }
+
+  const session = await getCurrentSessionUser();
+  if (!session?.id) {
+    redirect("/login");
+  }
+  try {
+    await requireTenantMembership(session.id, tenant.tenantId);
+  } catch {
+    redirect("/unauthorized");
   }
 
   const tenantInfo = await prisma.tenant
@@ -66,7 +80,7 @@ export async function generateMetadata({
   });
 
   return {
-    title: tenant ? `kalivergo - Kelas ${routeParams.class}` : "kalivergo",
+    title: tenant ? `Kalivergo - Kelas ${routeParams.class}` : "Kalivergo",
     description:
       "Platform terpadu untuk manajemen kelas, tracking tugas, kelola keuangan, dan pantau kegiatan seminar dalam satu tempat.",
   };

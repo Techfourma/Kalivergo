@@ -30,8 +30,8 @@ export async function findTransactionsByTenantId(
   });
 }
 
-export async function findTransactionById(id: string): Promise<Transaction | null> {
-  return prisma.transaction.findUnique({ where: { id } });
+export async function findTransactionById(id: string, tenantId: string): Promise<Transaction | null> {
+  return prisma.transaction.findFirst({ where: { id, tenantId } });
 }
 
 export async function createTransaction(input: {
@@ -50,9 +50,9 @@ export async function createTransaction(input: {
   });
 }
 
-export async function deleteTransactionById(id: string): Promise<Transaction> {
-  return prisma.transaction.delete({
-    where: { id },
+export async function deleteTransactionById(id: string, tenantId: string): Promise<Prisma.BatchPayload> {
+  return prisma.transaction.deleteMany({
+    where: { id, tenantId },
   });
 }
 

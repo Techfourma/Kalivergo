@@ -1,10 +1,11 @@
-import UpcomingSeminars from "@/features/seminar/components/UpcomingSeminars";
+import UpcomingSeminars from "@/features/seminar/components/UpcomingSeminar";
 import SeminarUnsubmittedList from "@/features/seminar/components/SeminarUnsubmittedList";
 import TenantNavbar from "@/components/layout/TenantNavbar";
 import WaveBackground from "@/components/ui/WaveBackground";
 import { cookies } from "next/headers";
-import { resolveTenantFromRoute } from "@/lib/tenant";
+import { requireTenantPageAccess, resolveTenantFromRoute } from "@/lib/tenant";
 import { loadCurrentUser } from "@/lib/user-session";
+import { notFound } from "next/navigation";
 import { listSeminarsWithSubmissions } from "@/features/seminar/services/list-seminars.service";
 import { prisma } from "@/lib/db";
 
@@ -25,6 +26,12 @@ export default async function SeminarPage({ params }: SeminarPageProps) {
 
   const tenantContext = await resolveTenantFromRoute(routeParams);
   const tenantId = tenantContext?.tenantId;
+
+  if (!tenantId) {
+    notFound();
+  }
+
+  await requireTenantPageAccess(tenantId);
 
   let currentUser: any = null;
 
@@ -78,7 +85,7 @@ export default async function SeminarPage({ params }: SeminarPageProps) {
         <main className="flex-1 py-8 pt-24 pb-28 relative z-10">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
 
-           
+            {/* Header */}
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-white font-display">
                 Seminar

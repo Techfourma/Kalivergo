@@ -6,7 +6,7 @@ import { createAuditLog } from "@/server/audit";
 import { validateSelfieFile } from "@/server/kyc/validation";
 import { generateSlug } from "@/lib/tenant";
 import { generateVerificationToken, hashToken } from "@/lib/auth";
-import { sendVerificationEmail } from "@/server/email";
+import { sendVerificationEmail } from "@/lib/email";
 import {
   createOwnerApplication,
 } from "@/features/owner/services/owner-application.service";

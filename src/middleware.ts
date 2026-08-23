@@ -91,9 +91,16 @@ export async function middleware(req: NextRequest) {
   }
 
   const isPlatformPath = pathname.startsWith('/platform');
-  const isCmsPath = pathname.startsWith('/cms');
+  const isCmsPath = pathname.includes('/cms');
+
+  const isTenantRoute = tenantContext !== null;
+
   const isProtectedPath =
-    pathname.startsWith('/dashboard') || pathname.startsWith('/profil') || pathname.startsWith('/home');
+    isTenantRoute &&
+    (pathname.includes('/dashboard') ||
+      pathname.includes('/profil') ||
+      pathname.includes('/home') ||
+      !pathname.includes('/portofolio'));
 
   const sessionUser = parseSessionCookie(req.cookies.get('kalivergo_user')?.value);
 
@@ -135,7 +142,6 @@ export async function middleware(req: NextRequest) {
     url.pathname = '/unauthorized';
     return setNoStore(NextResponse.redirect(url));
   }
-
   if (isProtectedPath) {
     if (!sessionUser?.id) {
       const url = req.nextUrl.clone();
@@ -156,6 +162,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
+  runtime: 'nodejs',
   matcher: [
     '/platform',
     '/platform/:path*',

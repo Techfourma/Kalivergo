@@ -6,7 +6,7 @@ import { generateSlug } from "@/lib/tenant";
 import { createAuditLog } from "@/server/audit";
 import { uploadToCloudinary, deleteFromCloudinary } from "@/server/storage/cloudinary";
 import { KYC_STORAGE_FOLDER } from "@/server/kyc/validation";
-import { sendOwnerApprovalEmail } from "@/server/email";
+import { sendOwnerApprovalEmail } from "@/lib/email";
 
 export interface CreateOwnerApplicationInput {
   userId: string;

@@ -2,7 +2,36 @@
 
 import { revalidatePath } from "next/cache";
 import { requireCmsActor, resolveTenantId } from "@/actions/cms/role-model";
-import { createUangKasScheduleService, deleteUangKasScheduleService } from "../services/uang-kas.service";
+import {
+  createUangKasScheduleService,
+  deleteUangKasScheduleService,
+  saveUangKasSettings,
+} from "../services/uang-kas.service";
+
+export async function saveUangKasSettingsAction(formData: FormData) {
+  try {
+    const dateValues = formData.getAll("dates").map(String).filter(Boolean);
+    const amount = Number(formData.get("amount"));
+
+    if (dateValues.length === 0) return { error: "Tambahkan minimal satu tanggal tagihan" };
+    const dates = dateValues.map((value) => new Date(value));
+    if (dates.some((date) => isNaN(date.getTime()))) return { error: "Tanggal tagihan tidak valid" };
+    if (new Set(dateValues).size !== dateValues.length) return { error: "Tanggal tagihan tidak boleh sama" };
+    if (!Number.isFinite(amount) || amount <= 0) return { error: "Nominal uang kas harus lebih dari 0" };
+
+    const tenantId = await resolveTenantId();
+    if (!tenantId) return { error: "Konteks kelas tidak ditemukan." };
+    if (!(await requireCmsActor(tenantId))) return { error: "Akses ditolak: hanya OWNER atau role CMS." };
+
+    await saveUangKasSettings({ tenantId, dates, amount });
+    revalidatePath("/cms/finance");
+    revalidatePath("/dashboard");
+    return { success: "Pengaturan uang kelas berhasil disimpan" };
+  } catch (error: any) {
+    console.error("Error saving uang kas settings:", error);
+    return { error: error.message || "Gagal menyimpan pengaturan uang kas" };
+  }
+}
 
 export async function createUangKasSchedule(formData: FormData) {
   try {

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
-import "@/styles/globals.css";
+import "@/styles/global.css";
 import Image from "next/image";
-import { AssistantWidget } from "@/components/ai-assistant";
+import { AssistantWidget } from "@/features/ai-assistant";
 
 const inter = Inter({
   subsets: ["latin"],
