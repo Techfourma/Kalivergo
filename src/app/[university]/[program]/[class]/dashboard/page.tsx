@@ -48,6 +48,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     description: string | null;
   }[] = [];
 
+  
   try {
     currentUser = await loadCurrentUser(userCookie, tenantId);
 
@@ -199,16 +200,15 @@ return {
 
     <div className="fixed inset-0 z-0 bg-gradient-to-b from-transparent via-[#0a0a14]/50 to-[#0a0a14] pointer-events-none" />
 
-    {/* TENANT NAVBAR - ISOLATED TO THIS TENANT ONLY */}
     <div className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a14]/80 backdrop-blur-md border-b border-white/10">
       <TenantNavbar user={currentUser} tenantPath={tenantPath} />
     </div>
 
-    {/* CONTENT */}
+  
     <main className="relative z-10 pt-[120px] pb-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-        {/* HEADER */}
+       
         <div className="mb-8">
           <div className="flex items-center gap-3">
 
@@ -224,7 +224,7 @@ return {
               </h1>
 
               <p className="text-gray-300 mt-1">
-                Monitoring uang kas kelas Kalivergo
+                Monitoring uang kas kelas kalivergo
               </p>
             </div>
 

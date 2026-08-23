@@ -39,9 +39,11 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
   await requireTenantPageAccess(tenantId);
 
   try {
+   
     currentUser = await loadCurrentUser(userCookie, tenantId);
 
     if (!currentUser) {
+      
       return (
         <div className="min-h-screen flex items-center justify-center bg-[#0a0a14]">
           <div className="text-white text-center">
@@ -55,6 +57,7 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
       );
     }
 
+    
     const taskWhere = tenantId ? { tenantId } : {};
     const scheduleWhere = tenantId ? { tenantId } : {};
 
@@ -104,7 +107,7 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
         <WaveBackground />
         <div className="fixed inset-0 z-0 bg-gradient-to-b from-transparent via-[#0a0a14]/50 to-[#0a0a14] pointer-events-none" />
 
-        {/* TENANT NAVBAR - ISOLATED TO THIS TENANT ONLY */}
+        
         <div className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a14]/80 backdrop-blur-md border-b border-white/10">
           <TenantNavbar
             user={currentUser}

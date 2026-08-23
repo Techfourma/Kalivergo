@@ -85,7 +85,7 @@ export default async function SeminarPage({ params }: SeminarPageProps) {
         <main className="flex-1 py-8 pt-24 pb-28 relative z-10">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
 
-            {/* Header */}
+           
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-white font-display">
                 Seminar
@@ -96,11 +96,9 @@ export default async function SeminarPage({ params }: SeminarPageProps) {
               </p>
             </div>
 
-            {/* Seminar Mendatang */}
             <div className="space-y-6">
               <UpcomingSeminars seminars={seminars as any} />
 
-              {/* Seminar Belum Mengumpulkan */}
               <SeminarUnsubmittedList
                 seminars={seminarsForUnsubmitted}
                 allUsers={allUsers}
