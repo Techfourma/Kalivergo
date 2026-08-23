@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
+import { logoutUser } from "@/actions/cms";
 import {
   Home,
   Wallet,
@@ -32,7 +33,7 @@ interface TenantNavbarProps {
   } | null;
   onSignIn?: () => void;
   onSignOut?: () => void;
-  tenantPath: string; 
+  tenantPath: string;
 }
 
 interface NavItem {
@@ -46,6 +47,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -61,6 +63,32 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
       document.body.style.overflow = '';
     };
   }, [mobileOpen]);
+
+  const handleSignOut = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+
+    try {
+      if (onSignOut) {
+        await onSignOut();
+      } else {
+        try {
+          await logoutUser();
+        } catch (e) {
+          console.error("Gagal memanggil logoutUser:", e);
+        }
+
+        document.cookie =
+          "kalivergo_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+        document.cookie =
+          "kalivergo_tenant=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+
+        window.location.replace("/login");
+      }
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   const navItems: NavItem[] = [
     { href: `${tenantPath}/home`, label: "Home", icon: Home },
@@ -112,7 +140,6 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
     return roleMap[role] || role;
   };
 
- 
   const filteredNavItems = !user
     ? navItems.filter((item) => !item.requiresAuth)
     : navItems;
@@ -138,12 +165,12 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
     <>
       <nav className="sticky top-0 z-40 border-b border-dark-200 bg-white/80 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">         
+          <div className="flex h-16 items-center justify-between">
             <Link href={`${tenantPath}/home`} className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 shadow-lg shadow-primary-500/25 overflow-hidden">
                 <Image
                   src="/logo.jpg"
-                  alt="kalivergo Logo"
+                  alt="Kalivergo Logo"
                   width={36}
                   height={36}
                   className="object-cover"
@@ -151,11 +178,10 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                 />
               </div>
               <span className="text-xl font-bold text-dark-900 font-display hidden sm:block">
-                kalivergo
+                Kalivergo
               </span>
             </Link>
 
-           
             <div className="hidden md:flex items-center gap-1">
               {filteredNavItems.map((item) => {
                 const Icon = item.icon;
@@ -178,7 +204,6 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
               })}
             </div>
 
-           
             <div className="hidden md:flex items-center gap-3">
               {user ? (
                 <div className="flex items-center gap-3">
@@ -198,7 +223,9 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={onSignOut}
+                    onClick={handleSignOut}
+                    disabled={isLoggingOut}
+                    isLoading={isLoggingOut}
                     className="!px-2 text-dark-500 hover:text-red-600 hover:bg-red-50"
                     title="Sign Out"
                   >
@@ -213,7 +240,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
               )}
             </div>
 
-          
+            {/* Mobile Menu Button */}
             <button
               className="md:hidden rounded-lg p-2 text-dark-600 hover:bg-dark-100 transition-colors"
               onClick={() => setMobileOpen(true)}
@@ -239,7 +266,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 shadow-lg overflow-hidden">
                   <Image
                     src="/logo.jpg"
-                    alt="kalivergo Logo"
+                    alt="Kalivergo Logo"
                     width={36}
                     height={36}
                     className="object-cover"
@@ -297,8 +324,10 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                   <Button
                     variant="outline"
                     className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                    disabled={isLoggingOut}
+                    isLoading={isLoggingOut}
                     onClick={() => {
-                      onSignOut?.();
+                      handleSignOut();
                       setMobileOpen(false);
                     }}
                   >

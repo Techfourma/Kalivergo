@@ -48,7 +48,6 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     description: string | null;
   }[] = [];
 
-  
   try {
     currentUser = await loadCurrentUser(userCookie, tenantId);
 
@@ -204,11 +203,9 @@ return {
       <TenantNavbar user={currentUser} tenantPath={tenantPath} />
     </div>
 
-  
     <main className="relative z-10 pt-[120px] pb-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-       
         <div className="mb-8">
           <div className="flex items-center gap-3">
 
@@ -224,7 +221,7 @@ return {
               </h1>
 
               <p className="text-gray-300 mt-1">
-                Monitoring uang kas kelas kalivergo
+                Monitoring uang kas kelas Kalivergo
               </p>
             </div>
 

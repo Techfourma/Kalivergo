@@ -149,14 +149,12 @@ export default function PlatformLandingPage() {
         subMessage="Silakan tunggu sebentar..."
       />
 
-      {/* Decorative background */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-primary-600/20 blur-[140px]" />
         <div className="absolute top-1/3 -right-40 h-[450px] w-[450px] rounded-full bg-accent-600/20 blur-[140px]" />
         <div className="absolute bottom-0 left-1/3 h-[350px] w-[350px] rounded-full bg-blue-600/10 blur-[120px]" />
       </div>
 
-      {/* Navbar */}
       <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#0a0a14]/80 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">

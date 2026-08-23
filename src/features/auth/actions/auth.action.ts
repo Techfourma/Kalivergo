@@ -17,7 +17,13 @@ export async function registerAction(formData: FormData) {
     return { error: result.error.errors[0]?.message, field: result.error.errors[0]?.path[0] as string };
   }
 
-  return registerUserService(result.data);
+  return registerUserService({
+    fullName,
+    nim,
+    email,
+    password,
+    confirmPassword,
+  });
 }
 
 export async function loginAction(nim: string, password: string) {
@@ -26,7 +32,7 @@ export async function loginAction(nim: string, password: string) {
     return { error: result.error.errors[0]?.message };
   }
 
-  const serviceResult = await loginUserService(result.data);
+  const serviceResult = await loginUserService({ nim, password });
   if (serviceResult.error) {
     return serviceResult;
   }
@@ -82,5 +88,5 @@ export async function resetPasswordAction(formData: FormData) {
     return { error: result.error.errors[0]?.message, field: result.error.errors[0]?.path[0] as string };
   }
 
-  return resetPasswordService(result.data);
+  return resetPasswordService({ nim, email, newPassword, confirmPassword });
 }

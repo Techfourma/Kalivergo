@@ -16,7 +16,6 @@ import {
   Users,
   FolderOpen,
   FileText,
-  Tags,
 } from "lucide-react";
 
 const cmsNavItems = [
@@ -25,7 +24,6 @@ const cmsNavItems = [
   { href: "/cms/tasks", label: "Manage Tasks", icon: ClipboardList },
   { href: "/cms/people", label: "People Management", icon: User },
   { href: "/cms/finance", label: "Finance", icon: Wallet },
-  { href: "/cms/categories", label: "Kategori Kas", icon: Tags },
   { href: "/cms/schedule", label: "Schedule", icon: Calendar },
   { href: "/cms/seminar", label: "Seminar", icon: GraduationCap },
   { href: "/cms/audit", label: "Audit Log", icon: FileText },
@@ -98,11 +96,7 @@ export default function Sidebar({ variant, userRole, tenantPath }: SidebarProps)
     ...(isNonMember ? [{ href: "/cms", label: "CMS Overview", icon: FolderOpen }] : []),
   ];
 
-  const isOwnerRole = effectiveRole === "OWNER";
-
-  const navItems = (isCms ? cmsNavItems : mainNavItems).filter((item) =>
-    item.href === "/cms/categories" ? isCms && isOwnerRole : true
-  );
+  const navItems = isCms ? cmsNavItems : mainNavItems;
   const sidebarTitle = isCms ? "CMS Menu" : "Navigation";
 
   if (!isMounted) {
@@ -121,7 +115,6 @@ export default function Sidebar({ variant, userRole, tenantPath }: SidebarProps)
         </button>
       )}
 
-      
       <aside
         className={cn(
           "shrink-0 bg-white border-r border-dark-200 min-h-screen transition-all duration-300 ease-in-out max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-40",

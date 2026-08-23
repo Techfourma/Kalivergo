@@ -106,12 +106,14 @@ export default function ActionFeedback({
 
     try {
       const result = customSubmit ? await customSubmit(formData) : await actions[actionType](formData);
-      if (result?.success) {
-        formRef.current?.reset();
-        setSuccess(true);
-        if (refreshOnSuccess) router.refresh();
-      } else if (result?.error) {
-        setError(result.error);
+      if (result && typeof result === "object") {
+        if (result.success) {
+          formRef.current?.reset();
+          setSuccess(true);
+          if (refreshOnSuccess) router.refresh();
+        } else if (result.error) {
+          setError(result.error);
+        }
       }
     } catch {
       setError("Terjadi kesalahan. Silakan coba lagi.");

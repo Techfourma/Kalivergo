@@ -1,5 +1,8 @@
 import { AIAssistantConfig } from './config';
+import { buildAssistantUrl } from './url';
 import type { AIAssistantError } from '@/features/ai-assistant/types';
+
+export { buildAssistantUrl };
 
 export interface AIServerRequest {
   message: string;
@@ -16,9 +19,22 @@ export interface AIServerResponse {
   error?: AIAssistantError;
 }
 
+function generateUuid(): string {
+  if (
+    typeof crypto !== 'undefined' &&
+    typeof (crypto as { randomUUID?: () => string }).randomUUID === 'function'
+  ) {
+    return (crypto as { randomUUID: () => string }).randomUUID();
+  }
 
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
-
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function sendToAIAssistant(
   request: AIServerRequest,
@@ -28,26 +44,40 @@ export async function sendToAIAssistant(
   const timeoutId = setTimeout(() => controller.abort(), AIAssistantConfig.timeoutMs);
 
   try {
-    const url = `${AIAssistantConfig.url}/api/chat`;
+    const requestId = generateUuid();
+    const conversationId =
+      request.conversationId && UUID_RE.test(request.conversationId)
+        ? request.conversationId
+        : generateUuid();
 
-    const response = await fetch(url, {
+    const response = await fetch(buildAssistantUrl(AIAssistantConfig.url || ''), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${secret}`,
       },
-      body: JSON.stringify(request),
+      body: JSON.stringify({
+        requestId,
+        conversationId,
+        message: request.message,
+      }),
       signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      let backendMessage: string | undefined;
+      const errorData = (await response.json().catch(() => ({} as Record<string, unknown>))) as
+        | Record<string, unknown>
+        | undefined;
+      if (errorData && typeof errorData === 'object' && typeof errorData.message === 'string') {
+        backendMessage = errorData.message;
+      }
 
       const aiError: AIAssistantError = {
         code: `HTTP_${response.status}`,
-        message: mapHTTPErrorToMessage(response.status),
+        message: backendMessage || mapHTTPErrorToMessage(response.status),
         isRetryable: response.status >= 500 || response.status === 429,
       };
 
@@ -61,11 +91,32 @@ export async function sendToAIAssistant(
       };
     }
 
-    const data: AIServerResponse = await response.json();
+    const data = (await response.json()) as Record<string, unknown>;
+
+    if (data.success === false) {
+      const message =
+        typeof data.message === 'string' ? data.message : 'Terjadi masalah saat memproses pertanyaan.';
+      const code = typeof data.error === 'string' ? data.error : 'AI_BACKEND_ERROR';
+      const aiError: AIAssistantError = { code, message, isRetryable: false };
+
+      return {
+        success: false,
+        error: new Error(message),
+        response: { success: false, error: aiError },
+      };
+    }
+
+    const answer = typeof data.answer === 'string' ? data.answer : '';
 
     return {
       success: true,
-      response: data,
+      response: {
+        success: true,
+        data: {
+          response: answer,
+          conversationId,
+        },
+      },
     };
   } catch (error) {
     clearTimeout(timeoutId);
@@ -78,7 +129,6 @@ export async function sendToAIAssistant(
     }
 
     if (error instanceof Error) {
-      
       if (error.message.includes('fetch') || error.message.includes('network')) {
         return {
           success: false,
@@ -99,8 +149,6 @@ export async function sendToAIAssistant(
   }
 }
 
-
-
 function mapHTTPErrorToMessage(status: number): string {
   switch (status) {
     case 400:
@@ -117,7 +165,6 @@ function mapHTTPErrorToMessage(status: number): string {
       return 'Terjadi masalah saat memproses pertanyaan.';
   }
 }
-
 
 export function validateAIResponse(data: unknown): data is AIServerResponse {
   if (!data || typeof data !== 'object') {

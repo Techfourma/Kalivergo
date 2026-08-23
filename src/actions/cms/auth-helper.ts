@@ -159,7 +159,7 @@ export async function loginUser(nim: string, password: string) {
       session.cmsRole = primary?.cmsRole ?? null;
     }
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     cookieStore.set('kalivergo_user', JSON.stringify(session), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -176,7 +176,7 @@ export async function loginUser(nim: string, password: string) {
 }
 
 export async function logoutUser() {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   cookieStore.delete('kalivergo_user');
   return { success: true };
 }

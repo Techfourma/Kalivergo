@@ -3,7 +3,7 @@ import "server-only";
 import { prisma } from "@/server/db/prisma";
 import { hash, compare } from "bcryptjs";
 import { generateVerificationToken, hashToken } from "@/lib/auth";
-import { sendVerificationEmail, sendForgotPasswordVerificationEmail } from "@/server/email";
+import { sendVerificationEmail, sendForgotPasswordVerificationEmail } from "@/lib/email";
 import { createAuditLog } from "@/server/audit";
 
 export interface RegisterUserInput {

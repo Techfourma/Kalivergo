@@ -38,7 +38,12 @@ export function buildPortfolioUpdate(input: Record<string, unknown>) {
   for (const field of portfolioFields) {
     if (input[field] !== undefined) {
       const value = input[field];
-      data[field] = typeof value === "string" || value === null ? value : undefined;
+      data[field] =
+        typeof value === "string"
+          ? value
+          : value === null
+            ? null
+            : undefined;
     }
   }
   return data;
