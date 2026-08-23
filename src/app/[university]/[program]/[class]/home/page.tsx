@@ -8,40 +8,35 @@ import TenantNavbar from "@/components/layout/TenantNavbar";
 import WaveBackground from "@/components/ui/WaveBackground";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { getCurrentTenant } from "@/lib/tenant-context";
+import { requireTenantPageAccess, resolveTenantFromRoute } from "@/lib/tenant";
 import { loadCurrentUser } from "@/lib/user-session";
 import { notFound } from "next/navigation";
+import { findTasksForTenant } from "@/features/task/services/task.service";
 
 export const dynamic = 'force-dynamic';
 
 type TenantHomePageProps = {
-  params: {
+  params: Promise<{
     university: string;
     program: string;
     class: string;
-  };
+  }>;
 };
 
 export default async function TenantHomePage({ params }: TenantHomePageProps) {
+  const routeParams = await params;
   const cookieStore = await cookies();
-  const userCookie = cookieStore.get('kalivergo_user')?.value;
+  const userCookie = cookieStore.get('techfourma_user')?.value;
   let currentUser: any = null;
 
-  const tenantContext = await getCurrentTenant();
+  const tenantContext = await resolveTenantFromRoute(routeParams);
   const tenantId = tenantContext?.tenantId;
 
   if (!tenantId) {
-    const { resolveTenantFromRoute } = await import("@/lib/tenant");
-    const resolvedTenant = await resolveTenantFromRoute({
-      university: params.university,
-      program: params.program,
-      class: params.class,
-    });
-
-    if (!resolvedTenant) {
-      notFound();
-    }
+    notFound();
   }
+
+  await requireTenantPageAccess(tenantId);
 
   try {
     currentUser = await loadCurrentUser(userCookie, tenantId);
@@ -64,11 +59,7 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
     const scheduleWhere = tenantId ? { tenantId } : {};
 
     const [tasks, schedules, allUsers] = await Promise.all([
-      prisma.task.findMany({
-        where: taskWhere,
-        orderBy: { deadline: "asc" },
-        include: { submissions: { select: { userId: true } } },
-      }),
+      findTasksForTenant(tenantId!, {}),
 
       prisma.schedule.findMany({
         where: scheduleWhere,
@@ -106,7 +97,7 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
       submissions: t.submissions.map((s) => ({ userId: s.userId })),
     }));
 
-    const tenantPath = `/${params.university}/${params.program}/${params.class}`;
+    const tenantPath = `/${routeParams.university}/${routeParams.program}/${routeParams.class}`;
 
     return (
       <>
@@ -126,7 +117,7 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-white font-display">Dashboard Home</h1>
               <p className="text-gray-300 mt-2">
-                Kelas: {params.class} - {params.program} - {params.university}
+                Kelas: {routeParams.class} - {routeParams.program} - {routeParams.university}
               </p>
               <p className="text-gray-300">
                 Selamat datang, {currentUser.name}!{" "}

@@ -7,30 +7,46 @@ import ArrearsList from "@/components/dashboard/ArrearsList";
 import WaveBackground from "@/components/ui/WaveBackground";
 import CacheGuard from "@/components/security/CacheGuard";
 import { cookies } from "next/headers";
-import { getCurrentTenant } from "@/lib/tenant-context";
+import { requireTenantPageAccess, resolveTenantFromRoute } from "@/lib/tenant";
 import { loadCurrentUser } from "@/lib/user-session";
+import { notFound } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
 
 type DashboardPageProps = {
-  params: {
+  params: Promise<{
     university: string;
     program: string;
     class: string;
-  };
+  }>;
 };
 
 export default async function DashboardPage({ params }: DashboardPageProps) {
+  const routeParams = await params;
   noStore();
   const cookieStore = await cookies();
   const userCookie = cookieStore.get('kalivergo_user')?.value;
 
-  const tenantContext = await getCurrentTenant();
+  const tenantContext = await resolveTenantFromRoute(routeParams);
   const tenantId = tenantContext?.tenantId;
+
+  if (!tenantId) {
+    notFound();
+  }
+
+  await requireTenantPageAccess(tenantId);
 
   let currentUser: any = null;
   let dbTransactions: any[] = [];
   let users: any[] = [];
+  let tenantInfo: any = null;
+  let uangKasScheduleDates: {
+    id: string;
+    date: string;
+    formattedDate: string;
+    amount: number;
+    description: string | null;
+  }[] = [];
 
   try {
     currentUser = await loadCurrentUser(userCookie, tenantId);
@@ -47,7 +63,18 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     const uangKasScheduleWhere = tenantId ? { tenantId } : {};
     const cashPaymentWhere = tenantId ? { tenantId } : {};
 
-    [dbTransactions, users] = await Promise.all([
+    tenantInfo = tenantId
+    ? await prisma.tenant.findUnique({
+        where: { id: tenantId },
+        include: {
+          university: true,
+          program: true,
+          },
+        })
+      : null;
+
+    let schedules: any[] = [];
+    [dbTransactions, users, schedules] = await Promise.all([
       prisma.transaction.findMany({
         where: transactionWhere,
         orderBy: { date: "asc" },
@@ -65,75 +92,28 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           }
         }
       }).then(memberships => memberships.map(m => m.user)),
+      prisma.uangKasSchedule.findMany({
+        where: { tenantId: tenantId! },
+        orderBy: { date: "asc" },
+      }),
     ]);
+
+    uangKasScheduleDates = schedules.map((schedule) => ({
+      id: schedule.id,
+      date: new Date(schedule.date).toISOString().split("T")[0],
+      formattedDate: new Date(schedule.date).toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }),
+      amount: Number(schedule.amount),
+      description: schedule.description,
+    }));
   } catch (err) {
     console.error("DashboardPage: DB error (non-fatal):", err);
   }
 
-const defaultKasAmount = 10000;
-
-  let uangKasScheduleDates: {
-  id: string;
-  date: string;
-  formattedDate: string;
-  amount: number;
-  description: string | null;
-}[] = [];
-
-  const uangKasDateLabels = [
-    "05 September",
-    "12 September",
-    "19 September",
-    "26 September",
-    "03 Oktober",
-    "10 Oktober",
-    "17 Oktober",
-    "24 Oktober",
-    "31 Oktober",
-    "07 November",
-    "14 November",
-    "21 November",
-    "28 November",
-    "05 Desember",
-    "12 Desember",
-    "19 Desember",
-  ];
-
-  const monthMap: Record<string, string> = {
-    januari: '01',
-    februari: '02',
-    maret: '03',
-    april: '04',
-    mei: '05',
-    juni: '06',
-    juli: '07',
-    agustus: '08',
-    september: '09',
-    oktober: '10',
-    november: '11',
-    desember: '12',
-  };
-
-  const currentYear = new Date().getFullYear();
-
-const fallbackPaymentDates = uangKasDateLabels.map((label) => {
-    const parts = label.split(' ');
-    const day = parts[0].padStart(2, '0');
-    const monthName = (parts[1] || '').toLowerCase();
-    const month = monthMap[monthName] || '01';
-    const iso = `${currentYear}-${month}-${day}`;
-    return {
-      id: `fallback-${iso}`,
-      date: iso,
-      formattedDate: label,
-      amount: defaultKasAmount,
-      description: null,
-    };
-  });
-
-  const finalExpectedPaymentDates = uangKasScheduleDates.length > 0
-    ? uangKasScheduleDates
-    : fallbackPaymentDates;
+  const finalExpectedPaymentDates = uangKasScheduleDates;
 
 const members = users.map((user) => {
 
@@ -207,34 +187,9 @@ return {
     };
   });
 
-const fallbackUnpaidDetail = [{ date: new Date().toISOString().split('T')[0], formattedDate: "Hari Ini", amount: 10000 }];
-  const fallbackTotalExpected = finalExpectedPaymentDates.reduce((sum, i) => sum + i.amount, 0) || defaultKasAmount;
-  const fallbackDates = finalExpectedPaymentDates.length > 0
-    ? finalExpectedPaymentDates.map(d => d.formattedDate)
-    : ["Hari Ini"];
+  const finalMembers = members;
 
-const finalMembers = members.length > 0 ? members : [
-    {
-      userId: "1",
-      userName: "Jundi Lesmana",
-      userEmail: "jundi@kalivergo.id",
-      totalPaid: 0,
-      totalExpected: fallbackTotalExpected,
-      arrears: fallbackTotalExpected,
-      unpaidMonths: ["Bulan Ini"],
-      unpaidDateDetails: finalExpectedPaymentDates.length > 0 ? finalExpectedPaymentDates : fallbackUnpaidDetail,
-      allPaymentDates: finalExpectedPaymentDates.length > 0 ? finalExpectedPaymentDates : fallbackUnpaidDetail,
-      paymentByDate: {},
-      schedules: finalExpectedPaymentDates.length > 0 ? finalExpectedPaymentDates : fallbackUnpaidDetail,
-
-      unpaidDates: fallbackDates,
-      unpaidCount: fallbackDates.length,
-      totalExpectedCount: finalExpectedPaymentDates.length || 1,
-      isFullyPaid: false,
-    }
-  ];
-
-  const tenantPath = `/${params.university}/${params.program}/${params.class}`;
+  const tenantPath = `/${routeParams.university}/${routeParams.program}/${routeParams.class}`;
 
   return (
   <>
@@ -276,14 +231,18 @@ const finalMembers = members.length > 0 ? members : [
           </div>
         </div>
 
-        {/* DASHBOARD CONTENT */}
         <div className="space-y-6">
           <CashFlowChart
             transactions={dbTransactions as any}
+            universityName={tenantInfo?.university.name || "Universitas"}
+            programName={tenantInfo?.program.name || "Program"}
+            className={tenantInfo?.name || "Kelas"}
+            members={users.map(u => ({ userId: u.id, userName: u.name }))}
           />
 
           <ArrearsList
             members={finalMembers as any}
+            hasUangKasSettings={finalExpectedPaymentDates.length > 0}
           />
         </div>
 
