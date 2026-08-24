@@ -110,6 +110,8 @@ model Tenant {
   programId      String
   name           String
   slug           String
+  customSlug     String?
+
   status         TenantStatus       @default(ACTIVE)
   university       University          @relation(fields: [universityId], references: [id], onDelete: Restrict)
   program          StudyProgram        @relation(fields: [programId], references: [id], onDelete: Restrict)
@@ -123,6 +125,7 @@ model Tenant {
   transactions     Transaction[]
   categories       Category[]
   uangKasSchedules UangKasSchedule[]
+  cmsAccessPermissions CmsAccessPermission[]
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt
 
@@ -161,6 +164,7 @@ model OwnerApplication {
   universityName   String
   programName      String
   className        String
+  customSlug       String?
   selfieStorageKey String
   ktmStorageKey    String?
   whatsappNumber   String?
@@ -382,4 +386,19 @@ model VerificationToken {
   newPasswordHash String?
 
   @@map("verification_tokens")
+}
+
+model CmsAccessPermission {
+  id          String   @id @default(cuid())
+  tenantId    String
+  cmsRole     CmsRole
+  module      String   // e.g., "finance", "tasks", "people", "seminar", "schedule", "audit"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, cmsRole, module])
+  @@index([tenantId])
+  @@map("cms_access_permissions")
 }

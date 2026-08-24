@@ -157,6 +157,7 @@ export async function registerOwnerClass(formData: FormData) {
   const password = (formData.get("password")?.toString() || "") as string;
   const confirmPassword = formData.get("confirmPassword")?.toString() || "";
   const phone = (formData.get("phone")?.toString() || formData.get("whatsapp")?.toString() || "").trim();
+  const customSlug = (formData.get("customSlug")?.toString() || "").trim();
 
   const universityName = (formData.get("universityName")?.toString() || "").trim();
   const programName = (formData.get("programName")?.toString() || "").trim();
@@ -174,6 +175,17 @@ export async function registerOwnerClass(formData: FormData) {
     return { error: "Password minimal 6 karakter", field: "password" };
   if (!phone || phone.length < 10)
     return { error: "Nomor telepon minimal 10 digit.", field: "phone" };
+  if (!customSlug || customSlug.length < 3)
+    return { error: "Nama website kelas minimal 3 karakter.", field: "customSlug" };
+
+  const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  if (!slugRegex.test(customSlug)) {
+    return {
+      error: "Nama website hanya boleh mengandung huruf kecil, angka, dan tanda hubung (-). Tidak boleh ada spasi atau karakter khusus.",
+      field: "customSlug"
+    };
+  }
+
   if (!universityName || universityName.length < 2)
     return { error: "Nama universitas wajib diisi.", field: "universityName" };
   if (!programName || programName.length < 2)
@@ -210,6 +222,21 @@ export async function registerOwnerClass(formData: FormData) {
   const normalizedUniversityName = universityName.toLowerCase().trim();
   const normalizedProgramName = programName.toLowerCase().trim();
   const normalizedClassName = className.toLowerCase().trim();
+  const normalizedCustomSlug = customSlug.toLowerCase().trim();
+
+  const existingSlugTenant = await prisma.tenant.findFirst({
+    where: {
+      customSlug: normalizedCustomSlug,
+      status: "ACTIVE",
+    },
+  });
+
+  if (existingSlugTenant) {
+    return {
+      error: "Nama website kelas ini sudah digunakan oleh kelas lain. Silakan gunakan nama yang berbeda.",
+      field: "customSlug"
+    };
+  }
 
   const existingApplication = await prisma.ownerApplication.findFirst({
     where: {
@@ -280,6 +307,7 @@ export async function registerOwnerClass(formData: FormData) {
       universityName,
       programName,
       className,
+      customSlug: normalizedCustomSlug,
       selfieStorageKey: upload.publicId,
       ktmStorageKey: ktmUpload.publicId,
       whatsappNumber: phone,

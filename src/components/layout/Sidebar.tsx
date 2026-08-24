@@ -16,6 +16,7 @@ import {
   Users,
   FolderOpen,
   FileText,
+  Shield,
 } from "lucide-react";
 
 const cmsNavItems = [
@@ -27,6 +28,7 @@ const cmsNavItems = [
   { href: "/cms/schedule", label: "Schedule", icon: Calendar },
   { href: "/cms/seminar", label: "Seminar", icon: GraduationCap },
   { href: "/cms/audit", label: "Audit Log", icon: FileText },
+  { href: "/cms/access", label: "Access Control", icon: Shield, ownerOnly: true },
 ];
 
 const mainNavItems = [
