@@ -195,19 +195,6 @@ export async function approveOwnerApplication(
     const normalizedClassName = generateSlug(application.className);
     const customSlugToUse = application.customSlug ? application.customSlug.toLowerCase().trim() : normalizedClassName;
 
-    if (application.customSlug) {
-      const existingSlugTenant = await prisma.tenant.findFirst({
-        where: {
-          customSlug: customSlugToUse,
-          status: "ACTIVE",
-        },
-      });
-
-      if (existingSlugTenant && existingSlugTenant.id !== (existingTenant?.id)) {
-        throw new Error("Nama website kelas ini sudah digunakan oleh kelas lain.");
-      }
-    }
-
     const existingTenant = await prisma.tenant.findFirst({
       where: {
         program: {
@@ -224,6 +211,19 @@ export async function approveOwnerApplication(
         },
       },
     });
+
+    if (application.customSlug) {
+      const existingSlugTenant = await prisma.tenant.findFirst({
+        where: {
+          customSlug: customSlugToUse,
+          status: "ACTIVE",
+        },
+      });
+
+      if (existingSlugTenant && existingSlugTenant.id !== existingTenant?.id) {
+        throw new Error("Nama website kelas ini sudah digunakan oleh kelas lain.");
+      }
+    }
 
     if (existingTenant && existingTenant.memberships.length > 0) {
       throw new Error("Kelas ini sudah memiliki owner yang disetujui. Tidak dapat membuat duplikat.");
