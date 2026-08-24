@@ -88,7 +88,7 @@ export class CmsAccessRepository {
     }
 
     return prisma.cmsAccessPermission.createMany({
-       modules.map((module) => ({
+      data: modules.map((module) => ({
         tenantId,
         cmsRole,
         module,
