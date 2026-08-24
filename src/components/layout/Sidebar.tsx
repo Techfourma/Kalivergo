@@ -16,6 +16,7 @@ import {
   Users,
   FolderOpen,
   FileText,
+  Shield,
 } from "lucide-react";
 
 const cmsNavItems = [

@@ -1,10 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getCurrentSessionUser } from "@/server/auth/session";
-import { requireTenantRole } from "@/lib/tenant/require-tenant-access";
+import { requireOwner, resolveTenantId } from "./role-model";
 import { CmsAccessService } from "@/features/cms/services/cms-access.service";
-import { resolveTenantFromRoute } from "@/lib/tenant";
 import { CmsRole } from "@prisma/client";
 
 const cmsAccessService = new CmsAccessService();
@@ -15,38 +13,27 @@ export interface CmsAccessUpdate {
 }
 
 export async function updateCmsAccessAction(
-  university: string,
-  program: string,
-  className: string,
   updates: CmsAccessUpdate[]
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const session = await getCurrentSessionUser();
-    if (!session?.id) {
-      return { success: false, error: "Unauthorized" };
+    const tenantId = await resolveTenantId();
+    if (!tenantId) {
+      return { success: false, error: "Konteks kelas tidak ditemukan." };
     }
 
-    const tenant = await resolveTenantFromRoute({
-      university,
-      program,
-      class: className,
-    });
-
-    if (!tenant) {
-      return { success: false, error: "Tenant not found" };
+    if (!(await requireOwner(tenantId))) {
+      return { success: false, error: "Only tenant owners can manage CMS access" };
     }
-
-    await requireTenantRole(session.id, tenant.tenantId, "OWNER");
 
     for (const update of updates) {
       await cmsAccessService.setPermissionsForRole(
-        tenant.tenantId,
+        tenantId,
         update.role,
         update.modules
       );
     }
 
-    revalidatePath(`/${university}/${program}/${className}/cms/access`);
+    revalidatePath("/cms/access");
     return { success: true };
   } catch (error) {
     console.error("Error updating CMS access:", error);
@@ -57,38 +44,18 @@ export async function updateCmsAccessAction(
   }
 }
 
-export async function getCmsAccessAction(
-  university: string,
-  program: string,
-  className: string
-): Promise<{
+export async function getCmsAccessAction(): Promise<{
   success: boolean;
   data?: Record<CmsRole, string[]>;
   error?: string;
 }> {
   try {
-    const session = await getCurrentSessionUser();
-    if (!session?.id) {
-      return { success: false, error: "Unauthorized" };
+    const tenantId = await resolveTenantId();
+    if (!tenantId) {
+      return { success: false, error: "Konteks kelas tidak ditemukan." };
     }
 
-    const tenant = await resolveTenantFromRoute({
-      university,
-      program,
-      class: className,
-    });
-
-    if (!tenant) {
-      return { success: false, error: "Tenant not found" };
-    }
-
-    const membership = await requireTenantRole(
-      session.id,
-      tenant.tenantId,
-      "OWNER"
-    ).catch(() => null);
-
-    if (!membership) {
+    if (!(await requireOwner(tenantId))) {
       return { success: false, error: "Only tenant owners can manage CMS access" };
     }
 
@@ -97,13 +64,13 @@ export async function getCmsAccessAction(
 
     for (const role of roles) {
       const modules = await cmsAccessService.getPermissionsForRole(
-        tenant.tenantId,
+        tenantId,
         role
       );
       result[role] = modules;
     }
 
-    return { success: true,  result };
+    return { success: true, data: result };
   } catch (error) {
     console.error("Error getting CMS access:", error);
     return {
@@ -113,32 +80,23 @@ export async function getCmsAccessAction(
   }
 }
 
-export async function initializeCmsAccessAction(
-  university: string,
-  program: string,
-  className: string
-): Promise<{ success: boolean; error?: string }> {
+export async function initializeCmsAccessAction(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
   try {
-    const session = await getCurrentSessionUser();
-    if (!session?.id) {
-      return { success: false, error: "Unauthorized" };
+    const tenantId = await resolveTenantId();
+    if (!tenantId) {
+      return { success: false, error: "Konteks kelas tidak ditemukan." };
     }
 
-    const tenant = await resolveTenantFromRoute({
-      university,
-      program,
-      class: className,
-    });
-
-    if (!tenant) {
-      return { success: false, error: "Tenant not found" };
+    if (!(await requireOwner(tenantId))) {
+      return { success: false, error: "Only tenant owners can manage CMS access" };
     }
 
-    await requireTenantRole(session.id, tenant.tenantId, "OWNER");
+    await cmsAccessService.initializeDefaultPermissions(tenantId);
 
-    await cmsAccessService.initializeDefaultPermissions(tenant.tenantId);
-
-    revalidatePath(`/${university}/${program}/${className}/cms/access`);
+    revalidatePath("/cms/access");
     return { success: true };
   } catch (error) {
     console.error("Error initializing CMS access:", error);

@@ -54,7 +54,7 @@ export default function CmsAccessPage({
     try {
       setLoading(true);
       const response = await fetch(
-        `/api/cms/access?university=${university}&program=${program}&class=${className}`
+        `/api/access`
       );
       const result = await response.json();
 
@@ -94,7 +94,7 @@ export default function CmsAccessPage({
       }));
 
       const response = await fetch(
-        `/api/cms/access?university=${university}&program=${program}&class=${className}`,
+        `/api/access`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
