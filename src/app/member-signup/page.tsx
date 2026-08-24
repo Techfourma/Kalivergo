@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { registerMember, getRegistrationData, type RegistrationUniversity } from "@/actions/registration";
 import Image from "next/image";
 import Link from "next/link";
-import { Eye, EyeOff, CheckCircle2, Mail, ArrowLeft, LogIn, Users } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2, Mail, ArrowLeft, LogIn, Users, Upload, User as UserIcon, CreditCard } from "lucide-react";
 import Loading from "@/components/layout/Loading";
 
 export default function MemberSignupPage() {
@@ -22,7 +22,10 @@ export default function MemberSignupPage() {
   const [selectedClass, setSelectedClass] = useState("");
   const [fullName, setFullName] = useState("");
   const [nim, setNim] = useState("");
-  const [matchedClass, setMatchedClass] = useState<{ university: string; program: string; class: string } | null>(null);
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
+  const [ktmPhoto, setKtmPhoto] = useState<File | null>(null);
+  const [profilePreview, setProfilePreview] = useState<string | null>(null);
+  const [ktmPreview, setKtmPreview] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -32,47 +35,64 @@ export default function MemberSignupPage() {
     loadData();
   }, []);
 
-  useEffect(() => {
-    if (fullName.trim() && nim.trim() && registrationData.length > 0) {
-      const normalizedInputName = fullName.toLowerCase().trim().replace(/\s+/g, " ");
-      const normalizedInputNim = nim.trim();
-
-      for (const uni of registrationData) {
-        for (const prog of uni.programs) {
-          for (const cls of prog.classes) {
-            if (cls.members?.some((m: any) => {
-              const dbName = m.name.toLowerCase().trim().replace(/\s+/g, " ");
-              const dbNim = m.nim ? m.nim.trim() : "";
-              return dbName === normalizedInputName && dbNim === normalizedInputNim;
-            })) {
-              setMatchedClass({
-                university: uni.slug,
-                program: prog.slug,
-                class: cls.slug,
-              });
-              setSelectedUniversity(uni.slug);
-              setSelectedProgram(prog.slug);
-              setSelectedClass(cls.slug);
-              return;
-            }
-          }
-        }
-      }
-    }
-  }, [fullName, nim, registrationData]);
-
   const filteredPrograms = registrationData.find(u => u.slug === selectedUniversity)?.programs || [];
   const filteredClasses = filteredPrograms.find(p => p.slug === selectedProgram)?.classes || [];
 
-  const handleSubmit = async (formData: FormData) => {
-    if (!matchedClass) {
-      setError("Nama dan NIM tidak ditemukan dalam data CMS kelas manapun. Silakan hubungi owner kelas Anda.");
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fileType: "profile" | "ktm") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("File harus berupa gambar (JPG, PNG, dll).");
       return;
     }
 
-    formData.set("university", matchedClass.university);
-    formData.set("program", matchedClass.program);
-    formData.set("class", matchedClass.class);
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Ukuran file maksimal 5MB.");
+      return;
+    }
+
+    setError("");
+
+    if (fileType === "profile") {
+      setProfilePhoto(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setKtmPhoto(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setKtmPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (formData: FormData) => {
+    if (!selectedUniversity || !selectedProgram || !selectedClass) {
+      setError("Silakan pilih universitas, program studi, dan kelas.");
+      return;
+    }
+
+    if (!profilePhoto) {
+      setError("Foto profil wajib diunggah.");
+      return;
+    }
+
+    if (!ktmPhoto) {
+      setError("Foto KTM wajib diunggah.");
+      return;
+    }
+
+    formData.set("university", selectedUniversity);
+    formData.set("program", selectedProgram);
+    formData.set("class", selectedClass);
+
+    formData.set("profilePhoto", profilePhoto);
+    formData.set("ktmPhoto", ktmPhoto);
 
     setIsLoading(true);
     setError("");
@@ -129,7 +149,7 @@ export default function MemberSignupPage() {
             <p className="text-dark-600 mb-6 leading-relaxed">
               Akun member Anda berhasil didaftarkan untuk kelas{" "}
               <span className="font-semibold text-dark-900">
-                {matchedClass?.class}
+                {selectedClass}
               </span>.
               {" "}Silakan cek email{" "}
               <span className="font-semibold text-dark-900">
@@ -180,7 +200,7 @@ export default function MemberSignupPage() {
             Daftar Member
           </h1>
           <p className="text-dark-500 mt-2">
-            Bergabung dengan kelas yang sudah ada — input nama dan NIM sesuai data CMS
+            Bergabung dengan kelas yang sudah ada — pilih universitas, program studi, dan kelas Anda
           </p>
         </div>
 
@@ -204,9 +224,9 @@ export default function MemberSignupPage() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
-              disabled={isLoading || showPopup || !!matchedClass}
+              disabled={isLoading || showPopup}
               className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
-              placeholder="Masukkan nama lengkap sesuai data CMS"
+              placeholder="Masukkan nama lengkap"
             />
           </div>
 
@@ -218,17 +238,11 @@ export default function MemberSignupPage() {
               value={nim}
               onChange={(e) => setNim(e.target.value)}
               required
-              disabled={isLoading || showPopup || !!matchedClass}
+              disabled={isLoading || showPopup}
               className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
-              placeholder="Masukkan NIM sesuai data CMS"
+              placeholder="Masukkan NIM"
             />
           </div>
-
-          {matchedClass && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm text-green-700 font-medium">✓ Data cocok dengan kelas yang terdaftar</p>
-            </div>
-          )}
 
           <div>
             <label className="block text-sm font-medium text-dark-700 mb-1">Email (Gmail)</label>
@@ -303,7 +317,7 @@ export default function MemberSignupPage() {
                   setSelectedClass("");
                 }}
                 required
-                disabled={isLoading || showPopup || !!matchedClass}
+                disabled={isLoading || showPopup}
                 className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
               >
                 <option value="">Pilih universitas</option>
@@ -322,7 +336,7 @@ export default function MemberSignupPage() {
                   setSelectedClass("");
                 }}
                 required
-                disabled={isLoading || showPopup || !selectedUniversity || !!matchedClass}
+                disabled={isLoading || showPopup || !selectedUniversity}
                 className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
               >
                 <option value="">Pilih program studi</option>
@@ -338,7 +352,7 @@ export default function MemberSignupPage() {
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
                 required
-                disabled={isLoading || showPopup || !selectedProgram || !!matchedClass}
+                disabled={isLoading || showPopup || !selectedProgram}
                 className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
               >
                 <option value="">Pilih kelas</option>
@@ -349,12 +363,95 @@ export default function MemberSignupPage() {
             </div>
           </div>
 
+          <div className="border-t border-dark-200 pt-4">
+            <h3 className="text-sm font-semibold text-dark-900 mb-3 flex items-center gap-2">
+              <Upload className="w-4 h-4" />
+              Dokumen Pendukung
+            </h3>
+
+            <div>
+              <label className="block text-sm font-medium text-dark-700 mb-1">Foto Profil</label>
+              <div className="flex items-center gap-4">
+                {profilePreview ? (
+                  <div className="relative h-20 w-20 rounded-full overflow-hidden border border-dark-200">
+                    <Image
+                      src={profilePreview}
+                      alt="Preview foto profil"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-20 w-20 rounded-full bg-dark-100 flex items-center justify-center border border-dark-200">
+                    <UserIcon className="h-8 w-8 text-dark-400" />
+                  </div>
+                )}
+                <label className="flex-1 cursor-pointer">
+                  <input
+                    type="file"
+                    name="profilePhoto"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, "profile")}
+                    disabled={isLoading || showPopup}
+                    className="hidden"
+                    required
+                  />
+                  <div className="flex items-center gap-2 px-4 py-2 border border-dark-200 rounded-lg hover:bg-dark-50 transition-colors">
+                    <Upload className="h-4 w-4 text-dark-500" />
+                    <span className="text-sm text-dark-600">
+                      {profilePhoto ? profilePhoto.name : "Pilih foto profil"}
+                    </span>
+                  </div>
+                </label>
+              </div>
+              <p className="text-xs text-dark-400 mt-1">Format: JPG, PNG. Maksimal 5MB.</p>
+            </div>
+
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-dark-700 mb-1">Foto KTM</label>
+              <div className="flex items-center gap-4">
+                {ktmPreview ? (
+                  <div className="relative h-20 w-20 rounded-lg overflow-hidden border border-dark-200">
+                    <Image
+                      src={ktmPreview}
+                      alt="Preview foto KTM"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-20 w-20 rounded-lg bg-dark-100 flex items-center justify-center border border-dark-200">
+                    <CreditCard className="h-8 w-8 text-dark-400" />
+                  </div>
+                )}
+                <label className="flex-1 cursor-pointer">
+                  <input
+                    type="file"
+                    name="ktmPhoto"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, "ktm")}
+                    disabled={isLoading || showPopup}
+                    className="hidden"
+                    required
+                  />
+                  <div className="flex items-center gap-2 px-4 py-2 border border-dark-200 rounded-lg hover:bg-dark-50 transition-colors">
+                    <Upload className="h-4 w-4 text-dark-500" />
+                    <span className="text-sm text-dark-600">
+                      {ktmPhoto ? ktmPhoto.name : "Pilih foto KTM"}
+                    </span>
+                  </div>
+                </label>
+              </div>
+              <p className="text-xs text-dark-400 mt-1">Format: JPG, PNG. Maksimal 5MB.</p>
+            </div>
+          </div>
+
           <button
             type="submit"
-            disabled={isLoading || showPopup || !matchedClass}
+            disabled={isLoading || showPopup || !selectedUniversity || !selectedProgram || !selectedClass || !profilePhoto || !ktmPhoto}
             className="w-full py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >
-            {isLoading ? "Memproses..." : !matchedClass ? "Input Nama & NIM untuk Mencocokkan Kelas" : "Daftar Member"}
+            {isLoading ? "Memproses..." : "Daftar Member"}
           </button>
         </form>
 
@@ -382,8 +479,9 @@ export default function MemberSignupPage() {
 
         <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-xs text-blue-700">
-            <strong>Catatan:</strong> Pastikan nama dan NIM yang Anda masukkan sesuai dengan data yang diinput oleh owner di CMS.
-            Sistem akan otomatis mencocokkan data Anda dengan kelas yang terdaftar. Setelah mendaftar, cek inbox (atau folder spam) email Anda untuk link verifikasi akun.
+            <strong>Catatan:</strong> Pilih universitas, program studi, dan kelas yang ingin Anda ikuti.
+            Setelah mendaftar, pendaftaran Anda akan menunggu persetujuan dari admin/owner kelas.
+            Cek inbox (atau folder spam) email Anda untuk link verifikasi akun.
           </p>
         </div>
       </div>

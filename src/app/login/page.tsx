@@ -121,10 +121,10 @@ export default function LoginPage() {
             <p className="text-sm text-dark-500">
               Belum punya akun?{" "}
               <Link
-                href="/signup"
+                href="/member-signup"
                 onClick={(e) => {
                   e.preventDefault();
-                  handleNavigate("/signup");
+                  handleNavigate("/member-signup");
                 }}
                 className="text-primary-600 hover:text-primary-700 font-medium"
               >
