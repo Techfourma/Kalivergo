@@ -117,6 +117,7 @@ export interface TenantLandingProps {
   university?: string;
   program?: string;
   classSlug?: string;
+  customSlug?: string;
 }
 
 export default function TenantLanding({
@@ -125,16 +126,14 @@ export default function TenantLanding({
   university,
   program,
   classSlug,
+  customSlug,
 }: TenantLandingProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [members, setMembers] = useState<OrgMember[]>([]);
   const [isMembersLoading, setIsMembersLoading] = useState(true);
 
-  const tenantPath =
-    university && program && classSlug
-      ? `/${university}/${program}/${classSlug}`
-      : "";
+  const tenantPath = customSlug ? `/${customSlug}` : "";
 
   useEffect(() => {
     const fetchMembers = async () => {

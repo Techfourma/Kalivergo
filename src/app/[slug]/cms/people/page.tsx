@@ -2,23 +2,21 @@ import { prisma } from '@/lib/db';
 import { resolveTenantFromRoute } from '@/lib/tenant';
 import { notFound } from 'next/navigation';
 import { acceptUser, rejectUser, updateUserRole } from '@/actions/cms/people';
+import MemberReviewCard from '@/components/cms/MemberReviewCard';
+import { env } from '@/config/env';
 
 export const dynamic = 'force-dynamic';
 
 type TenantCmsPeoplePageProps = {
   params: Promise<{
-    university: string;
-    program: string;
-    class: string;
+    slug: string;
   }>;
 };
 
 export default async function PeoplePage({ params }: TenantCmsPeoplePageProps) {
   const routeParams = await params;
   const tenant = await resolveTenantFromRoute({
-    university: routeParams.university,
-    program: routeParams.program,
-    class: routeParams.class,
+    slug: routeParams.slug,
   });
 
   if (!tenant) {
@@ -49,6 +47,27 @@ export default async function PeoplePage({ params }: TenantCmsPeoplePageProps) {
     tenantRole: membership.role,
     cmsRole: membership.cmsRole,
     membershipId: membership.id,
+  }));
+
+  const memberApplications = await prisma.memberApplication.findMany({
+    where: { tenantId, status: 'PENDING_APPROVAL' },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  const cloudName = env.cloudinaryCloudName;
+  const reviews = memberApplications.map((application) => ({
+    id: application.id,
+    userId: application.userId,
+    fullName: application.fullName,
+    nim: application.nim,
+    email: application.email,
+    profilePhotoUrl: cloudName
+      ? `https://res.cloudinary.com/${cloudName}/image/upload/${application.profilePhotoStorageKey}`
+      : null,
+    ktmPhotoUrl: cloudName
+      ? `https://res.cloudinary.com/${cloudName}/image/upload/${application.ktmPhotoStorageKey}`
+      : null,
+    createdAt: application.createdAt.toISOString(),
   }));
 
   const roleLabels: Record<string, string> = {
@@ -88,15 +107,12 @@ export default async function PeoplePage({ params }: TenantCmsPeoplePageProps) {
                 <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
-                  Aksi
-                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-dark-100">
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-dark-500">
+                  <td colSpan={5} className="px-6 py-8 text-center text-dark-500">
                     Belum ada data anggota
                   </td>
                 </tr>
@@ -126,6 +142,7 @@ export default async function PeoplePage({ params }: TenantCmsPeoplePageProps) {
                         {!isOwner ? (
                           <form action={updateUserRole} className="flex items-center gap-2">
                             <input type="hidden" name="userId" value={user.id} />
+                            <input type="hidden" name="tenantId" value={tenantId} />
                             <select
                               name="role"
                               defaultValue={user.cmsRole || 'MEMBER'}
@@ -164,36 +181,6 @@ export default async function PeoplePage({ params }: TenantCmsPeoplePageProps) {
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4">
-                        {!isOwner && (
-                          <div className="flex items-center gap-2">
-                            {isPending ? (
-                              <>
-                                <form action={acceptUser}>
-                                  <input type="hidden" name="userId" value={user.id} />
-                                  <button
-                                    type="submit"
-                                    className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                                  >
-                                    Approve
-                                  </button>
-                                </form>
-                                <form action={rejectUser}>
-                                  <input type="hidden" name="userId" value={user.id} />
-                                  <button
-                                    type="submit"
-                                    className="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                                  >
-                                    Reject
-                                  </button>
-                                </form>
-                              </>
-                            ) : (
-                              <span className="text-xs text-dark-400">-</span>
-                            )}
-                          </div>
-                        )}
-                      </td>
                     </tr>
                   );
                 })
@@ -202,6 +189,24 @@ export default async function PeoplePage({ params }: TenantCmsPeoplePageProps) {
           </table>
         </div>
       </div>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-xl font-bold text-dark-900 font-display">Review Pendaftaran Anggota</h2>
+          <p className="text-dark-500 mt-1">Periksa data dan dokumen member-signup sebelum menyetujui pendaftaran.</p>
+        </div>
+        {reviews.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-sm border border-dark-100 px-6 py-8 text-center text-dark-500">
+            Tidak ada pendaftaran anggota yang menunggu review
+          </div>
+        ) : (
+          <div className="grid gap-6 lg:grid-cols-2">
+            {reviews.map((review) => (
+              <MemberReviewCard key={review.id} review={review} tenantId={tenantId} />
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

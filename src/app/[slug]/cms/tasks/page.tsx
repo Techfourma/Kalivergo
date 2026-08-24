@@ -9,18 +9,14 @@ export const dynamic = 'force-dynamic';
 
 type TenantCmsTasksPageProps = {
   params: Promise<{
-    university: string;
-    program: string;
-    class: string;
+    slug: string;
   }>;
 };
 
 export default async function TasksPage({ params }: TenantCmsTasksPageProps) {
   const routeParams = await params;
   const tenant = await resolveTenantFromRoute({
-    university: routeParams.university,
-    program: routeParams.program,
-    class: routeParams.class,
+    slug: routeParams.slug,
   });
 
   if (!tenant) {

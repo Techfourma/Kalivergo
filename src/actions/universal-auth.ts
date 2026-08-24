@@ -129,6 +129,7 @@ export async function loginUserUniversal(identifier: string, password: string): 
       universitySlug: m.tenant.university.slug,
       programSlug: m.tenant.program.slug,
       classSlug: m.tenant.slug,
+      customSlug: m.tenant.customSlug,
     }));
 
     if (tenants.length === 0) {
@@ -147,7 +148,11 @@ export async function loginUserUniversal(identifier: string, password: string): 
     const sortedTenants = [...tenants].sort((a, b) => rank(a) - rank(b));
     const primaryTenant = sortedTenants[0];
 
-    const redirectUrl = `/${primaryTenant.universitySlug}/${primaryTenant.programSlug}/${primaryTenant.classSlug}/home`;
+    if (!primaryTenant.customSlug) {
+      return { error: "Tenant belum memiliki Nama Website yang valid." };
+    }
+
+    const redirectUrl = `/${primaryTenant.customSlug}/home`;
 
     let tenantContext: TenantCookie | undefined;
     if (primaryTenant.role === "OWNER") {

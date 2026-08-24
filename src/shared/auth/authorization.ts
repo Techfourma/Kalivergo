@@ -19,7 +19,9 @@ export type SessionUser = {
   name?: string;
   email?: string;
   nim?: string | null;
+  image?: string | null;
   isVerified?: boolean;
+  canAccessCms?: boolean;
   platformRole?: string | null;
   role?: string | null;
   cmsRole?: string | null;

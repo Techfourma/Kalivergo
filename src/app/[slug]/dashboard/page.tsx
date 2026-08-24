@@ -15,9 +15,7 @@ export const dynamic = 'force-dynamic';
 
 type DashboardPageProps = {
   params: Promise<{
-    university: string;
-    program: string;
-    class: string;
+    slug: string;
   }>;
 };
 
@@ -189,7 +187,7 @@ return {
 
   const finalMembers = members;
 
-  const tenantPath = `/${routeParams.university}/${routeParams.program}/${routeParams.class}`;
+  const tenantPath = `/${routeParams.slug}`;
 
   return (
   <>
