@@ -13,9 +13,7 @@ export const dynamic = "force-dynamic";
 
 type ProfilePageProps = {
   params: Promise<{
-    university: string;
-    program: string;
-    class: string;
+    slug: string;
   }>;
 };
 
@@ -25,8 +23,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const userCookie = cookieStore.get("kalivergo_user")?.value;
   let currentUser: any = null;
 
-  const { university, program, class: className } = await params;
-  const tenantContext = await resolveTenantFromRoute({ university, program, class: className });
+  const { slug } = await params;
+  const tenantContext = await resolveTenantFromRoute({ slug });
   const tenantId = tenantContext?.tenantId;
 
   if (!tenantId) {
@@ -53,7 +51,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       );
     }
 
-    const tenantPath = `/${university}/${program}/${className}`;
+    const tenantPath = `/${slug}`;
 
     return (
       <>

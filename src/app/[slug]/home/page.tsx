@@ -17,9 +17,7 @@ export const dynamic = 'force-dynamic';
 
 type TenantHomePageProps = {
   params: Promise<{
-    university: string;
-    program: string;
-    class: string;
+    slug: string;
   }>;
 };
 
@@ -97,7 +95,7 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
       submissions: t.submissions.map((s) => ({ userId: s.userId })),
     }));
 
-    const tenantPath = `/${routeParams.university}/${routeParams.program}/${routeParams.class}`;
+    const tenantPath = `/${routeParams.slug}`;
 
     return (
       <>
@@ -117,7 +115,7 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-white font-display">Dashboard Home</h1>
               <p className="text-gray-300 mt-2">
-                Kelas: {routeParams.class} - {routeParams.program} - {routeParams.university}
+                Kelas: {tenantContext.classSlug}
               </p>
               <p className="text-gray-300">
                 Selamat datang, {currentUser.name}!{" "}

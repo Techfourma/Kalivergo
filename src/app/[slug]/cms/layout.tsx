@@ -12,9 +12,7 @@ export const dynamic = "force-dynamic";
 type TenantCmsLayoutProps = {
   children: React.ReactNode;
   params: Promise<{
-    university: string;
-    program: string;
-    class: string;
+    slug: string;
   }>;
 };
 
@@ -24,12 +22,10 @@ export default async function TenantCmsLayout({
 }: TenantCmsLayoutProps) {
   noStore();
 
-  const { university, program, class: className } = await params;
+  const { slug } = await params;
 
   const tenant = await resolveTenantFromRoute({
-    university,
-    program,
-    class: className,
+    slug,
   });
 
   if (!tenant) {
@@ -49,7 +45,7 @@ export default async function TenantCmsLayout({
     redirect("/unauthorized");
   }
 
-  const tenantPath = `/${university}/${program}/${className}`;
+  const tenantPath = `/${slug}`;
 
   return (
     <div className="flex min-h-screen bg-gray-50">

@@ -17,9 +17,7 @@ export const dynamic = 'force-dynamic';
 
 type TenantCmsOverviewPageProps = {
   params: Promise<{
-    university: string;
-    program: string;
-    class: string;
+    slug: string;
   }>;
 };
 
@@ -28,9 +26,7 @@ export default async function CMSOverviewPage({
 }: TenantCmsOverviewPageProps) {
   const routeParams = await params;
   const tenant = await resolveTenantFromRoute({
-    university: routeParams.university,
-    program: routeParams.program,
-    class: routeParams.class,
+    slug: routeParams.slug,
   });
 
   if (!tenant) {
@@ -38,7 +34,7 @@ export default async function CMSOverviewPage({
   }
 
   const tenantId = tenant.tenantId;
-  const tenantPath = `/${routeParams.university}/${routeParams.program}/${routeParams.class}`;
+  const tenantPath = `/${routeParams.slug}`;
 
   const taskWhere = { tenantId };
   const transactionWhere = { tenantId };

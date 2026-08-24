@@ -12,9 +12,7 @@ export const dynamic = "force-dynamic";
 
 type TenantLandingPageProps = {
   params: Promise<{
-    university: string;
-    program: string;
-    class: string;
+    slug: string;
   }>;
 };
 
@@ -22,11 +20,7 @@ export default async function TenantLandingPage({
   params,
 }: TenantLandingPageProps) {
   const routeParams = await params;
-  const tenant = await resolveTenantFromRoute({
-    university: routeParams.university,
-    program: routeParams.program,
-    class: routeParams.class,
-  });
+  const tenant = await resolveTenantFromRoute(routeParams);
 
   if (!tenant) {
     notFound();
@@ -55,9 +49,7 @@ export default async function TenantLandingPage({
   return (
     <TenantLanding
       tenantId={tenant.tenantId}
-      university={routeParams.university}
-      program={routeParams.program}
-      classSlug={routeParams.class}
+      customSlug={routeParams.slug}
       tenant={{
         label: tenantInfo
           ? `${tenantInfo.name} ${tenantInfo.university?.name ?? ""}`.trim()
@@ -73,14 +65,10 @@ export async function generateMetadata({
   params,
 }: TenantLandingPageProps): Promise<Metadata> {
   const routeParams = await params;
-  const tenant = await resolveTenantFromRoute({
-    university: routeParams.university,
-    program: routeParams.program,
-    class: routeParams.class,
-  });
+  const tenant = await resolveTenantFromRoute(routeParams);
 
   return {
-    title: tenant ? `Kalivergo - Kelas ${routeParams.class}` : "Kalivergo",
+    title: tenant ? `Kalivergo - ${tenant.classSlug}` : "Kalivergo",
     description:
       "Platform terpadu untuk manajemen kelas, tracking tugas, kelola keuangan, dan pantau kegiatan seminar dalam satu tempat.",
   };

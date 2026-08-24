@@ -6,9 +6,7 @@ import { TENANT_COOKIE, getCurrentSessionUserId } from "@/server/auth/session";
 import { requireTenantMembership } from "@/lib/tenant/require-tenant-access";
 
 export type TenantRouteParams = {
-  university: string;
-  program: string;
-  class: string;
+  slug: string;
 };
 
 export type TenantContext = {
@@ -24,19 +22,19 @@ export async function resolveTenantFromRoute(
   try {
     const tenant = await prisma.tenant.findFirst({
       where: {
-        university: { slug: params.university },
-        program: { slug: params.program },
-        slug: params.class,
+        customSlug: params.slug,
+        status: "ACTIVE",
       },
       select: {
         id: true,
         slug: true,
+        customSlug: true,
         university: { select: { slug: true } },
         program: { select: { slug: true } },
       },
     });
 
-    if (!tenant) return null;
+    if (!tenant || !tenant.customSlug) return null;
 
     return {
       tenantId: tenant.id,

@@ -74,7 +74,7 @@ export async function acceptUser(formData: FormData) {
     const userId = formData.get('userId') as string;
     if (!userId) return;
 
-    const tenantId = await resolveTenantId();
+    const tenantId = (formData.get('tenantId') as string)?.trim() || await resolveTenantId();
     if (!tenantId) return;
 
     const session = await readSessionUser();
@@ -116,7 +116,7 @@ export async function rejectUser(formData: FormData) {
     const userId = formData.get('userId') as string;
     if (!userId) return;
 
-    const tenantId = await resolveTenantId();
+    const tenantId = (formData.get('tenantId') as string)?.trim() || await resolveTenantId();
     if (!tenantId) return;
 
     const session = await readSessionUser();
@@ -171,7 +171,7 @@ export async function updateUserRole(formData: FormData) {
       return;
     }
 
-    const tenantId = await resolveTenantId();
+    const tenantId = (formData.get('tenantId') as string)?.trim() || await resolveTenantId();
     if (!tenantId) return;
 
     const session = await readSessionUser();

@@ -13,9 +13,7 @@ export const dynamic = "force-dynamic";
 
 type SeminarPageProps = {
   params: Promise<{
-    university: string;
-    program: string;
-    class: string;
+    slug: string;
   }>;
 };
 
@@ -70,7 +68,7 @@ export default async function SeminarPage({ params }: SeminarPageProps) {
       submissions: s.submissions.map((sub) => ({ userId: sub.userId })),
     }));
 
-    const tenantPath = `/${routeParams.university}/${routeParams.program}/${routeParams.class}`;
+    const tenantPath = `/${routeParams.slug}`;
 
     return (
       <>

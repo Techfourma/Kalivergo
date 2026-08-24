@@ -11,21 +11,17 @@ export const dynamic = "force-dynamic";
 
 type CmsAccessPageProps = {
   params: Promise<{
-    university: string;
-    program: string;
-    class: string;
+    slug: string;
   }>;
 };
 
 export default async function Page({ params }: CmsAccessPageProps) {
   noStore();
 
-  const { university, program, class: className } = await params;
+  const { slug } = await params;
 
   const tenant = await resolveTenantFromRoute({
-    university,
-    program,
-    class: className,
+    slug,
   });
 
   if (!tenant) {
@@ -48,9 +44,9 @@ export default async function Page({ params }: CmsAccessPageProps) {
     <div className="space-y-6">
       <CacheGuard redirectTo="/unauthorized" />
       <CmsAccessPage
-        university={university}
-        program={program}
-        className={className}
+        university={tenant.universitySlug}
+        program={tenant.programSlug}
+        className={tenant.classSlug}
       />
     </div>
   );

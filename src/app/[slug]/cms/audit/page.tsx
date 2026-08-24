@@ -7,7 +7,7 @@ export default async function AuditPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ university: string; program: string; class: string }>;
+  params: Promise<{ slug: string }>;
   searchParams: { module?: string; startDate?: string; endDate?: string };
 }) {
   const routeParams = await params;

@@ -41,8 +41,6 @@ export default function LoginPage() {
 
     const nim = formData.get("nim") as string;
     const password = formData.get("password") as string;
-    let shouldRedirect = false;
-
     try {
       const { loginUserUniversal } = await import("@/actions/universal-auth");
       const result = await loginUserUniversal(nim, password);
@@ -51,15 +49,14 @@ export default function LoginPage() {
         setError(result.error);
       } else if (result?.success) {
         localStorage.setItem("user", JSON.stringify(result.user));
-        shouldRedirect = true;
         const redirectUrl = result.redirectUrl || "/home";
-        setTimeout(() => router.push(redirectUrl), 100);
+        window.location.assign(redirectUrl);
       }
     } catch (err) {
       console.error("Login error:", err);
       setError("Terjadi kesalahan. Silakan coba lagi.");
     } finally {
-      if (!shouldRedirect) setIsLoading(false);
+      setIsLoading(false);
     }
   };
 

@@ -20,7 +20,7 @@ function formatCurrency(value: number) {
 export default async function FinancePage({
   params,
 }: {
-  params: Promise<{ university: string; program: string; class: string }>;
+  params: Promise<{ slug: string }>;
 }) {
   const routeParams = await params;
   const tenantContext = await resolveTenantFromRoute(routeParams);

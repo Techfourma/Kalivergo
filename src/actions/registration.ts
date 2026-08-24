@@ -456,17 +456,6 @@ export async function registerMember(formData: FormData) {
       },
     });
 
-    const plainToken = generateVerificationToken();
-    const tokenHash = hashToken(plainToken);
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
-
-    await prisma.verificationToken.deleteMany({ where: { email: email } });
-    await prisma.verificationToken.create({
-      data: { tokenHash, email: email, expiresAt },
-    });
-
-    await sendVerificationEmail(email, fullName, plainToken);
-
     await prisma.tenantMembership.upsert({
       where: {
         userId_tenantId: { userId: user.id, tenantId: tenant.id },
@@ -491,7 +480,7 @@ export async function registerMember(formData: FormData) {
     );
 
     return {
-      success: "Pendaftaran berhasil! Silakan verifikasi email Anda dan tunggu persetujuan dari admin/owner kelas.",
+      success: "Pendaftaran berhasil! Silakan tunggu persetujuan dari admin/owner kelas sebelum verifikasi email.",
       tenantId: tenant.id,
       className: tenant.name,
     };

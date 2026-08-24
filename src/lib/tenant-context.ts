@@ -22,7 +22,7 @@ export async function getCurrentTenantForUser(
 export async function requireTenant(params: TenantRouteParams): Promise<TenantContext> {
   const tenant = await getCurrentTenant(params);
   if (!tenant) {
-    throw new Error('Tenant context required. Please access via /[university]/[program]/[class] route.');
+    throw new Error('Tenant context required. Please access via /[slug] route.');
   }
   return tenant;
 }

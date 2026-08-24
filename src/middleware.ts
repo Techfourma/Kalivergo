@@ -25,22 +25,22 @@ async function resolveTenantFromPath(pathname: string): Promise<{
   classSlug: string;
 } | null> {
   const parts = pathname.split('/').filter(Boolean);
-  if (parts.length < 3) return null;
+  if (parts.length < 1) return null;
 
-  const [university, program, classSlug] = parts;
+  const [slug] = parts;
   const knownRoutes = ['api', 'auth', 'signup', 'login', 'platform', 'portofolio', 'verify-forgot-password', 'forgot-password', 'callback', 'terms', 'privacy', 'unauthorized', 'cms'];
-  if (knownRoutes.includes(university)) return null;
+  if (knownRoutes.includes(slug)) return null;
 
   try {
     const { prisma } = await import('@/lib/prisma');
     const tenant = await prisma.tenant.findFirst({
       where: {
-        university: { slug: university },
-        program: { slug: program },
-        slug: classSlug,
+        customSlug: slug,
+        status: 'ACTIVE',
       },
       select: {
         id: true,
+        slug: true,
         university: { select: { slug: true } },
         program: { select: { slug: true } },
       },
@@ -51,7 +51,7 @@ async function resolveTenantFromPath(pathname: string): Promise<{
           tenantId: tenant.id,
           universitySlug: tenant.university.slug,
           programSlug: tenant.program.slug,
-          classSlug,
+          classSlug: tenant.slug,
         }
       : null;
   } catch (error) {
