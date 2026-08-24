@@ -109,6 +109,8 @@ model Tenant {
   programId      String
   name           String
   slug           String
+  customSlug     String?
+
   status         TenantStatus       @default(ACTIVE)
   university       University          @relation(fields: [universityId], references: [id], onDelete: Restrict)
   program          StudyProgram        @relation(fields: [programId], references: [id], onDelete: Restrict)
@@ -159,6 +161,7 @@ model OwnerApplication {
   universityName   String
   programName      String
   className        String
+  customSlug       String?
   selfieStorageKey String
   ktmStorageKey    String?
   whatsappNumber   String?

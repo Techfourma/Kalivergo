@@ -13,6 +13,7 @@ export interface CreateOwnerApplicationInput {
   universityName: string;
   programName: string;
   className: string;
+  customSlug?: string;
   selfieStorageKey: string;
   ktmStorageKey?: string;
   whatsappNumber?: string;
@@ -120,7 +121,6 @@ export async function createOwnerApplication(
       };
     }
 
-    // Check for pending applications
     const existingPending = await prisma.ownerApplication.findFirst({
       where: {
         userId: input.userId,
@@ -141,6 +141,7 @@ export async function createOwnerApplication(
         universityName: input.universityName,
         programName: input.programName,
         className: input.className,
+        customSlug: input.customSlug || null,
         selfieStorageKey: input.selfieStorageKey,
         ktmStorageKey: input.ktmStorageKey || null,
         whatsappNumber: input.whatsappNumber || null,
@@ -159,6 +160,7 @@ export async function createOwnerApplication(
         universityName: input.universityName,
         programName: input.programName,
         className: input.className,
+        customSlug: input.customSlug,
       }
     );
 
@@ -190,8 +192,22 @@ export async function approveOwnerApplication(
       throw new Error(`Aplikasi sudah dalam status ${application.status}. Tidak dapat diproses.`);
     }
 
-    // 2. Check for conflicting approved owners in the same class
     const normalizedClassName = generateSlug(application.className);
+    const customSlugToUse = application.customSlug ? application.customSlug.toLowerCase().trim() : normalizedClassName;
+
+    if (application.customSlug) {
+      const existingSlugTenant = await prisma.tenant.findFirst({
+        where: {
+          customSlug: customSlugToUse,
+          status: "ACTIVE",
+        },
+      });
+
+      if (existingSlugTenant && existingSlugTenant.id !== (existingTenant?.id)) {
+        throw new Error("Nama website kelas ini sudah digunakan oleh kelas lain.");
+      }
+    }
+
     const existingTenant = await prisma.tenant.findFirst({
       where: {
         program: {
@@ -213,7 +229,6 @@ export async function approveOwnerApplication(
       throw new Error("Kelas ini sudah memiliki owner yang disetujui. Tidak dapat membuat duplikat.");
     }
 
-    // 3. Create or find university
     const universitySlug = generateSlug(application.universityName);
     const university = await prisma.university.upsert({
       where: { slug: universitySlug },
@@ -224,7 +239,6 @@ export async function approveOwnerApplication(
       },
     });
 
-    // 4. Create or find study program
     const programSlug = generateSlug(application.programName);
     const program = await prisma.studyProgram.upsert({
       where: {
@@ -254,12 +268,14 @@ export async function approveOwnerApplication(
           update: {
             name: application.className,
             status: "ACTIVE",
+            customSlug: customSlugToUse,
           },
           create: {
             universityId: university.id,
             programId: program.id,
             name: application.className,
             slug: classSlug,
+            customSlug: customSlugToUse,
             status: "ACTIVE",
           },
           include: {
@@ -332,7 +348,6 @@ export async function approveOwnerApplication(
         const tokenHash = hashToken(plainToken);
         const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
-        // Clean up old verification tokens for this email
         await prisma.verificationToken.deleteMany({ where: { email: applicantEmail } });
         await prisma.verificationToken.create({
           data: { tokenHash, email: applicantEmail, expiresAt },
@@ -386,7 +401,6 @@ export async function rejectOwnerApplication(
         },
       });
 
-      // Create KYC review record
       await tx.kycReview.create({
         data: {
           applicationId,
