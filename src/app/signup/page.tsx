@@ -94,11 +94,11 @@ export default function SignupPage() {
 
             <div className="flex items-center justify-center gap-2 text-primary-600 mb-4">
               <Mail className="w-5 h-5" />
-              <span className="text-sm font-medium">Menunggu Verifikasi Admin KYC</span>
+              <span className="text-sm font-medium">Menunggu Verifikasi platform</span>
             </div>
 
             <p className="text-dark-600 mb-6 leading-relaxed">
-              Pengajuan kelas Anda berhasil dikirim. Data Anda sudah masuk ke antrean KYC dan akan ditinjau admin dalam 1x24 jam.
+              Pengajuan kelas Anda berhasil dikirim. Data Anda sudah masuk ke antrean  dan akan ditinjau dalam 1x24 jam.
               Setelah disetujui, email autentikasi akan dikirim ke Gmail Anda.
             </p>
 
@@ -119,7 +119,7 @@ export default function SignupPage() {
             </div>
 
             <p className="text-xs text-dark-400 mt-5">
-              Proses review KYC biasanya selesai dalam 1 hari kerja.
+              Proses review biasanya selesai dalam 1 hari kerja.
             </p>
           </div>
         </div>
@@ -140,10 +140,10 @@ export default function SignupPage() {
             </div>
           </div>
           <h1 className="text-2xl font-bold text-dark-900 font-display">
-            Daftar Kelas Baru (Owner)
+            Daftar Kelas Baru
           </h1>
           <p className="text-dark-500 mt-2">
-            Buat kelas multi-tenant — lengkapi data universitas, prodi, kelas, nomor telepon, selfie, dan KTM untuk KYC
+            Buat kelas — lengkapi data universitas, prodi, kelas, nomor telepon, selfie, dan KTM.
           </p>
         </div>
 
@@ -246,12 +246,22 @@ export default function SignupPage() {
             </div>
           </div>
 
-          <div className="border-t border-dark-200 pt-4">
-            <h3 className="text-sm font-semibold text-dark-900 mb-3 flex items-center gap-2">
-              <University className="w-4 h-4" />
-              Data Kelas (KYC)
-            </h3>
+          <div>
+            <label className="block text-sm font-medium text-dark-700 mb-1">Masukan Nama Website Kelas Mu</label>
+            <input
+              type="text"
+              name="customSlug"
+              required
+              disabled={isLoading || showPopup}
+              className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+              placeholder="Contoh: techfourma"
+            />
+            <p className="text-xs text-dark-500 mt-1">
+              Slug akan digunakan sebagai subdomain, contoh: kalivergo.com/techfourma
+            </p>
+          </div>
 
+          <div className="border-t border-dark-200 pt-4">
             <div>
               <label className="block text-sm font-medium text-dark-700 mb-1">Nama Universitas</label>
               <input
@@ -260,7 +270,7 @@ export default function SignupPage() {
                 required
                 disabled={isLoading || showPopup}
                 className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
-                placeholder="Contoh: Universitas Indonesia"
+                placeholder="Contoh: Universitas Pamulang"
               />
             </div>
 
@@ -284,12 +294,12 @@ export default function SignupPage() {
                 required
                 disabled={isLoading || showPopup}
                 className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
-                placeholder="Contoh: TI-4A"
+                placeholder="Contoh: 03TPLE004"
               />
             </div>
 
             <div className="mt-4">
-              <label className="block text-sm font-medium text-dark-700 mb-2">Upload Selfie (KYC)</label>
+              <label className="block text-sm font-medium text-dark-700 mb-2">Upload Selfie</label>
               <div className="flex items-center gap-4">
                 {selfiePreview && (
                   <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-dark-200">
@@ -396,9 +406,9 @@ export default function SignupPage() {
 
         <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-xs text-blue-700">
-            <strong>Catatan:</strong> Semua data pendaftaran Anda akan dikirim ke platform KYC untuk verifikasi.
-            Setelah disetujui admin, email autentikasi akan dikirim ke Gmail Anda.
-            Pengajuan kelas akan melalui proses review KYC oleh platform admin dalam 1x24 jam.
+            <strong>Catatan:</strong>
+            Pengajuan kelas akan melalui proses review oleh platform  dalam 1x24 jam.
+            Silahkan periksa email anda untuk verifikasi setelah pengajuan disetujui.
           </p>
         </div>
       </div>
