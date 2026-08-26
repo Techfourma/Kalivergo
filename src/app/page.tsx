@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -22,12 +21,13 @@ import {
 import Loading from "@/components/layout/Loading";
 import { cn } from "@/lib/utils";
 
+import PageBackground from "@/components/ui/PageBackground";
+
 const FEATURES = [
   {
     icon: BookOpenCheck,
     title: "Tracking Tugas",
-    description:
-      "Pantau deadline, status pengumpulan, dan progres tugas kuliah setiap anggota secara real-time.",
+    description: "Pantau deadline, status pengumpulan, dan progres tugas kuliah setiap anggota secara real-time.",
     color: "text-primary-400",
     bg: "bg-primary-500/10",
     border: "hover:border-primary-500/50",
@@ -35,8 +35,7 @@ const FEATURES = [
   {
     icon: Wallet,
     title: "Manajemen Keuangan",
-    description:
-      "Kelola arus kas kelas, hitung tunggakan uang kas otomatis, dan unggah bukti transaksi dengan transparan.",
+    description: "Kelola arus kas kelas, hitung tunggakan uang kas otomatis, dan unggah bukti transaksi dengan transparan.",
     color: "text-accent-400",
     bg: "bg-accent-500/10",
     border: "hover:border-accent-500/50",
@@ -44,8 +43,7 @@ const FEATURES = [
   {
     icon: GraduationCap,
     title: "Seminar & Kegiatan",
-    description:
-      "Daftarkan seminar, pantau kehadiran, dan koordinasikan seluruh agenda kelas dalam satu kalender.",
+    description: "Daftarkan seminar, pantau kehadiran, dan koordinasikan seluruh agenda kelas dalam satu kalender.",
     color: "text-green-400",
     bg: "bg-green-500/10",
     border: "hover:border-green-500/50",
@@ -53,8 +51,7 @@ const FEATURES = [
   {
     icon: ShieldCheck,
     title: "Verifikasi & Keamanan",
-    description:
-      "Setiap kelas diverifikasi oleh platform melalui proses KYC. Data anggota aman dan terkontrol.",
+    description: "Setiap kelas diverifikasi oleh platform melalui proses KYC. Data anggota aman dan terkontrol.",
     color: "text-blue-400",
     bg: "bg-blue-500/10",
     border: "hover:border-blue-500/50",
@@ -62,28 +59,11 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  {
-    step: "01",
-    icon: Building2,
-    title: "Daftarkan Kelasmu",
-    description:
-      "Owner kelas mendaftarkan universitas, program studi, dan kelas. Cukup sekali, langsung terintegrasi.",
-  },
-  {
-    step: "02",
-    icon: ShieldCheck,
-    title: "Verifikasi KYC oleh Platform",
-    description:
-      "Tim platform memverifikasi identitas owner. Kelas baru aktif setelah disetujui dan aman digunakan.",
-  },
-  {
-    step: "03",
-    icon: LayoutDashboard,
-    title: "Kelola & Pantau",
-    description:
-      "Kelola anggota, tugas, keuangan, dan seminar dari dashboard terpadu yang mudah digunakan.",
-  },
+  { step: "01", icon: Building2, title: "Daftarkan Kelasmu", description: "Owner kelas mendaftarkan universitas, program studi, dan kelas. Cukup sekali, langsung terintegrasi." },
+  { step: "02", icon: ShieldCheck, title: "Verifikasi KYC oleh Platform", description: "Tim platform memverifikasi identitas owner. Kelas baru aktif setelah disetujui dan aman digunakan." },
+  { step: "03", icon: LayoutDashboard, title: "Kelola & Pantau", description: "Kelola anggota, tugas, keuangan, dan seminar dari dashboard terpadu yang mudah digunakan." },
 ];
+
 const STATS = [
   { value: "1", label: "Platform Terpadu", icon: Zap },
   { value: "4+", label: "Modul Inti Kelas", icon: LayoutDashboard },
@@ -91,30 +71,10 @@ const STATS = [
 ];
 
 const BENEFITS = [
-  {
-    icon: Users,
-    title: "Multi-Kelas",
-    description:
-      "Satu aplikasi melayani banyak universitas, program studi, dan kelas dengan isolasi data yang ketat.",
-  },
-  {
-    icon: Landmark,
-    title: "Isolasi Data per Tenant",
-    description:
-      "Setiap kelas adalah tenant independen. Data kelas A tidak pernah tercampur dengan kelas B.",
-  },
-  {
-    icon: CheckCircle2,
-    title: "Transparan & Akuntabel",
-    description:
-      "Laporan keuangan dan audit log tersedia lengkap untuk setiap kelas dan kepengurusan.",
-  },
-  {
-    icon: Zap,
-    title: "Cepat & Ringan",
-    description:
-      "Dibangun dengan teknologi modern sehingga responsif di perangkat apa pun, kapan pun.",
-  },
+  { icon: Users, title: "Multi-Kelas", description: "Satu aplikasi melayani banyak universitas, program studi, dan kelas dengan isolasi data yang ketat." },
+  { icon: Landmark, title: "Isolasi Data per Tenant", description: "Setiap kelas adalah tenant independen. Data kelas A tidak pernah tercampur dengan kelas B." },
+  { icon: CheckCircle2, title: "Transparan & Akuntabel", description: "Laporan keuangan dan audit log tersedia lengkap untuk setiap kelas dan kepengurusan." },
+  { icon: Zap, title: "Cepat & Ringan", description: "Dibangun dengan teknologi modern sehingga responsif di perangkat apa pun, kapan pun." },
 ];
 
 const FOOTER_LINKS = [
@@ -143,13 +103,18 @@ export default function PlatformLandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-dark-50 dark:bg-dark-950 relative overflow-hidden text-dark-900 dark:text-white">
+      
+      {/* ✅ 2. INTEGRASI 3D BACKGROUND DI SINI (Layer paling belakang) */}
+      <PageBackground />
+
       <Loading
         isVisible={isLoading}
         message="Sedang memuat halaman"
         subMessage="Silakan tunggu sebentar..."
       />
 
-      <div className="pointer-events-none absolute inset-0">
+      {/* ✅ 3. TAMBAHKAN z-[1] AGAR INLINE BLUR TETAP DI ATAS CANVAS 3D */}
+      <div className="pointer-events-none absolute inset-0 z-[1]">
         <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-primary-600/20 blur-[140px]" />
         <div className="absolute top-1/3 -right-40 h-[450px] w-[450px] rounded-full bg-accent-600/20 blur-[140px]" />
         <div className="absolute bottom-0 left-1/3 h-[350px] w-[350px] rounded-full bg-blue-600/10 blur-[120px]" />
@@ -390,7 +355,7 @@ export default function PlatformLandingPage() {
             </div>
           </section>
 
-{/* Benefits */}
+          {/* Benefits */}
           <section id="keunggulan" className="py-20">
             <div className="text-center max-w-2xl mx-auto mb-14">
               <p className="text-sm font-semibold text-green-400 mb-2">

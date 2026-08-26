@@ -9,8 +9,8 @@ interface ThemeState {
 }
 
 export const useThemeStore = create<ThemeState>()((set) => ({
-  // Dark mode is the default theme of the platform.
-  theme: "dark",
+  // default theme mode.
+  theme: "light",
   setTheme: (theme) => set({ theme }),
   toggleTheme: () =>
     set((state) => ({

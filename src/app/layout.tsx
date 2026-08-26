@@ -49,11 +49,9 @@ export default function RootLayout({
   return (
     <html lang="id" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <head>
-        {/* Favicon */}
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/logo.jpg" />
-        <link rel="shortcut icon" href="/logo.jpg" type="image/jpeg" />
-        {/* Critical theme script: set initial theme (default dark) before hydration */}
+        <link rel="shortcut icon" href="/logo.jpg" />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('kalivergo-theme');document.documentElement.classList.toggle('dark',t!=='light');}catch(e){document.documentElement.classList.add('dark');}})();`,
