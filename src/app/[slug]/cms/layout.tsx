@@ -2,10 +2,21 @@ import { unstable_noStore as noStore } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 
 import { requireTenantCmsAccess, resolveTenantFromRoute } from "@/lib/tenant";
+import { prisma } from "@/lib/db";
+import type { CmsRole } from "@/types";
 
 import Sidebar from "@/components/layout/Sidebar";
 import CacheGuard from "@/components/security/CacheGuard";
 import { getCurrentSessionUser } from "@/server/auth/session";
+
+const ALL_CMS_MODULES = [
+  "tasks",
+  "people",
+  "finance",
+  "schedule",
+  "seminar",
+  "audit",
+];
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +58,17 @@ export default async function TenantCmsLayout({
 
   const tenantPath = `/${slug}`;
 
+  let cmsModules: string[] = [];
+  if (membership.role === "OWNER") {
+    cmsModules = ALL_CMS_MODULES;
+  } else if (membership.cmsRole) {
+    const permissions = await prisma.cmsAccessPermission.findMany({
+      where: { tenantId: tenant.tenantId, cmsRole: membership.cmsRole as CmsRole },
+      select: { module: true },
+    });
+    cmsModules = permissions.map((p) => p.module);
+  }
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <CacheGuard redirectTo="/unauthorized" />
@@ -54,6 +76,7 @@ export default async function TenantCmsLayout({
         variant="cms"
         userRole={membership.role}
         tenantPath={tenantPath}
+        cmsModules={cmsModules}
       />
 
       <main className="flex-1 p-8 overflow-auto">{children}</main>

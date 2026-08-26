@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import type { LucideIcon } from "lucide-react";
 import {
   ClipboardList,
   Wallet,
@@ -19,16 +20,24 @@ import {
   Shield,
 } from "lucide-react";
 
-const cmsNavItems = [
+type CmsNavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  module?: string;
+  ownerOnly?: boolean;
+};
+
+const cmsNavItems: CmsNavItem[] = [
   { href: "/home", label: "Home", icon: Home },
   { href: "/cms", label: "Overview", icon: LayoutDashboard },
-  { href: "/cms/tasks", label: "Manage Tasks", icon: ClipboardList },
-  { href: "/cms/people", label: "People Management", icon: User },
-  { href: "/cms/finance", label: "Finance", icon: Wallet },
-  { href: "/cms/schedule", label: "Schedule", icon: Calendar },
-  { href: "/cms/seminar", label: "Seminar", icon: GraduationCap },
-  { href: "/cms/audit", label: "Audit Log", icon: FileText },
-  { href: "/cms/access", label: "Access Control", icon: Shield, ownerOnly: true },
+  { href: "/cms/tasks", label: "Manage Tasks", icon: ClipboardList, module: "tasks" },
+  { href: "/cms/people", label: "People Management", icon: User, module: "people" },
+  { href: "/cms/finance", label: "Finance", icon: Wallet, module: "finance" },
+  { href: "/cms/schedule", label: "Schedule", icon: Calendar, module: "schedule" },
+  { href: "/cms/seminar", label: "Seminar", icon: GraduationCap, module: "seminar" },
+  { href: "/cms/audit", label: "Audit Log", icon: FileText, module: "audit" },
+  { href: "/cms/access", label: "Access Control", icon: Shield, module: "access", ownerOnly: true },
 ];
 
 const mainNavItems = [
@@ -40,9 +49,10 @@ interface SidebarProps {
   variant?: "cms" | "main";
   userRole?: string;
   tenantPath?: string;
+  cmsModules?: string[];
 }
 
-export default function Sidebar({ variant, userRole, tenantPath }: SidebarProps) {
+export default function Sidebar({ variant, userRole, tenantPath, cmsModules }: SidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -90,6 +100,7 @@ export default function Sidebar({ variant, userRole, tenantPath }: SidebarProps)
 
   const effectiveRole = userRole || detectedRole;
   const isNonMember = effectiveRole && effectiveRole !== "MEMBER";
+  const isOwner = effectiveRole === "OWNER";
 
   const mainNavItems = [
     { href: "/home", label: "Home", icon: Home },
@@ -98,7 +109,16 @@ export default function Sidebar({ variant, userRole, tenantPath }: SidebarProps)
     ...(isNonMember ? [{ href: "/cms", label: "CMS Overview", icon: FolderOpen }] : []),
   ];
 
-  const navItems = isCms ? cmsNavItems : mainNavItems;
+  const visibleCmsNavItems = isCms
+    ? cmsNavItems.filter((item) => {
+        if (isOwner) return true;
+        if (item.ownerOnly) return false;
+        if (!item.module) return true;
+        return !!cmsModules?.includes(item.module);
+      })
+    : [];
+
+  const navItems = isCms ? visibleCmsNavItems : mainNavItems;
   const sidebarTitle = isCms ? "CMS Menu" : "Navigation";
 
   if (!isMounted) {

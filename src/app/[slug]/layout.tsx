@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentSessionUser } from "@/server/auth/session";
-import TenantNavbar from "@/components/layout/TenantNavbar";
+import NavbarGate from "@/components/layout/NavbarGate";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +60,7 @@ export default async function SlugLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <TenantNavbar
+      <NavbarGate
         user={user}
         tenantPath={tenantPath}
       />
