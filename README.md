@@ -1,1 +1,0 @@
-Kalivergo adalah platform web manajemen terpadu yang dirancang khusus untuk memenuhi kebutuhan operasional, akademik, keuangan, dan kegiatan organisasi/kelas.
