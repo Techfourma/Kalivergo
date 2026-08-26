@@ -8,6 +8,7 @@ import { deleteKtmFromKYC, deleteSelfieFromKYC } from '@/features/kyc/services/k
 import { generateVerificationToken, hashToken } from '@/lib/auth';
 import { sendVerificationEmail } from '@/lib/email';
 import { CmsRole } from '@prisma/client';
+import { env } from '@/config/env';
 
 export async function addUser(formData: FormData) {
   try {
@@ -96,6 +97,21 @@ export async function acceptUser(formData: FormData) {
       update: { role: 'MEMBER', cmsRole: null },
       create: { userId, tenantId, role: 'MEMBER', cmsRole: null },
     });
+
+    const cloudName = env.cloudinaryCloudName;
+    if (application.profilePhotoStorageKey && cloudName) {
+      const profilePhotoUrl = `https://res.cloudinary.com/${cloudName}/image/upload/${application.profilePhotoStorageKey}`;
+      const existingUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { image: true },
+      });
+      if (existingUser && !existingUser.image) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: { image: profilePhotoUrl },
+        });
+      }
+    }
 
     await prisma.memberApplication.update({
       where: { id: application.id },

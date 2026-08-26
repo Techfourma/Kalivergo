@@ -21,6 +21,9 @@ interface SessionUser {
   name: string;
   email: string;
   nim: string | null;
+  image: string | null;
+  isVerified: boolean;
+  canAccessCms: boolean;
   platformRole: string | null;
   role: string | null;
   cmsRole: string | null;
@@ -89,6 +92,9 @@ export async function loginUserUniversal(identifier: string, password: string): 
         name: user.name,
         email: user.email ?? "",
         nim: user.nim ?? null,
+        image: user.image ?? null,
+        isVerified: user.isVerified,
+        canAccessCms: false,
         platformRole: user.platformRole,
         role: user.platformRole,
         cmsRole: null,
@@ -116,6 +122,9 @@ export async function loginUserUniversal(identifier: string, password: string): 
       name: user.name,
       email: user.email ?? "",
       nim: user.nim ?? null,
+      image: user.image ?? null,
+      isVerified: user.isVerified,
+      canAccessCms: primaryRole === "OWNER" || !!primary?.cmsRole,
       platformRole: null,
       role: primaryRole,
       cmsRole: primary?.cmsRole ?? null,
