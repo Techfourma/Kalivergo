@@ -143,7 +143,7 @@ export default function MemberSignupPage() {
 
             <div className="flex items-center justify-center gap-2 text-primary-600 mb-4">
               <Mail className="w-5 h-5" />
-              <span className="text-sm font-medium">Verifikasi Email Diperlukan</span>
+              <span className="text-sm font-medium">Menunggu Persetujuan</span>
             </div>
 
             <p className="text-dark-600 mb-6 leading-relaxed">
@@ -151,11 +151,12 @@ export default function MemberSignupPage() {
               <span className="font-semibold text-dark-900">
                 {selectedClass}
               </span>.
-              {" "}Silakan cek email{" "}
+              {" "}Pendaftaran Anda sedang menunggu persetujuan admin/owner kelas.{" "}
+              Setelah disetujui, link verifikasi akan dikirim ke email{" "}
               <span className="font-semibold text-dark-900">
                 (termasuk folder spam/promosi)
               </span>{" "}
-              untuk klik link verifikasi akun agar Anda dapat login.
+              untuk mengaktifkan akun Anda.
             </p>
 
             <div className="grid grid-cols-2 gap-3">
@@ -481,7 +482,7 @@ export default function MemberSignupPage() {
           <p className="text-xs text-blue-700">
             <strong>Catatan:</strong> Pilih universitas, program studi, dan kelas yang ingin Anda ikuti.
             Setelah mendaftar, pendaftaran Anda akan menunggu persetujuan dari admin/owner kelas.
-            Cek inbox (atau folder spam) email Anda untuk link verifikasi akun.
+            Setelah disetujui, link verifikasi akan dikirim ke email Anda (cek inbox atau folder spam).
           </p>
         </div>
       </div>

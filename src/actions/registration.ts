@@ -456,14 +456,6 @@ export async function registerMember(formData: FormData) {
       },
     });
 
-    await prisma.tenantMembership.upsert({
-      where: {
-        userId_tenantId: { userId: user.id, tenantId: tenant.id },
-      },
-      update: { role: "MEMBER" },
-      create: { userId: user.id, tenantId: tenant.id, role: "MEMBER" },
-    });
-
     await createAuditLog(
       "MEMBER_REGISTRATION",
       "JOIN",
@@ -480,7 +472,7 @@ export async function registerMember(formData: FormData) {
     );
 
     return {
-      success: "Pendaftaran berhasil! Silakan tunggu persetujuan dari admin/owner kelas sebelum verifikasi email.",
+      success: "Pendaftaran berhasil! Pendaftaran Anda sedang menunggu persetujuan admin/owner kelas. Setelah disetujui, link verifikasi akan dikirim ke email Anda.",
       tenantId: tenant.id,
       className: tenant.name,
     };

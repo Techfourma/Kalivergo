@@ -1,7 +1,9 @@
 'use server';
 
 import { prisma } from '@/lib/db';
-import { readSessionUser } from './role-model';
+import { readSessionUser, requireCmsActor } from './role-model';
+
+const CMS_AUDIT_MODULES = ['FINANCE', 'PEOPLE', 'TASKS', 'SEMINAR', 'SCHEDULE', 'ACCESS'] as const;
 
 export async function createAuditLog(
   module: string,
@@ -47,16 +49,22 @@ export async function createAuditLog(
 
 export async function getAuditLogs(module?: string, startDate?: Date, endDate?: Date, tenantId?: string) {
   try {
+    if (!tenantId) return [];
+    if (!(await requireCmsActor(tenantId))) return [];
+    if (module && module !== 'ALL' && !CMS_AUDIT_MODULES.includes(module as typeof CMS_AUDIT_MODULES[number])) {
+      return [];
+    }
+
     const where: any = {};
-    if (module && module !== 'ALL') where.entityType = module;
+    where.entityType = module && module !== 'ALL'
+      ? module
+      : { in: [...CMS_AUDIT_MODULES] };
     if (startDate || endDate) {
       where.createdAt = {};
       if (startDate) where.createdAt.gte = startDate;
       if (endDate) where.createdAt.lte = endDate;
     }
-    if (tenantId) {
-      where.metadata = { path: ['tenantId'], equals: tenantId };
-    }
+    where.metadata = { path: ['tenantId'], equals: tenantId };
 
     const rows = await prisma.auditLog.findMany({ where, orderBy: { createdAt: 'desc' } });
 

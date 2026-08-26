@@ -18,7 +18,6 @@ export default async function SlugLayout({
 }: SlugLayoutProps) {
   const routeParams = await params;
 
-  // Resolve tenant by customSlug directly
   const tenant = await prisma.tenant.findFirst({
     where: {
       customSlug: routeParams.slug,
@@ -39,8 +38,6 @@ export default async function SlugLayout({
 
   const session = await getCurrentSessionUser();
 
-  // For public pages like home, we don't require auth
-  // But for protected pages, we'll check membership in the page component
   let user = null;
   if (session?.id) {
     const { requireTenantMembership } = await import("@/lib/tenant/require-tenant-access");
@@ -56,8 +53,6 @@ export default async function SlugLayout({
         isVerified: session.isVerified,
       };
     } catch {
-      // User is not a member, but we still allow access to public pages
-      // The page component will handle redirection if needed
     }
   }
 
