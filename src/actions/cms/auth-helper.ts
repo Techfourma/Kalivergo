@@ -135,6 +135,8 @@ export async function loginUser(nim: string, password: string) {
       name: user.name,
       email: user.email ?? '',
       nim: user.nim,
+      image: user.image ?? null,
+      isVerified: user.isVerified,
       platformRole: user.platformRole ?? null,
       memberships: memberships.map((m) => ({
         tenantId: m.tenantId,
@@ -158,6 +160,7 @@ export async function loginUser(nim: string, password: string) {
       session.role = primary?.role === 'OWNER' ? 'OWNER' : primary?.cmsRole ?? primary?.role ?? 'MEMBER';
       session.cmsRole = primary?.cmsRole ?? null;
     }
+    session.canAccessCms = session.role === 'OWNER' || !!session.cmsRole;
 
     const cookieStore = await cookies();
     cookieStore.set('kalivergo_user', JSON.stringify(session), {

@@ -318,9 +318,21 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
               {user ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 px-2">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-white font-bold flex-shrink-0">
-                      {user.name?.charAt(0).toUpperCase()}
-                    </div>
+                    {user.image ? (
+                      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                        <Image
+                          src={user.image}
+                          alt={user.name}
+                          fill
+                          className="object-cover"
+                          sizes="40px"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-white font-bold flex-shrink-0">
+                        {user.name?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div className="flex flex-col min-w-0">
                       <span className="text-sm font-semibold text-dark-900 truncate dark:text-dark-100">{user.name}</span>
                       <span className="text-xs text-dark-500 truncate">{formatRole(user.role)}</span>
