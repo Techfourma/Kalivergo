@@ -77,6 +77,22 @@ export default function Navbar({ user, onSignIn, onSignOut }: NavbarProps) {
     };
   }, [mobileOpen]);
 
+  const formatRole = (role?: string) => {
+    const roleMap: Record<string, string> = {
+      MEMBER: "Member",
+      OWNER: "Owner",
+      PRESIDENT: "Presiden",
+      VICE_PRESIDENT: "Wakil Presiden",
+      TREASURER: "Bendahara",
+      VICE_TREASURER: "Wakil Bendahara",
+      SECRETARY: "Sekretaris",
+      SUPER_ADMIN_KYC: "Super Admin",
+      ADMIN_KYC: "Admin KYC",
+    };
+    if (!role) return "Member";
+    return roleMap[role] || role;
+  };
+
   const filteredNavItems = (() => {
     const isCmsPath = pathname?.startsWith("/cms");
 
@@ -181,15 +197,27 @@ export default function Navbar({ user, onSignIn, onSignOut }: NavbarProps) {
               {user ? (
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2 rounded-xl bg-dark-50 px-3 py-1.5 border border-dark-100">
-                    <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-white text-xs font-bold">
-                      {user.name?.charAt(0).toUpperCase()}
-                    </div>
+                    {user.image ? (
+                      <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full">
+                        <Image
+                          src={user.image}
+                          alt={user.name}
+                          fill
+                          className="object-cover"
+                          sizes="28px"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-7 w-7 shrink-0 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-white text-xs font-bold">
+                        {user.name?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div className="flex flex-col">
                       <span className="text-xs font-medium text-dark-900 leading-tight">
                         {user.name}
                       </span>
                       <span className="text-[10px] text-dark-400 leading-tight">
-                        {user.role || "Member"}
+                        {formatRole(user.role)}
                       </span>
                     </div>
                   </div>
@@ -284,12 +312,24 @@ export default function Navbar({ user, onSignIn, onSignOut }: NavbarProps) {
               {user ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 px-2">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-white font-bold flex-shrink-0">
-                      {user.name?.charAt(0).toUpperCase()}
-                    </div>
+                    {user.image ? (
+                      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                        <Image
+                          src={user.image}
+                          alt={user.name}
+                          fill
+                          className="object-cover"
+                          sizes="40px"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-white font-bold flex-shrink-0">
+                        {user.name?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div className="flex flex-col min-w-0">
                       <span className="text-sm font-semibold text-dark-900 truncate">{user.name}</span>
-                      <span className="text-xs text-dark-500 truncate">{user.role || "Member"}</span>
+                      <span className="text-xs text-dark-500 truncate">{formatRole(user.role)}</span>
                     </div>
                   </div>
                   <Button

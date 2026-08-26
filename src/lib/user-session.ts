@@ -54,15 +54,32 @@ export async function loadCurrentUser(
   });
   if (!dbUser) return null;
 
-  const membership = session.memberships?.find((m) => m.tenantId === tenantId);
-  const role = membership?.role ?? session.role ?? dbUser.platformRole ?? "MEMBER";
-  const cmsRole = membership?.cmsRole ?? session.cmsRole ?? null;
+  const cachedMembership = session.memberships?.find((m) => m.tenantId === tenantId);
+
+  const liveMembership =
+    tenantId == null
+      ? null
+      : await prisma.tenantMembership.findFirst({
+          where: { userId: session.id, tenantId },
+          select: { role: true, cmsRole: true },
+        });
+
+  const membershipRole = liveMembership?.role ?? cachedMembership?.role;
+  const membershipCmsRole = liveMembership?.cmsRole ?? cachedMembership?.cmsRole;
+
+  const role =
+    membershipRole === "OWNER"
+      ? "OWNER"
+      : membershipCmsRole ?? membershipRole ?? session.role ?? dbUser.platformRole ?? "MEMBER";
+  const cmsRole = membershipCmsRole ?? null;
+
+  const isPlatformAdmin = !tenantId && !!dbUser.platformRole;
 
   return {
     ...dbUser,
     role,
     cmsRole,
-    canAccessCms: role === "OWNER" || !!cmsRole,
+    canAccessCms: isPlatformAdmin ? true : role === "OWNER" || !!cmsRole,
     memberships: session.memberships ?? [],
   };
 }

@@ -64,6 +64,67 @@ const getActionColor = (action: string) => {
   }
 };
 
+const getModuleLabel = (module: string) => {
+  const labels: Record<string, string> = {
+    FINANCE: 'Finance',
+    PEOPLE: 'People Management',
+    TASKS: 'Tasks',
+    SEMINAR: 'Seminar',
+    SCHEDULE: 'Schedule',
+    ACCESS: 'Access Control',
+  };
+  return labels[module] || module;
+};
+
+const getActionLabel = (action: string) => {
+  const labels: Record<string, string> = {
+    CREATE: 'Menambahkan',
+    UPDATE: 'Mengubah',
+    UPDATE_ROLE: 'Mengubah jabatan',
+    DELETE: 'Menghapus',
+    APPROVE: 'Menyetujui',
+  };
+  return labels[action] || action;
+};
+
+const getMetadataLabel = (key: string) => {
+  const labels: Record<string, string> = {
+    amount: 'Jumlah',
+    type: 'Jenis',
+    title: 'Judul',
+    name: 'Nama',
+    location: 'Lokasi',
+    date: 'Tanggal',
+    deadline: 'Batas waktu',
+    newRole: 'Jabatan baru',
+    description: 'Keterangan',
+  };
+  return labels[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, (value) => value.toUpperCase());
+};
+
+const formatMetadataValue = (key: string, value: unknown) => {
+  if (value === null || value === undefined || value === '') return '-';
+  if (key === 'amount' && typeof value === 'number') {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
+  }
+  if ((key === 'date' || key === 'deadline') && typeof value === 'string') {
+    return new Intl.DateTimeFormat('id-ID', {
+      dateStyle: 'medium',
+      timeStyle: key === 'deadline' ? 'short' : undefined,
+    }).format(new Date(value));
+  }
+  if (typeof value === 'boolean') return value ? 'Ya' : 'Tidak';
+  if (typeof value === 'object') return JSON.stringify(value);
+  return String(value);
+};
+
+const getVisibleMetadata = (metadata: AuditLog['metadata']) => {
+  if (!metadata || typeof metadata !== 'object') return [];
+  return Object.entries(metadata).filter(
+    ([key]) => !['description', 'userName', 'tenantId'].includes(key) && !key.endsWith('Id')
+  );
+};
+
 export default function AuditLogTable({ logs }: AuditLogTableProps) {
   const formatDateTime = (date: Date) => {
     return new Intl.DateTimeFormat("id-ID", {
@@ -85,7 +146,7 @@ export default function AuditLogTable({ logs }: AuditLogTableProps) {
       {logs.length === 0 ? (
         <div className="p-12 text-center">
           <FileText className="h-12 w-12 text-dark-300 mx-auto mb-4" />
-          <p className="text-dark-500">Belum ada riwayat audit</p>
+          <p className="text-dark-500">Tidak ada perubahan pada modul yang dipilih dalam rentang tanggal ini.</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -120,22 +181,27 @@ export default function AuditLogTable({ logs }: AuditLogTableProps) {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getModuleColor(log.module)}`}>
                       {getModuleIcon(log.module)}
-                      {log.module}
+                      {getModuleLabel(log.module)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getActionColor(log.action)}`}>
                       {log.action === 'CREATE' && <Plus className="h-3 w-3 mr-1" />}
                       {log.action === 'DELETE' && <Trash2 className="h-3 w-3 mr-1" />}
-                      {log.action}
+                      {getActionLabel(log.action)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <p className="text-sm text-dark-900">{log.description}</p>
-                    {log.metadata && (
-                      <pre className="text-xs text-dark-500 mt-1 font-mono">
-                        {JSON.stringify(log.metadata, null, 2)}
-                      </pre>
+                    {getVisibleMetadata(log.metadata).length > 0 && (
+                      <dl className="mt-2 space-y-1 text-xs text-dark-500">
+                        {getVisibleMetadata(log.metadata).map(([key, value]) => (
+                          <div key={key} className="flex gap-2">
+                            <dt className="font-medium text-dark-600">{getMetadataLabel(key)}:</dt>
+                            <dd>{formatMetadataValue(key, value)}</dd>
+                          </div>
+                        ))}
+                      </dl>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
