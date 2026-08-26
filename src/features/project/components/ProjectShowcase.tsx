@@ -47,8 +47,8 @@ export default function ProjectShowcase({ projects }: ProjectShowcaseProps) {
             <FolderKanban className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">Project Showcase</h1>
-            <p className="text-sm text-white">
+            <h1 className="text-2xl font-bold text-dark-900 dark:text-white">Project Showcase</h1>
+            <p className="text-sm text-dark-900 dark:text-white">
               {projects.length} project dari anggota kelas
             </p>
           </div>
@@ -123,10 +123,10 @@ export default function ProjectShowcase({ projects }: ProjectShowcaseProps) {
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4">
-                  <h3 className="text-lg font-bold text-white line-clamp-1">
+                  <h3 className="text-lg font-bold text-dark-900 dark:text-white line-clamp-1">
                     {project.title}
                   </h3>
-                  <p className="text-xs text-white/80 mt-1">
+                  <p className="text-xs text-dark-900 dark:text-white/80 mt-1">
                     by {project.memberName}
                   </p>
                 </div>

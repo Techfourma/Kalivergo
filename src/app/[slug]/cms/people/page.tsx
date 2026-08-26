@@ -5,6 +5,8 @@ import { acceptUser, rejectUser, updateUserRole } from '@/actions/cms/people';
 import MemberReviewCard from '@/components/cms/MemberReviewCard';
 import { env } from '@/config/env';
 
+import PageBackground from '@/components/ui/PageBackground';
+
 export const dynamic = 'force-dynamic';
 
 type TenantCmsPeoplePageProps = {
@@ -55,6 +57,7 @@ export default async function PeoplePage({ params }: TenantCmsPeoplePageProps) {
   });
 
   const cloudName = env.cloudinaryCloudName;
+
   const reviews = memberApplications.map((application) => ({
     id: application.id,
     userId: application.userId,
@@ -81,132 +84,134 @@ export default async function PeoplePage({ params }: TenantCmsPeoplePageProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-dark-900 font-display">People Management</h1>
-        <p className="text-dark-500 mt-1">Kelola anggota kelas - Approve/Reject dan ubah jabatan</p>
-      </div>
+    <>
+      <PageBackground />
 
-      <div className="bg-white rounded-xl shadow-sm border border-dark-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-dark-100">
-            <thead className="bg-dark-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
-                  Nama
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
-                  NIM
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
-                  Email
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
-                  Jabatan
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-dark-100">
-              {users.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-dark-500">
-                    Belum ada data anggota
-                  </td>
-                </tr>
-              ) : (
-                users.map((user: any) => {
-                  const displayRole = (user.tenantRole === 'MEMBER' && user.cmsRole)
-                    ? user.cmsRole
-                    : (user.tenantRole || user.role || 'MEMBER');
-
-                  const isPending = !user.isVerified;
-                  const isOwner = user.tenantRole === 'OWNER';
-
-                  return (
-                    <tr key={user.id} className="hover:bg-dark-50 transition-colors">
-                      <td className="px-6 py-4">
-                        <span className="text-sm font-semibold text-dark-900">
-                          {user.name}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm text-dark-500">{user.nim || '-'}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm text-dark-500">{user.email}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        {!isOwner ? (
-                          <form action={updateUserRole} className="flex items-center gap-2">
-                            <input type="hidden" name="userId" value={user.id} />
-                            <input type="hidden" name="tenantId" value={tenantId} />
-                            <select
-                              name="role"
-                              defaultValue={user.cmsRole || 'MEMBER'}
-                              disabled={isPending}
-                              className="px-3 py-1.5 text-sm border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
-                            >
-                              <option value="MEMBER">Anggota</option>
-                              <option value="PRESIDENT">Ketua Kelas</option>
-                              <option value="VICE_PRESIDENT">Wakil Ketua</option>
-                              <option value="TREASURER">Bendahara</option>
-                              <option value="VICE_TREASURER">Wakil Bendahara</option>
-                              <option value="SECRETARY">Sekretaris</option>
-                            </select>
-                            <button
-                              type="submit"
-                              disabled={isPending}
-                              className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
-                            >
-                              Ubah
-                            </button>
-                          </form>
-                        ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">
-                            {roleLabels[displayRole] || displayRole}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        {isPending ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700">
-                            Menunggu Approval
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">
-                            Aktif
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <section className="space-y-4">
+      <div className="relative z-10 space-y-6">
         <div>
-          <h2 className="text-xl font-bold text-dark-900 font-display">Review Pendaftaran Anggota</h2>
-          <p className="text-dark-500 mt-1">Periksa data dan dokumen member-signup sebelum menyetujui pendaftaran.</p>
+          <h1 className="text-2xl font-bold text-dark-900 font-display">People Management</h1>
+          <p className="text-dark-500 mt-1">Kelola anggota kelas - Approve/Reject dan ubah jabatan</p>
         </div>
-        {reviews.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm border border-dark-100 px-6 py-8 text-center text-dark-500">
-            Tidak ada pendaftaran anggota yang menunggu review
+
+        <div className="bg-white rounded-xl shadow-sm border border-dark-100 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-dark-100">
+              <thead className="bg-dark-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
+                    Nama
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
+                    NIM
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
+                    Jabatan
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-dark-100">
+                {users.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-8 text-center text-dark-500">
+                      Belum ada data anggota
+                    </td>
+                  </tr>
+                ) : (
+                  users.map((user: any) => {
+                    const displayRole = (user.tenantRole === 'MEMBER' && user.cmsRole)
+                      ? user.cmsRole
+                      : (user.tenantRole || user.role || 'MEMBER');
+                    const isPending = !user.isVerified;
+                    const isOwner = user.tenantRole === 'OWNER';
+                    return (
+                      <tr key={user.id} className="hover:bg-dark-50 transition-colors">
+                        <td className="px-6 py-4">
+                          <span className="text-sm font-semibold text-dark-900">
+                            {user.name}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-sm text-dark-500">{user.nim || '-'}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-sm text-dark-500">{user.email}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          {!isOwner ? (
+                            <form action={updateUserRole} className="flex items-center gap-2">
+                              <input type="hidden" name="userId" value={user.id} />
+                              <input type="hidden" name="tenantId" value={tenantId} />
+                              <select
+                                name="role"
+                                defaultValue={user.cmsRole || 'MEMBER'}
+                                disabled={isPending}
+                                className="px-3 py-1.5 text-sm border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+                              >
+                                <option value="MEMBER">Anggota</option>
+                                <option value="PRESIDENT">Ketua Kelas</option>
+                                <option value="VICE_PRESIDENT">Wakil Ketua</option>
+                                <option value="TREASURER">Bendahara</option>
+                                <option value="VICE_TREASURER">Wakil Bendahara</option>
+                                <option value="SECRETARY">Sekretaris</option>
+                              </select>
+                              <button
+                                type="submit"
+                                disabled={isPending}
+                                className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+                              >
+                                Ubah
+                              </button>
+                            </form>
+                          ) : (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">
+                              {roleLabels[displayRole] || displayRole}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {isPending ? (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700">
+                              Menunggu Approval
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">
+                              Aktif
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
           </div>
-        ) : (
-          <div className="grid gap-6 lg:grid-cols-2">
-            {reviews.map((review) => (
-              <MemberReviewCard key={review.id} review={review} tenantId={tenantId} />
-            ))}
+        </div>
+
+        <section className="space-y-4">
+          <div>
+            <h2 className="text-xl font-bold text-dark-900 font-display">Review Pendaftaran Anggota</h2>
+            <p className="text-dark-500 mt-1">Periksa data dan dokumen member-signup sebelum menyetujui pendaftaran.</p>
           </div>
-        )}
-      </section>
-    </div>
+          {reviews.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-sm border border-dark-100 px-6 py-8 text-center text-dark-500">
+              Tidak ada pendaftaran anggota yang menunggu review
+            </div>
+          ) : (
+            <div className="grid gap-6 lg:grid-cols-2">
+              {reviews.map((review) => (
+                <MemberReviewCard key={review.id} review={review} tenantId={tenantId} />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </>
   );
 }

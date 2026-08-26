@@ -4,7 +4,7 @@ import TenantNavbar from "@/components/layout/TenantNavbar";
 import Footer from "@/components/layout/Footer";
 import CashFlowChart from "@/components/dashboard/CashFlowChart";
 import ArrearsList from "@/components/dashboard/ArrearsList";
-import WaveBackground from "@/components/ui/WaveBackground";
+import PageBackground from "@/components/ui/PageBackground";
 import CacheGuard from "@/components/security/CacheGuard";
 import { cookies } from "next/headers";
 import { requireTenantPageAccess, resolveTenantFromRoute } from "@/lib/tenant";
@@ -193,11 +193,9 @@ return {
   <>
     <CacheGuard />
 
-    <WaveBackground />
+    <PageBackground />
 
-    <div className="fixed inset-0 z-0 bg-gradient-to-b from-transparent via-[#0a0a14]/50 to-[#0a0a14] pointer-events-none" />
-
-    <div className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a14]/80 backdrop-blur-md border-b border-white/10">
+    <div className="fixed top-0 left-0 right-0 z-50 nav-shell">
       <TenantNavbar user={currentUser} tenantPath={tenantPath} />
     </div>
 
@@ -207,18 +205,18 @@ return {
         <div className="mb-8">
           <div className="flex items-center gap-3">
 
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-100 text-primary-600">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-100 text-primary-600 dark:bg-primary-500/15 dark:text-primary-400">
               <span className="text-2xl font-bold">
                 💰
               </span>
             </div>
 
             <div>
-              <h1 className="text-3xl font-bold text-white font-display">
+              <h1 className="text-3xl font-bold text-dark-900 dark:text-white font-display">
                 Dashboard Keuangan
               </h1>
 
-              <p className="text-gray-300 mt-1">
+              <p className="text-muted mt-1">
                 Monitoring uang kas kelas Kalivergo
               </p>
             </div>

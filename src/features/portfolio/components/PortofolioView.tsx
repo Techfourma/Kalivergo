@@ -113,7 +113,7 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-2 text-gray-300 hover:text-primary-400 transition-colors"
+        className="flex items-center gap-2 text-muted hover:text-primary-400 transition-colors"
       >
         <Icon className="h-5 w-5" />
         <span className="text-sm">{label}</span>
@@ -137,7 +137,7 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
         )}
 
         {/* Header Section */}
-        <Card padding="lg" className="bg-white/5 border-white/10">
+        <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             <div className="relative">
               <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center overflow-hidden">
@@ -150,19 +150,19 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
                     className="object-cover"
                   />
                 ) : (
-                  <User className="w-16 h-16 text-white" />
+                  <User className="w-16 h-16 text-dark-900 dark:text-white" />
                 )}
               </div>
             </div>
 
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-3xl font-bold text-white font-display">{portfolioUser.name}</h1>
+              <h1 className="text-3xl font-bold text-dark-900 dark:text-white font-display">{portfolioUser.name}</h1>
               <p className="text-primary-400 mt-1">{getRoleDisplay(portfolioUser.role || 'MEMBER')}</p>
               {portfolioUser.nim && (
-                <p className="text-gray-400 text-sm mt-1">NIM: {portfolioUser.nim}</p>
+                <p className="text-faint text-sm mt-1">NIM: {portfolioUser.nim}</p>
               )}
               {portfolioUser.email && (
-                <div className="flex items-center justify-center md:justify-start gap-2 mt-2 text-gray-300">
+                <div className="flex items-center justify-center md:justify-start gap-2 mt-2 text-muted">
                   <Mail className="h-4 w-4" />
                   <span className="text-sm">{portfolioUser.email}</span>
                 </div>
@@ -207,8 +207,8 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
         </Card>
 
         {/* About Me / Bio */}
-        <Card padding="lg" className="bg-white/5 border-white/10">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+        <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+          <h2 className="text-xl font-bold text-dark-900 dark:text-white mb-4 flex items-center gap-2">
             <User className="h-5 w-5 text-primary-400" />
             Tentang Saya
           </h2>
@@ -216,20 +216,20 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
             <textarea
               value={formData.bio}
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-              className="w-full px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-white resize-none focus:outline-none focus:border-primary-500"
+              className="w-full px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-dark-900 dark:text-white resize-none focus:outline-none focus:border-primary-500"
               rows={4}
               placeholder="Ceritakan tentang diri Anda..."
             />
           ) : (
-            <p className="text-gray-300 leading-relaxed">
+            <p className="text-muted leading-relaxed">
               {portfolioUser.bio || "Belum ada biografi."}
             </p>
           )}
         </Card>
 
         {/* Work Experience */}
-        <Card padding="lg" className="bg-white/5 border-white/10">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+        <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+          <h2 className="text-xl font-bold text-dark-900 dark:text-white mb-4 flex items-center gap-2">
             <Briefcase className="h-5 w-5 text-primary-400" />
             Pengalaman Kerja
           </h2>
@@ -237,20 +237,20 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
             <textarea
               value={formData.workExperience}
               onChange={(e) => setFormData({ ...formData, workExperience: e.target.value })}
-              className="w-full px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-white resize-none focus:outline-none focus:border-primary-500"
+              className="w-full px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-dark-900 dark:text-white resize-none focus:outline-none focus:border-primary-500"
               rows={4}
               placeholder="Deskripsikan pengalaman kerja Anda..."
             />
           ) : (
-            <p className="text-gray-300 leading-relaxed whitespace-pre-line">
+            <p className="text-muted leading-relaxed whitespace-pre-line">
               {portfolioUser.workExperience || "Belum ada pengalaman kerja yang ditambahkan."}
             </p>
           )}
         </Card>
 
         {/* Skills */}
-        <Card padding="lg" className="bg-white/5 border-white/10">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+        <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+          <h2 className="text-xl font-bold text-dark-900 dark:text-white mb-4 flex items-center gap-2">
             <GraduationCap className="h-5 w-5 text-primary-400" />
             Keahlian
           </h2>
@@ -258,7 +258,7 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
             <textarea
               value={formData.skills}
               onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-              className="w-full px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-white resize-none focus:outline-none focus:border-primary-500"
+              className="w-full px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-dark-900 dark:text-white resize-none focus:outline-none focus:border-primary-500"
               rows={3}
               placeholder="Contoh: JavaScript, React, Node.js, Python"
             />
@@ -274,15 +274,15 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
                   </span>
                 ))
               ) : (
-                <p className="text-gray-300">Belum ada keahlian yang ditambahkan.</p>
+                <p className="text-muted">Belum ada keahlian yang ditambahkan.</p>
               )}
             </div>
           )}
         </Card>
 
         {/* Social Media Links */}
-        <Card padding="lg" className="bg-white/5 border-white/10">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+        <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+          <h2 className="text-xl font-bold text-dark-900 dark:text-white mb-4 flex items-center gap-2">
             <LinkIcon className="h-5 w-5 text-primary-400" />
             Social Media & Links
           </h2>
@@ -290,7 +290,7 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
           {isEditing ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted mb-2">
                   <Instagram className="h-4 w-4 inline mr-1" />
                   Instagram URL
                 </label>
@@ -298,12 +298,12 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
                   type="url"
                   value={formData.instagramUrl}
                   onChange={(e) => setFormData({ ...formData, instagramUrl: e.target.value })}
-                  className="w-full px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-white focus:outline-none focus:border-primary-500"
+                  className="w-full px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-dark-900 dark:text-white focus:outline-none focus:border-primary-500"
                   placeholder="https://instagram.com/username"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted mb-2">
                   <Github className="h-4 w-4 inline mr-1" />
                   GitHub URL
                 </label>
@@ -311,12 +311,12 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
                   type="url"
                   value={formData.githubUrl}
                   onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
-                  className="w-full px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-white focus:outline-none focus:border-primary-500"
+                  className="w-full px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-dark-900 dark:text-white focus:outline-none focus:border-primary-500"
                   placeholder="https://github.com/username"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted mb-2">
                   <Linkedin className="h-4 w-4 inline mr-1" />
                   LinkedIn URL
                 </label>
@@ -324,12 +324,12 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
                   type="url"
                   value={formData.linkedinUrl}
                   onChange={(e) => setFormData({ ...formData, linkedinUrl: e.target.value })}
-                  className="w-full px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-white focus:outline-none focus:border-primary-500"
+                  className="w-full px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-dark-900 dark:text-white focus:outline-none focus:border-primary-500"
                   placeholder="https://linkedin.com/in/username"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted mb-2">
                   <Globe className="h-4 w-4 inline mr-1" />
                   Website Pribadi
                 </label>
@@ -337,7 +337,7 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
                   type="url"
                   value={formData.websiteUrl}
                   onChange={(e) => setFormData({ ...formData, websiteUrl: e.target.value })}
-                  className="w-full px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-white focus:outline-none focus:border-primary-500"
+                  className="w-full px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-dark-900 dark:text-white focus:outline-none focus:border-primary-500"
                   placeholder="https://website-anda.com"
                 />
               </div>
@@ -349,7 +349,7 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
               <SocialLink url={portfolioUser.linkedinUrl} icon={Linkedin} label="LinkedIn" />
               <SocialLink url={portfolioUser.websiteUrl} icon={Globe} label="Website" />
               {!portfolioUser.instagramUrl && !portfolioUser.githubUrl && !portfolioUser.linkedinUrl && !portfolioUser.websiteUrl && (
-                <p className="text-gray-300 col-span-full">Belum ada social media yang ditambahkan.</p>
+                <p className="text-muted col-span-full">Belum ada social media yang ditambahkan.</p>
               )}
             </div>
           )}

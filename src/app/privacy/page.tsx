@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Shield, Eye, Share2, Lock, UserCheck, Mail, Database, Cookie, ArrowUp, Menu, X } from "lucide-react";
-import WaveBackground from "@/components/ui/WaveBackground";
+import PageBackground from "@/components/ui/PageBackground";
 
 export default function PrivacyPage() {
   const [activeSection, setActiveSection] = useState("");
@@ -58,12 +58,11 @@ export default function PrivacyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a14] relative overflow-hidden">
+    <div className="min-h-screen bg-dark-50 dark:bg-dark-950 relative overflow-hidden">
       {/* Wave Background */}
-      <WaveBackground />
+      <PageBackground />
 
       {/* Overlay gradient untuk depth */}
-      <div className="fixed inset-0 z-0 bg-gradient-to-b from-transparent via-[#0a0a14]/50 to-[#0a0a14] pointer-events-none" />
 
       {/* Content Wrapper */}
       <div className="relative z-10 flex flex-col min-h-screen">
@@ -71,15 +70,15 @@ export default function PrivacyPage() {
         <div className="relative z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-white/10 backdrop-blur-sm rounded-xl">
-                <Shield className="h-8 w-8 text-white" />
+              <div className="p-3 bg-dark-100/80 dark:bg-dark-800/70 backdrop-blur-sm rounded-xl">
+                <Shield className="h-8 w-8 text-dark-900 dark:text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold font-display text-white">Kebijakan Privasi</h1>
-                <p className="text-white/70 mt-1">Transparansi dalam pengelolaan data Anda</p>
+                <h1 className="text-4xl font-bold font-display text-dark-900 dark:text-white">Kebijakan Privasi</h1>
+                <p className="text-muted mt-1">Transparansi dalam pengelolaan data Anda</p>
               </div>
             </div>
-            <p className="text-white/70 mt-6 max-w-2xl">
+            <p className="text-muted mt-6 max-w-2xl">
               Terakhir diperbarui: {new Date().toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" })}
             </p>
           </div>
@@ -89,8 +88,8 @@ export default function PrivacyPage() {
           <div className="flex gap-8">
             {/* Table of Contents - Desktop */}
             <aside className="hidden lg:block w-64 flex-shrink-0">
-              <div className="sticky top-8 bg-white/5 backdrop-blur-md rounded-2xl shadow-sm border border-white/10 p-6">
-                <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+              <div className="sticky top-8 bg-dark-100/80 dark:bg-dark-800/70 backdrop-blur-md rounded-2xl shadow-sm border border-dark-200/60 dark:border-dark-800 p-6">
+                <h3 className="font-semibold text-dark-900 dark:text-white mb-4 flex items-center gap-2">
                   <Menu className="h-4 w-4" />
                   Daftar Isi
                 </h3>
@@ -104,7 +103,7 @@ export default function PrivacyPage() {
                         className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
                           activeSection === section.id
                             ? "bg-primary-50 text-primary-300 font-medium"
-                            : "text-gray-300 hover:bg-white/5 hover:text-white"
+                            : "text-muted hover:bg-dark-100/80 dark:bg-dark-800/70 hover:text-dark-900 dark:text-white"
                         }`}
                       >
                         <Icon className="h-4 w-4 flex-shrink-0" />
@@ -120,7 +119,7 @@ export default function PrivacyPage() {
             <div className="lg:hidden fixed bottom-6 right-6 z-40">
               <button
                 onClick={() => setMobileTocOpen(!mobileTocOpen)}
-                className="p-4 bg-primary-600 text-white rounded-full shadow-lg hover:bg-primary-700 transition-colors"
+                className="p-4 bg-primary-600 text-dark-900 dark:text-white rounded-full shadow-lg hover:bg-primary-700 transition-colors"
               >
                 {mobileTocOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
@@ -130,10 +129,10 @@ export default function PrivacyPage() {
             {mobileTocOpen && (
               <div className="lg:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setMobileTocOpen(false)}>
                 <div
-                  className="absolute bottom-0 left-0 right-0 bg-[#0a0a14] rounded-t-2xl p-6 max-h-[70vh] overflow-y-auto border-t border-white/10"
+                  className="absolute bottom-0 left-0 right-0 bg-dark-50 dark:bg-dark-950 rounded-t-2xl p-6 max-h-[70vh] overflow-y-auto border-t border-dark-200/60 dark:border-dark-800"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <h3 className="font-semibold text-white mb-4">Daftar Isi</h3>
+                  <h3 className="font-semibold text-dark-900 dark:text-white mb-4">Daftar Isi</h3>
                   <nav className="space-y-1">
                     {sections.map((section) => {
                       const Icon = section.icon;
@@ -141,7 +140,7 @@ export default function PrivacyPage() {
                         <button
                           key={section.id}
                           onClick={() => scrollToSection(section.id)}
-                          className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-gray-300 hover:bg-white/5 hover:text-white"
+                          className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-muted hover:bg-dark-100/80 dark:bg-dark-800/70 hover:text-dark-900 dark:text-white"
                         >
                           <Icon className="h-4 w-4" />
                           <span>{section.title}</span>
@@ -155,7 +154,7 @@ export default function PrivacyPage() {
 
             {/* Main Content */}
             <main className="flex-1 max-w-3xl">
-              <div className="bg-white/5 backdrop-blur-md rounded-2xl shadow-sm border border-white/10 p-8 sm:p-12">
+              <div className="bg-dark-100/80 dark:bg-dark-800/70 backdrop-blur-md rounded-2xl shadow-sm border border-dark-200/60 dark:border-dark-800 p-8 sm:p-12">
                 {/* Introduction */}
                 <section id="intro" className="mb-12 scroll-mt-20">
                   <div className="flex items-start gap-4 mb-6">
@@ -163,11 +162,11 @@ export default function PrivacyPage() {
                       <Shield className="h-6 w-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">Pendahuluan</h2>
-                      <p className="text-gray-400 text-sm mt-1">Komitmen kami terhadap privasi Anda</p>
+                      <h2 className="text-2xl font-bold text-dark-900 dark:text-white">Pendahuluan</h2>
+                      <p className="text-faint text-sm mt-1">Komitmen kami terhadap privasi Anda</p>
                     </div>
                   </div>
-                  <div className="prose prose-invert max-w-none text-gray-300 leading-relaxed space-y-4">
+                  <div className="prose prose-invert max-w-none text-muted leading-relaxed space-y-4">
                     <p>
                       Selamat datang di Kalivergo. Kami menghargai kepercayaan Anda dan berkomitmen untuk melindungi privasi data pribadi Anda. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi Anda saat menggunakan platform kami.
                     </p>
@@ -186,11 +185,11 @@ export default function PrivacyPage() {
                       <Database className="h-6 w-6 text-blue-400" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">Data yang Kami Kumpulkan</h2>
-                      <p className="text-gray-400 text-sm mt-1">Informasi yang kami butuhkan untuk layanan</p>
+                      <h2 className="text-2xl font-bold text-dark-900 dark:text-white">Data yang Kami Kumpulkan</h2>
+                      <p className="text-faint text-sm mt-1">Informasi yang kami butuhkan untuk layanan</p>
                     </div>
                   </div>
-                  <div className="text-gray-300 leading-relaxed">
+                  <div className="text-muted leading-relaxed">
                     <p className="mb-4">Kami mengumpulkan informasi yang Anda berikan secara langsung:</p>
                     <div className="grid gap-3">
                       {[
@@ -200,11 +199,11 @@ export default function PrivacyPage() {
                         { label: "Foto Profil", desc: "Opsional, untuk personalisasi akun" },
                         { label: "Data Akademik", desc: "Informasi tugas dan aktivitas kelas" },
                       ].map((item, idx) => (
-                        <div key={idx} className="flex items-start gap-3 p-3 bg-white/5 rounded-lg border border-white/5">
+                        <div key={idx} className="flex items-start gap-3 p-3 bg-dark-100/80 dark:bg-dark-800/70 rounded-lg border border-dark-200/60 dark:border-dark-800">
                           <div className="w-2 h-2 bg-primary-400 rounded-full mt-2 flex-shrink-0" />
                           <div>
-                            <p className="font-medium text-white">{item.label}</p>
-                            <p className="text-sm text-gray-400">{item.desc}</p>
+                            <p className="font-medium text-dark-900 dark:text-white">{item.label}</p>
+                            <p className="text-sm text-faint">{item.desc}</p>
                           </div>
                         </div>
                       ))}
@@ -219,11 +218,11 @@ export default function PrivacyPage() {
                       <Eye className="h-6 w-6 text-purple-400" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">Bagaimana Kami Menggunakan Data</h2>
-                      <p className="text-gray-400 text-sm mt-1">Tujuan penggunaan informasi Anda</p>
+                      <h2 className="text-2xl font-bold text-dark-900 dark:text-white">Bagaimana Kami Menggunakan Data</h2>
+                      <p className="text-faint text-sm mt-1">Tujuan penggunaan informasi Anda</p>
                     </div>
                   </div>
-                  <div className="text-gray-300 leading-relaxed">
+                  <div className="text-muted leading-relaxed">
                     <p className="mb-4">Informasi Anda digunakan untuk:</p>
                     <ul className="space-y-3">
                       {[
@@ -251,11 +250,11 @@ export default function PrivacyPage() {
                       <Share2 className="h-6 w-6 text-orange-400" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">Berbagi Informasi</h2>
-                      <p className="text-gray-400 text-sm mt-1">Dengan siapa data Anda dibagikan</p>
+                      <h2 className="text-2xl font-bold text-dark-900 dark:text-white">Berbagi Informasi</h2>
+                      <p className="text-faint text-sm mt-1">Dengan siapa data Anda dibagikan</p>
                     </div>
                   </div>
-                  <div className="text-gray-300 leading-relaxed">
+                  <div className="text-muted leading-relaxed">
                     <div className="bg-red-500/10 border-l-4 border-red-500/50 p-4 rounded-r-lg mb-4">
                       <p className="text-red-200 font-medium">
                         Kami TIDAK menjual atau menyewakan data pribadi Anda kepada pihak ketiga.
@@ -286,11 +285,11 @@ export default function PrivacyPage() {
                       <Lock className="h-6 w-6 text-green-400" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">Keamanan Data</h2>
-                      <p className="text-gray-400 text-sm mt-1">Langkah perlindungan yang kami ambil</p>
+                      <h2 className="text-2xl font-bold text-dark-900 dark:text-white">Keamanan Data</h2>
+                      <p className="text-faint text-sm mt-1">Langkah perlindungan yang kami ambil</p>
                     </div>
                   </div>
-                  <div className="text-gray-300 leading-relaxed">
+                  <div className="text-muted leading-relaxed">
                     <p className="mb-4">
                       Kami menggunakan enkripsi dan langkah keamanan standar industri untuk melindungi data Anda:
                     </p>
@@ -301,9 +300,9 @@ export default function PrivacyPage() {
                         { title: "Autentikasi Credentials", desc: "Login via NIM & Password" },
                         { title: "Backup Berkala", desc: "Data selalu tersedia" },
                       ].map((item, idx) => (
-                        <div key={idx} className="p-4 bg-white/5 rounded-lg border border-white/5">
-                          <p className="font-medium text-white text-sm">{item.title}</p>
-                          <p className="text-xs text-gray-400 mt-1">{item.desc}</p>
+                        <div key={idx} className="p-4 bg-dark-100/80 dark:bg-dark-800/70 rounded-lg border border-dark-200/60 dark:border-dark-800">
+                          <p className="font-medium text-dark-900 dark:text-white text-sm">{item.title}</p>
+                          <p className="text-xs text-faint mt-1">{item.desc}</p>
                         </div>
                       ))}
                     </div>
@@ -317,23 +316,23 @@ export default function PrivacyPage() {
                       <Database className="h-6 w-6 text-indigo-400" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">Penyimpanan dan Penghapusan Data</h2>
-                      <p className="text-gray-400 text-sm mt-1">Berapa lama data disimpan</p>
+                      <h2 className="text-2xl font-bold text-dark-900 dark:text-white">Penyimpanan dan Penghapusan Data</h2>
+                      <p className="text-faint text-sm mt-1">Berapa lama data disimpan</p>
                     </div>
                   </div>
-                  <div className="text-gray-300 leading-relaxed">
+                  <div className="text-muted leading-relaxed">
                     <div className="space-y-4">
                       <div className="border-l-4 border-primary-500/50 pl-4">
-                        <h3 className="font-semibold text-white mb-2">Periode Penyimpanan</h3>
-                        <ul className="space-y-2 text-sm text-gray-300">
+                        <h3 className="font-semibold text-dark-900 dark:text-white mb-2">Periode Penyimpanan</h3>
+                        <ul className="space-y-2 text-sm text-muted">
                           <li>• Data akun disimpan selama Anda menjadi anggota aktif</li>
                           <li>• Data tugas dan aktivitas disimpan sesuai kebutuhan akademik</li>
                           <li>• Akun tidak aktif selama 12 bulan akan dihapus</li>
                         </ul>
                       </div>
                       <div className="border-l-4 border-accent-500/50 pl-4">
-                        <h3 className="font-semibold text-white mb-2">Penghapusan Data</h3>
-                        <ul className="space-y-2 text-sm text-gray-300">
+                        <h3 className="font-semibold text-dark-900 dark:text-white mb-2">Penghapusan Data</h3>
+                        <ul className="space-y-2 text-sm text-muted">
                           <li>• Anda dapat meminta penghapusan data kapan saja</li>
                           <li>• Permintaan diproses dalam 30 hari</li>
                           <li>• Hubungi kami untuk permintaan penghapusan</li>
@@ -350,11 +349,11 @@ export default function PrivacyPage() {
                       <Share2 className="h-6 w-6 text-cyan-400" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">Layanan Pihak Ketiga</h2>
-                      <p className="text-gray-400 text-sm mt-1">Layanan yang kami gunakan</p>
+                      <h2 className="text-2xl font-bold text-dark-900 dark:text-white">Layanan Pihak Ketiga</h2>
+                      <p className="text-faint text-sm mt-1">Layanan yang kami gunakan</p>
                     </div>
                   </div>
-                  <div className="text-gray-300 leading-relaxed">
+                  <div className="text-muted leading-relaxed">
                     <p className="mb-4">
                       Aplikasi ini menggunakan layanan berikut yang mungkin memproses data Anda:
                     </p>
@@ -364,10 +363,10 @@ export default function PrivacyPage() {
                         { name: "Neon/PostgreSQL", purpose: "Penyimpanan database" },
                         { name: "bcryptjs", purpose: "Enkripsi password" },
                       ].map((item, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/5">
+                        <div key={idx} className="flex items-center justify-between p-4 bg-dark-100/80 dark:bg-dark-800/70 rounded-lg border border-dark-200/60 dark:border-dark-800">
                           <div>
-                            <p className="font-medium text-white">{item.name}</p>
-                            <p className="text-sm text-gray-400">{item.purpose}</p>
+                            <p className="font-medium text-dark-900 dark:text-white">{item.name}</p>
+                            <p className="text-sm text-faint">{item.purpose}</p>
                           </div>
                           <div className="w-2 h-2 bg-green-400 rounded-full" />
                         </div>
@@ -383,11 +382,11 @@ export default function PrivacyPage() {
                       <Cookie className="h-6 w-6 text-yellow-400" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">Cookies dan Teknologi Serupa</h2>
-                      <p className="text-gray-400 text-sm mt-1">Teknologi yang kami gunakan</p>
+                      <h2 className="text-2xl font-bold text-dark-900 dark:text-white">Cookies dan Teknologi Serupa</h2>
+                      <p className="text-faint text-sm mt-1">Teknologi yang kami gunakan</p>
                     </div>
                   </div>
-                  <div className="text-gray-300 leading-relaxed">
+                  <div className="text-muted leading-relaxed">
                     <p className="mb-4">Aplikasi ini menggunakan cookies untuk:</p>
                     <ul className="space-y-3">
                       <li className="flex items-start gap-3">
@@ -409,7 +408,7 @@ export default function PrivacyPage() {
                         <span>Keamanan dan autentikasi</span>
                       </li>
                     </ul>
-                    <p className="mt-4 text-sm text-gray-400">
+                    <p className="mt-4 text-sm text-faint">
                       Anda dapat mengontrol cookies melalui pengaturan browser Anda.
                     </p>
                   </div>
@@ -422,11 +421,11 @@ export default function PrivacyPage() {
                       <UserCheck className="h-6 w-6 text-pink-400" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">Hak Anda</h2>
-                      <p className="text-gray-400 text-sm mt-1">Kontrol atas data Anda</p>
+                      <h2 className="text-2xl font-bold text-dark-900 dark:text-white">Hak Anda</h2>
+                      <p className="text-faint text-sm mt-1">Kontrol atas data Anda</p>
                     </div>
                   </div>
-                  <div className="text-gray-300 leading-relaxed">
+                  <div className="text-muted leading-relaxed">
                     <p className="mb-4">Anda berhak untuk:</p>
                     <div className="grid gap-3">
                       {[
@@ -435,13 +434,13 @@ export default function PrivacyPage() {
                         { title: "Hapus Akun", desc: "Menghapus akun dan data Anda" },
                         { title: "Export Data", desc: "Mendapatkan salinan data Anda" },
                       ].map((item, idx) => (
-                        <div key={idx} className="flex items-center gap-4 p-4 bg-white/5 rounded-lg border border-white/5">
+                        <div key={idx} className="flex items-center gap-4 p-4 bg-dark-100/80 dark:bg-dark-800/70 rounded-lg border border-dark-200/60 dark:border-dark-800">
                           <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
                             <span className="text-primary-400 font-bold">{idx + 1}</span>
                           </div>
                           <div>
-                            <p className="font-medium text-white">{item.title}</p>
-                            <p className="text-sm text-gray-400">{item.desc}</p>
+                            <p className="font-medium text-dark-900 dark:text-white">{item.title}</p>
+                            <p className="text-sm text-faint">{item.desc}</p>
                           </div>
                         </div>
                       ))}
@@ -456,22 +455,22 @@ export default function PrivacyPage() {
                       <Mail className="h-6 w-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">Kontak</h2>
-                      <p className="text-gray-400 text-sm mt-1">Hubungi kami</p>
+                      <h2 className="text-2xl font-bold text-dark-900 dark:text-white">Kontak</h2>
+                      <p className="text-faint text-sm mt-1">Hubungi kami</p>
                     </div>
                   </div>
-                  <div className="text-gray-300 leading-relaxed">
+                  <div className="text-muted leading-relaxed">
                     <p className="mb-4">
                       Untuk pertanyaan tentang kebijakan privasi ini atau permintaan terkait data Anda, hubungi kami di:
                     </p>
                     <a
                       href="mailto:jundulloh2109@gmail.com"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-dark-900 dark:text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
                     >
                       <Mail className="h-4 w-4" />
                       jundulloh2109@gmail.com
                     </a>
-                    <p className="text-sm text-gray-400 mt-4">
+                    <p className="text-sm text-faint mt-4">
                       Kami akan merespon permintaan Anda dalam waktu 30 hari.
                     </p>
                   </div>
@@ -485,7 +484,7 @@ export default function PrivacyPage() {
         {showBackToTop && (
           <button
             onClick={scrollToTop}
-            className="fixed bottom-6 right-6 p-3 bg-primary-600 text-white rounded-full shadow-lg hover:bg-primary-700 transition-all z-30"
+            className="fixed bottom-6 right-6 p-3 bg-primary-600 text-dark-900 dark:text-white rounded-full shadow-lg hover:bg-primary-700 transition-all z-30"
             aria-label="Kembali ke atas"
           >
             <ArrowUp className="h-5 w-5" />

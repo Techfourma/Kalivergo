@@ -6,7 +6,7 @@ import { resetPassword } from "@/actions/cms";
 import Image from "next/image";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-import WaveBackground from "@/components/ui/WaveBackground";
+import PageBackground from "@/components/ui/PageBackground";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -39,15 +39,12 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0a14] relative p-4">
-      {/* Wave Background */}
-      <WaveBackground />
-      
-      {/* Overlay */}
-      <div className="fixed inset-0 z-0 bg-gradient-to-b from-transparent via-[#0a0a14]/50 to-[#0a0a14] pointer-events-none" />
-      
+    <div className="min-h-screen flex items-center justify-center bg-dark-50 dark:bg-dark-950 relative p-4">
+      {/* Theme-aware background */}
+      <PageBackground />
+
       {/* Content */}
-      <div className="relative z-10 bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+      <div className="relative z-10 surface-card p-8 rounded-2xl shadow-2xl w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
@@ -62,10 +59,10 @@ export default function ForgotPasswordPage() {
               />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-dark-900 font-display">
+          <h1 className="text-2xl font-bold text-dark-900 dark:text-dark-100 font-display">
             Lupa Password
           </h1>
-          <p className="text-dark-500 mt-2">
+          <p className="text-dark-500 dark:text-dark-400 mt-2">
             Masukkan data untuk reset password akun Anda
           </p>
         </div>
@@ -87,7 +84,7 @@ export default function ForgotPasswordPage() {
         <form action={handleSubmit} className="space-y-4">
           {/* NIM */}
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
               NIM
             </label>
             <input
@@ -95,14 +92,14 @@ export default function ForgotPasswordPage() {
               name="nim"
               required
               disabled={isLoading || !!success}
-              className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+              className="field disabled:opacity-50"
               placeholder="Masukkan NIM Anda"
             />
           </div>
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
               Email (Gmail)
             </label>
             <input
@@ -110,14 +107,14 @@ export default function ForgotPasswordPage() {
               name="email"
               required
               disabled={isLoading || !!success}
-              className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+              className="field disabled:opacity-50"
               placeholder="nama@gmail.com"
             />
           </div>
 
           {/* New Password */}
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
               Password Baru
             </label>
             <div className="relative">
@@ -127,13 +124,13 @@ export default function ForgotPasswordPage() {
                 required
                 disabled={isLoading || !!success}
                 minLength={6}
-                className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 pr-10"
+                className="field disabled:opacity-50 pr-10"
                 placeholder="Minimal 6 karakter"
               />
               <button
                 type="button"
                 onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 hover:text-dark-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 hover:text-dark-600 dark:text-dark-400 dark:hover:text-dark-200"
                 tabIndex={-1}
               >
                 {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -143,7 +140,7 @@ export default function ForgotPasswordPage() {
 
           {/* Confirm Password */}
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
               Ulangi Password Baru
             </label>
             <div className="relative">
@@ -152,13 +149,13 @@ export default function ForgotPasswordPage() {
                 name="confirmPassword"
                 required
                 disabled={isLoading || !!success}
-                className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 pr-10"
+                className="field disabled:opacity-50 pr-10"
                 placeholder="Ulangi password baru"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 hover:text-dark-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 hover:text-dark-600 dark:text-dark-400 dark:hover:text-dark-200"
                 tabIndex={-1}
               >
                 {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

@@ -1,7 +1,7 @@
 import UpcomingSeminars from "@/features/seminar/components/UpcomingSeminar";
 import SeminarUnsubmittedList from "@/features/seminar/components/SeminarUnsubmittedList";
 import TenantNavbar from "@/components/layout/TenantNavbar";
-import WaveBackground from "@/components/ui/WaveBackground";
+import PageBackground from "@/components/ui/PageBackground";
 import { cookies } from "next/headers";
 import { requireTenantPageAccess, resolveTenantFromRoute } from "@/lib/tenant";
 import { loadCurrentUser } from "@/lib/user-session";
@@ -72,11 +72,9 @@ export default async function SeminarPage({ params }: SeminarPageProps) {
 
     return (
       <>
-        <WaveBackground />
+        <PageBackground />
 
-        <div className="fixed inset-0 z-0 bg-gradient-to-b from-transparent via-[#0a0a14]/50 to-[#0a0a14] pointer-events-none" />
-
-        <div className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a14]/80 backdrop-blur-md border-b border-white/10">
+        <div className="fixed top-0 left-0 right-0 z-50 nav-shell">
           <TenantNavbar user={currentUser} tenantPath={tenantPath} />
         </div>
 
@@ -85,11 +83,11 @@ export default async function SeminarPage({ params }: SeminarPageProps) {
 
             {/* Header */}
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-white font-display">
+              <h1 className="text-3xl font-bold text-dark-900 dark:text-white font-display">
                 Seminar
               </h1>
 
-              <p className="text-gray-300 mt-2">
+              <p className="text-muted mt-2">
                 Informasi seminar dan kegiatan yang tersedia untuk mahasiswa
               </p>
             </div>
@@ -111,7 +109,7 @@ export default async function SeminarPage({ params }: SeminarPageProps) {
     console.error("SeminarPage: DB error (non-fatal):", err);
 
     return (
-      <div className="text-white p-10">
+      <div className="text-dark-900 dark:text-white p-10">
         Terjadi kesalahan saat memuat data seminar.
       </div>
     );

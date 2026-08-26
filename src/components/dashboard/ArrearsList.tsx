@@ -120,7 +120,7 @@ export default function ArrearsList({ members, hasUangKasSettings = true }: Arre
                       </span>
                     ))}
                     {member.unpaidDates.length > 3 && (
-                      <span className="rounded-md bg-dark-700 px-2 py-0.5 text-[10px] font-medium text-dark-300">
+                      <span className="rounded-md bg-dark-700 px-2 py-0.5 text-[10px] font-medium text-dark-300 dark:text-dark-200">
                         +{member.unpaidDates.length - 3} lainnya
                       </span>
                     )}
@@ -190,7 +190,7 @@ export default function ArrearsList({ members, hasUangKasSettings = true }: Arre
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {schedules.length === 0 ? (
             <div className="col-span-full text-center py-12 text-dark-400">
-              <CalendarDays className="h-12 w-12 mx-auto mb-3 text-dark-300" />
+              <CalendarDays className="h-12 w-12 mx-auto mb-3 text-dark-300 dark:text-dark-200" />
               <p className="font-medium">Belum ada jadwal uang kas.</p>
             </div>
           ) : (
@@ -275,7 +275,7 @@ export default function ArrearsList({ members, hasUangKasSettings = true }: Arre
   return (
     <Card padding="lg">
       <div className="py-12 text-center text-dark-400">
-        <AlertCircle className="h-12 w-12 mx-auto mb-3 text-dark-300" />
+        <AlertCircle className="h-12 w-12 mx-auto mb-3 text-dark-300 dark:text-dark-200" />
         <p className="font-medium">Anggota tidak ditemukan.</p>
       </div>
     </Card>
