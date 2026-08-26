@@ -1,4 +1,5 @@
 import { getAuditLogs } from '@/actions/cms';
+import AuditLogTable from '@/components/cms/AuditLogTable';
 import { resolveTenantFromRoute } from '@/lib/tenant';
 
 export const dynamic = 'force-dynamic';
@@ -8,12 +9,26 @@ export default async function AuditPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: { module?: string; startDate?: string; endDate?: string };
+  searchParams: Promise<{ module?: string; startDate?: string; endDate?: string }>;
 }) {
   const routeParams = await params;
-  const module = searchParams.module || 'ALL';
-  const startDate = searchParams.startDate ? new Date(searchParams.startDate) : undefined;
-  const endDate = searchParams.endDate ? new Date(searchParams.endDate) : undefined;
+  const filters = await searchParams;
+  const module = filters.module || 'ALL';
+  const today = new Date();
+  const defaultStartDate = new Date(today);
+  defaultStartDate.setDate(today.getDate() - 3);
+  defaultStartDate.setHours(0, 0, 0, 0);
+  const startDate = filters.startDate
+    ? new Date(filters.startDate)
+    : defaultStartDate;
+  const endDate = filters.endDate ? new Date(filters.endDate) : today;
+
+  const formatDateInput = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   const tenantContext = await resolveTenantFromRoute(routeParams);
   const tenantId = tenantContext?.tenantId;
@@ -31,6 +46,7 @@ export default async function AuditPage({
     { value: 'PEOPLE', label: 'People Management' },
     { value: 'SCHEDULE', label: 'Schedule' },
     { value: 'SEMINAR', label: 'Seminar' },
+    { value: 'ACCESS', label: 'Access Control' },
   ];
 
   return (
@@ -46,7 +62,7 @@ export default async function AuditPage({
 
       <div className="bg-white rounded-xl shadow-sm border border-dark-100 p-6">
         <h2 className="text-lg font-semibold mb-4">Filter Audit Log</h2>
-        <form className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form method="get" className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-dark-700 mb-2">
               Module
@@ -71,7 +87,7 @@ export default async function AuditPage({
             <input
               type="date"
               name="startDate"
-              defaultValue={searchParams.startDate}
+              defaultValue={formatDateInput(startDate)}
               className="w-full px-4 py-2 border border-dark-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
           </div>
@@ -83,7 +99,7 @@ export default async function AuditPage({
             <input
               type="date"
               name="endDate"
-              defaultValue={searchParams.endDate}
+              defaultValue={formatDateInput(endDate)}
               className="w-full px-4 py-2 border border-dark-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
           </div>
@@ -99,6 +115,7 @@ export default async function AuditPage({
         </form>
       </div>
 
+      <AuditLogTable logs={logs} />
     </div>
   );
 }

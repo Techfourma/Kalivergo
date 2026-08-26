@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireOwner, resolveTenantId } from "./role-model";
 import { CmsAccessService } from "@/features/cms/services/cms-access.service";
 import { CmsRole } from "@prisma/client";
+import { createAuditLog } from "./audit";
 
 const cmsAccessService = new CmsAccessService();
 
@@ -32,6 +33,14 @@ export async function updateCmsAccessAction(
         update.modules
       );
     }
+
+    await createAuditLog(
+      "ACCESS",
+      "UPDATE",
+      "Memperbarui pengaturan akses CMS",
+      undefined,
+      { updates, tenantId }
+    );
 
     revalidatePath("/cms/access");
     return { success: true };
