@@ -65,76 +65,76 @@ export default async function CMSOverviewPage({
           <Shield className="h-7 w-7" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             CMS Dashboard
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Content Management System.
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 dark:bg-dark-900 dark:border-dark-800">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400">
               <ClipboardList className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-500">Total Tugas</p>
-              <p className="text-2xl font-bold text-gray-900">{tasksCount}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Total Tugas</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{tasksCount}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 dark:bg-dark-900 dark:border-dark-800">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-600 dark:bg-green-500/15 dark:text-green-400">
               <Wallet className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-500">Saldo Kas</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(balance)}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Saldo Kas</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(balance)}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 dark:bg-dark-900 dark:border-dark-800">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-500/15 dark:text-purple-400">
               <GraduationCap className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-500">Seminar Aktif</p>
-              <p className="text-2xl font-bold text-gray-900">{seminarsCount}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Seminar Aktif</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{seminarsCount}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 dark:bg-dark-900 dark:border-dark-800">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400">
               <Users className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-500">Anggota</p>
-              <p className="text-2xl font-bold text-gray-900">{membersCount}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Anggota</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{membersCount}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 dark:bg-dark-900 dark:border-dark-800">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400">
               <FileText className="h-6 w-6" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Input Tugas
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Tambah tugas baru untuk kelas
               </p>
             </div>
@@ -149,17 +149,17 @@ export default async function CMSOverviewPage({
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 dark:bg-dark-900 dark:border-dark-800">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 text-green-600">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 text-green-600 dark:bg-green-500/15 dark:text-green-400">
               <TrendingUp className="h-6 w-6" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Input Transaksi
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Tambah pemasukan atau pengeluaran
               </p>
             </div>

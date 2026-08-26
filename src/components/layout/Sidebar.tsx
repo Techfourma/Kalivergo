@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import {
   ClipboardList,
   Wallet,
@@ -102,7 +103,7 @@ export default function Sidebar({ variant, userRole, tenantPath }: SidebarProps)
   const sidebarTitle = isCms ? "CMS Menu" : "Navigation";
 
   if (!isMounted) {
-    return <aside className="w-64 border-r border-dark-200 bg-white" />;
+    return <aside className="w-64 border-r border-dark-200 bg-white dark:border-dark-800 dark:bg-dark-950" />;
   }
 
   return (
@@ -110,16 +111,16 @@ export default function Sidebar({ variant, userRole, tenantPath }: SidebarProps)
       {isCollapsed && (
         <button
           onClick={toggleSidebar}
-          className="fixed left-0 top-0 z-40 p-2 bg-white border border-dark-200 rounded-lg shadow-lg hover:bg-dark-50 transition-colors"
+          className="fixed left-0 top-0 z-40 p-2 bg-white border border-dark-200 rounded-lg shadow-lg hover:bg-dark-50 transition-colors dark:bg-dark-950 dark:border-dark-800 dark:hover:bg-dark-900"
           title="Open Menu"
         >
-          <Menu className="h-5 w-5 text-dark-600" />
+          <Menu className="h-5 w-5 text-dark-600 dark:text-dark-300" />
         </button>
       )}
 
       <aside
         className={cn(
-          "shrink-0 bg-white border-r border-dark-200 min-h-screen transition-all duration-300 ease-in-out max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-40",
+          "shrink-0 bg-white border-r border-dark-200 min-h-screen transition-all duration-300 ease-in-out max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-40 dark:bg-dark-950 dark:border-dark-800",
           isCollapsed ? "w-0" : "w-64"
         )}
       >
@@ -129,13 +130,16 @@ export default function Sidebar({ variant, userRole, tenantPath }: SidebarProps)
               <p className="text-xs font-semibold uppercase tracking-wider text-dark-400">
                 {sidebarTitle}
               </p>
-              <button
-                onClick={toggleSidebar}
-                className="p-1.5 hover:bg-dark-100 rounded-lg transition-colors"
-                title="Close Menu"
-              >
-                <X className="h-4 w-4 text-dark-500" />
-              </button>
+              <div className="flex items-center gap-2">
+                <ThemeToggle className="h-8 w-8" />
+                <button
+                  onClick={toggleSidebar}
+                  className="p-1.5 hover:bg-dark-100 rounded-lg transition-colors dark:hover:bg-dark-800"
+                  title="Close Menu"
+                >
+                  <X className="h-4 w-4 text-dark-500 dark:text-dark-300" />
+                </button>
+              </div>
             </div>
             <div className="space-y-1">
               {navItems.map((item) => {
@@ -152,14 +156,14 @@ export default function Sidebar({ variant, userRole, tenantPath }: SidebarProps)
                     className={cn(
                       "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                       isActive
-                        ? "bg-primary-50 text-primary-700 shadow-sm"
-                        : "text-dark-600 hover:bg-dark-100 hover:text-dark-900"
+                        ? "bg-primary-50 text-primary-700 shadow-sm dark:bg-primary-500/15 dark:text-primary-300"
+                        : "text-dark-600 hover:bg-dark-100 hover:text-dark-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-dark-100"
                     )}
                   >
                     <Icon
                       className={cn(
                         "h-5 w-5",
-                        isActive ? "text-primary-600" : "text-dark-400"
+                        isActive ? "text-primary-600 dark:text-primary-400" : "text-dark-400 dark:text-dark-500"
                       )}
                     />
                     {item.label}
