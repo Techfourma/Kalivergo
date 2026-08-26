@@ -74,7 +74,7 @@ export default async function TenantCmsLayout({
       <CacheGuard redirectTo="/unauthorized" />
       <Sidebar
         variant="cms"
-        userRole={membership.role}
+        userRole={membership.cmsRole ?? membership.role}
         tenantPath={tenantPath}
         cmsModules={cmsModules}
       />

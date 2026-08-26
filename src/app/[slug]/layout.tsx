@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { getCurrentSessionUser } from "@/server/auth/session";
 import NavbarGate from "@/components/layout/NavbarGate";
@@ -43,15 +44,10 @@ export default async function SlugLayout({
     const { requireTenantMembership } = await import("@/lib/tenant/require-tenant-access");
     try {
       await requireTenantMembership(session.id, tenant.id);
-      user = {
-        name: session.name,
-        email: session.email,
-        image: session.image,
-        role: session.role,
-        cmsRole: session.cmsRole,
-        canAccessCms: session.canAccessCms,
-        isVerified: session.isVerified,
-      };
+      const { loadCurrentUser } = await import("@/lib/user-session");
+      const cookieStore = await cookies();
+      user =
+        (await loadCurrentUser(cookieStore.get("kalivergo_user")?.value, tenant.id)) ?? null;
     } catch {
     }
   }
