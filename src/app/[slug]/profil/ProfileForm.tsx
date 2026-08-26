@@ -328,7 +328,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         </div>
       )}
 
-      <Card padding="lg" className="bg-white/5 border-white/10">
+      <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
         <div className="flex flex-col items-center space-y-4">
           <div className="relative group">
             <div
@@ -336,15 +336,15 @@ export default function ProfileForm({ user }: ProfileFormProps) {
               onClick={handleImageClick}
             >
               {isLoading ? (
-                <Loader2 className="w-16 h-16 text-white animate-spin" />
+                <Loader2 className="w-16 h-16 text-dark-900 dark:text-white animate-spin" />
               ) : previewImage ? (
                 <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
               ) : (
-                <User className="w-16 h-16 text-white" />
+                <User className="w-16 h-16 text-dark-900 dark:text-white" />
               )}
               {!isLoading && (
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-full">
-                  <Upload className="w-8 h-8 text-white" />
+                  <Upload className="w-8 h-8 text-dark-900 dark:text-white" />
                 </div>
               )}
             </div>
@@ -369,8 +369,8 @@ export default function ProfileForm({ user }: ProfileFormProps) {
           />
 
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-white">{user.name}</h3>
-            <p className="text-gray-400 text-sm">{getRoleDisplay(user.role || "MEMBER")}</p>
+            <h3 className="text-lg font-semibold text-dark-900 dark:text-white">{user.name}</h3>
+            <p className="text-faint text-sm">{getRoleDisplay(user.role || "MEMBER")}</p>
             <button
               type="button"
               onClick={handleImageClick}
@@ -383,45 +383,45 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         </div>
       </Card>
 
-      <Card padding="lg" className="bg-white/5 border-white/10">
+      <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Nama Lengkap</label>
-            <div className="px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-white">{user.name || "-"}</div>
+            <label className="block text-sm font-medium text-muted mb-2">Nama Lengkap</label>
+            <div className="px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-dark-900 dark:text-white">{user.name || "-"}</div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Title / Jabatan</label>
-            <div className="px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-white">{getRoleDisplay(user.role || "MEMBER")}</div>
+            <label className="block text-sm font-medium text-muted mb-2">Title / Jabatan</label>
+            <div className="px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-dark-900 dark:text-white">{getRoleDisplay(user.role || "MEMBER")}</div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">NIM</label>
-            <div className="px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-white">{user.nim || "-"}</div>
+            <label className="block text-sm font-medium text-muted mb-2">NIM</label>
+            <div className="px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-dark-900 dark:text-white">{user.nim || "-"}</div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
-            <div className="px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-white">{user.email || "-"}</div>
+            <label className="block text-sm font-medium text-muted mb-2">Email</label>
+            <div className="px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-dark-900 dark:text-white">{user.email || "-"}</div>
           </div>
         </div>
       </Card>
 
-      <Card padding="lg" className="bg-white/5 border-white/10">
-        <label htmlFor="bio" className="block text-sm font-medium text-gray-300 mb-2">Tentang Saya</label>
+      <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+        <label htmlFor="bio" className="block text-sm font-medium text-muted mb-2">Tentang Saya</label>
         <textarea
           id="bio"
           name="bio"
           rows={4}
           value={formData.bio}
           onChange={handleInputChange}
-          className="w-full rounded-xl border border-dark-600 bg-[#111827] px-4 py-3 text-white resize-none focus:outline-none focus:border-primary-500"
+          className="w-full rounded-xl border border-dark-600 bg-white dark:bg-dark-800 px-4 py-3 text-dark-900 dark:text-white resize-none focus:outline-none focus:border-primary-500"
           placeholder="Ceritakan tentang diri Anda..."
         />
       </Card>
 
-      <Card padding="lg" className="bg-white/5 border-white/10">
+      <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-xl font-bold text-white">Pengalaman Kerja</h2>
-            <p className="text-sm text-gray-400">Tambahkan pengalaman dalam format terstruktur.</p>
+            <h2 className="text-xl font-bold text-dark-900 dark:text-white">Pengalaman Kerja</h2>
+            <p className="text-sm text-faint">Tambahkan pengalaman dalam format terstruktur.</p>
           </div>
           <Button type="button" variant="secondary" onClick={addExperience} disabled={isLoading}>
             + Tambah Pengalaman
@@ -436,14 +436,14 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                   value={exp.position}
                   onChange={(e) => handleExperienceChange(exp.id, "position", e.target.value)}
                   placeholder="Posisi"
-                  className="w-full rounded-xl border border-dark-600 bg-[#111827] px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full rounded-xl border border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 <input
                   type="text"
                   value={exp.company}
                   onChange={(e) => handleExperienceChange(exp.id, "company", e.target.value)}
                   placeholder="Perusahaan"
-                  className="w-full rounded-xl border border-dark-600 bg-[#111827] px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full rounded-xl border border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
               <div className="grid gap-3 md:grid-cols-2 mb-3">
@@ -451,13 +451,13 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                   type="month"
                   value={exp.startDate}
                   onChange={(e) => handleExperienceChange(exp.id, "startDate", e.target.value)}
-                  className="w-full rounded-xl border border-dark-600 bg-[#111827] px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full rounded-xl border border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 <input
                   type="month"
                   value={exp.endDate}
                   onChange={(e) => handleExperienceChange(exp.id, "endDate", e.target.value)}
-                  className="w-full rounded-xl border border-dark-600 bg-[#111827] px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full rounded-xl border border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
               <textarea
@@ -465,7 +465,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                 onChange={(e) => handleExperienceChange(exp.id, "description", e.target.value)}
                 rows={3}
                 placeholder="Deskripsi pengalaman"
-                className="w-full rounded-xl border border-dark-600 bg-[#111827] px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                className="w-full rounded-xl border border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
               />
               <button
                 type="button"
@@ -479,8 +479,8 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         </div>
       </Card>
 
-      <Card padding="lg" className="bg-white/5 border-white/10">
-        <h2 className="text-xl font-bold text-white mb-4">Keahlian</h2>
+      <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+        <h2 className="text-xl font-bold text-dark-900 dark:text-white mb-4">Keahlian</h2>
         <div className="flex flex-wrap gap-2 mb-4">
           {formData.skills.map((skill) => (
             <span
@@ -504,7 +504,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
             value={newSkill}
             onChange={(e) => setNewSkill(e.target.value)}
             placeholder="Tambah keahlian baru"
-            className="flex-grow rounded-l-xl border border-dark-600 bg-[#111827] px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="flex-grow rounded-l-xl border border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
           <button
             type="button"
@@ -516,47 +516,47 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         </div>
       </Card>
 
-      <Card padding="lg" className="bg-white/5 border-white/10">
-        <h2 className="text-xl font-bold text-white mb-4">Tautan Sosial</h2>
+      <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+        <h2 className="text-xl font-bold text-dark-900 dark:text-white mb-4">Tautan Sosial</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm text-gray-300 mb-2">Instagram</label>
+            <label className="block text-sm text-muted mb-2">Instagram</label>
             <input
               type="text"
               value={formData.socialLinks.instagram || ""}
               onChange={(e) => handleSocialChange("instagram", e.target.value)}
               placeholder="@username atau link"
-              className="w-full rounded-xl border border-dark-600 bg-[#111827] px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-xl border border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-300 mb-2">GitHub</label>
+            <label className="block text-sm text-muted mb-2">GitHub</label>
             <input
               type="text"
               value={formData.socialLinks.github || ""}
               onChange={(e) => handleSocialChange("github", e.target.value)}
               placeholder="github.com/username"
-              className="w-full rounded-xl border border-dark-600 bg-[#111827] px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-xl border border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-300 mb-2">LinkedIn</label>
+            <label className="block text-sm text-muted mb-2">LinkedIn</label>
             <input
               type="text"
               value={formData.socialLinks.linkedin || ""}
               onChange={(e) => handleSocialChange("linkedin", e.target.value)}
               placeholder="linkedin.com/in/username"
-              className="w-full rounded-xl border border-dark-600 bg-[#111827] px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-xl border border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-300 mb-2">Website</label>
+            <label className="block text-sm text-muted mb-2">Website</label>
             <input
               type="text"
               value={formData.socialLinks.website || ""}
               onChange={(e) => handleSocialChange("website", e.target.value)}
               placeholder="https://example.com"
-              className="w-full rounded-xl border border-dark-600 bg-[#111827] px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-xl border border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
         </div>

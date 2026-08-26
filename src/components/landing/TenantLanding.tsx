@@ -15,7 +15,7 @@ import {
   FileText,
 } from "lucide-react";
 import Image from "next/image";
-import WaveBackground from "@/components/ui/WaveBackground";
+import PageBackground from "@/components/ui/PageBackground";
 import {
   type OrgMember,
   convertUserToOrgMember,
@@ -198,15 +198,14 @@ export default function TenantLanding({
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0a0a14] relative overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-dark-50 dark:bg-dark-950 relative overflow-hidden">
       <Loading
         isVisible={isLoading}
         message="Sedang memuat halaman"
         subMessage="Silakan tunggu sebentar..."
       />
       {}
-      <WaveBackground />
-      <div className="fixed inset-0 z-[1] bg-gradient-to-b from-transparent via-[#0a0a14]/50 to-[#0a0a14] pointer-events-none" />
+      <PageBackground />
 
       {}
       <div className="relative z-10 flex flex-col min-h-screen">
@@ -251,7 +250,7 @@ function Navbar({
   onLoginClick?: () => void;
 }) {
   return (
-    <nav className="border-b border-white/10 backdrop-blur-md sticky top-0 z-50 bg-[#0a0a14]/80">
+    <nav className="border-b border-dark-200/60 dark:border-dark-800 backdrop-blur-md sticky top-0 z-50 bg-dark-50 dark:bg-dark-950/80">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           <button
@@ -268,7 +267,7 @@ function Navbar({
                 priority
               />
             </div>
-            <span className="text-xl font-bold font-display text-white">
+            <span className="text-xl font-bold font-display text-dark-900 dark:text-white">
               Kalivergo
             </span>
           </button>
@@ -276,7 +275,7 @@ function Navbar({
           <div className="flex items-center gap-3">
             <button
               onClick={onLoginClick ?? (() => router.push("/login"))}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 px-4 py-2 text-sm font-medium text-white hover:shadow-lg hover:shadow-primary-500/30 transition-all"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 px-4 py-2 text-sm font-medium text-dark-900 dark:text-white hover:shadow-lg hover:shadow-primary-500/30 transition-all"
             >
               <UserPlus className="h-4 w-4" />
               Login
@@ -301,19 +300,19 @@ function HeroSection({
 }) {
   return (
     <div className="text-center max-w-3xl mx-auto">
-      <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-1.5 text-sm font-medium mb-8">
+      <div className="inline-flex items-center gap-2 rounded-full bg-dark-100/80 dark:bg-dark-800/70 backdrop-blur-sm border border-dark-300 dark:border-dark-700 px-4 py-1.5 text-sm font-medium mb-8">
         <Sparkles className="h-4 w-4 text-primary-400" />
-        <span className="text-white">Class Management System</span>
+        <span className="text-dark-900 dark:text-white">Class Management System</span>
       </div>
 
-      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display tracking-tight text-white">
+      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display tracking-tight text-dark-900 dark:text-white">
         Welcome to{" "}
         <span className="bg-gradient-to-r from-primary-400 via-accent-400 to-primary-400 bg-clip-text text-transparent animate-gradient">
           Kalivergo
         </span>
       </h1>
 
-      <p className="mt-6 text-lg text-gray-300 leading-relaxed">
+      <p className="mt-6 text-lg text-muted leading-relaxed">
         Platform terpadu untuk manajemen kelas{" "}
         {tenantLabel ?? " Universitas Pamulang"}.
         Tracking tugas, kelola keuangan, dan pantau kegiatan seminar dalam satu
@@ -330,7 +329,7 @@ function HeroSection({
         </button>
         <button
           onClick={() => navigateWithLoading(tenantPath ? `${tenantPath}/project` : "/project")}
-          className="flex items-center gap-2 rounded-xl border-2 border-white/30 bg-white/5 backdrop-blur-sm px-8 py-3.5 text-base font-semibold text-white hover:bg-white/10 hover:border-white/50 hover:scale-105 transition-all"
+          className="flex items-center gap-2 rounded-xl border-2 border-white/30 bg-dark-100/80 dark:bg-dark-800/70 backdrop-blur-sm px-8 py-3.5 text-base font-semibold text-dark-900 dark:text-white hover:bg-dark-100/80 dark:bg-dark-800/70 hover:border-dark-200/60 dark:border-dark-8000 hover:scale-105 transition-all"
         >
           Lihat Project
         </button>
@@ -350,13 +349,13 @@ function StatsSection({ memberCount }: { memberCount: number }) {
         return (
           <div
             key={stat.label}
-            className="rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-6 text-center hover:bg-white/10 transition-all hover:scale-105"
+            className="rounded-2xl bg-dark-100/80 dark:bg-dark-800/70 backdrop-blur-md border border-dark-200/60 dark:border-dark-800 p-6 text-center hover:bg-dark-100/80 dark:bg-dark-800/70 transition-all hover:scale-105"
           >
             <Icon className="h-6 w-6 mx-auto mb-2 text-primary-400" />
-            <p className="text-3xl font-bold font-display text-white">
+            <p className="text-3xl font-bold font-display text-dark-900 dark:text-white">
               {value}
             </p>
-            <p className="text-sm text-gray-400 mt-1">{stat.label}</p>
+            <p className="text-sm text-faint mt-1">{stat.label}</p>
           </div>
         );
       })}
@@ -367,14 +366,14 @@ function StatsSection({ memberCount }: { memberCount: number }) {
 function AboutSection({ tenantLabel }: { tenantLabel?: string }) {
   return (
     <div className="mt-24 max-w-4xl mx-auto">
-      <h2 className="text-3xl font-bold text-white mb-8 text-center">
+      <h2 className="text-3xl font-bold text-dark-900 dark:text-white mb-8 text-center">
         Tentang {tenantLabel ? tenantLabel.split(" ")[0] : "kalivergo"}
       </h2>
 
-      <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all">
-        <div className="space-y-6 text-gray-300">
+      <div className="bg-dark-100/80 dark:bg-dark-800/70 backdrop-blur-md border border-dark-200/60 dark:border-dark-800 rounded-2xl p-8 hover:bg-dark-100/80 dark:bg-dark-800/70 transition-all">
+        <div className="space-y-6 text-muted">
           <div>
-            <h3 className="text-xl font-semibold text-white mb-3">
+            <h3 className="text-xl font-semibold text-dark-900 dark:text-white mb-3">
               Platform Manajemen Kelas Terpadu
             </h3>
             <p className="leading-relaxed">
@@ -386,7 +385,7 @@ function AboutSection({ tenantLabel }: { tenantLabel?: string }) {
           </div>
 
           <div>
-            <h3 className="text-xl font-semibold text-white mb-4">
+            <h3 className="text-xl font-semibold text-dark-900 dark:text-white mb-4">
               Fitur Utama
             </h3>
             <div className="grid sm:grid-cols-2 gap-4">
@@ -395,16 +394,16 @@ function AboutSection({ tenantLabel }: { tenantLabel?: string }) {
                 return (
                   <div
                     key={feature.title}
-                    className={`flex items-start gap-3 p-4 bg-white/5 rounded-xl border border-white/5 ${feature.hoverColor} transition-all`}
+                    className={`flex items-start gap-3 p-4 bg-dark-100/80 dark:bg-dark-800/70 rounded-xl border border-dark-200/60 dark:border-dark-800 ${feature.hoverColor} transition-all`}
                   >
                     <Icon
                       className={`h-6 w-6 ${feature.iconColor} flex-shrink-0 mt-1`}
                     />
                     <div>
-                      <h4 className="font-semibold text-white mb-1">
+                      <h4 className="font-semibold text-dark-900 dark:text-white mb-1">
                         {feature.title}
                       </h4>
-                      <p className="text-sm text-gray-400">
+                      <p className="text-sm text-faint">
                         {feature.description}
                       </p>
                     </div>
@@ -415,7 +414,7 @@ function AboutSection({ tenantLabel }: { tenantLabel?: string }) {
           </div>
 
           <div>
-            <h3 className="text-xl font-semibold text-white mb-3">
+            <h3 className="text-xl font-semibold text-dark-900 dark:text-white mb-3">
               Untuk Siapa Platform Ini?
             </h3>
             <p className="leading-relaxed">
@@ -427,7 +426,7 @@ function AboutSection({ tenantLabel }: { tenantLabel?: string }) {
           </div>
 
           <div>
-            <h3 className="text-xl font-semibold text-white mb-3">Teknologi</h3>
+            <h3 className="text-xl font-semibold text-dark-900 dark:text-white mb-3">Teknologi</h3>
             <p className="leading-relaxed">
               Platform ini dibangun menggunakan teknologi modern seperti Next.js
               untuk frontend, PostgreSQL untuk database, dan verifikasi data mahasiswa yang aman.
@@ -442,21 +441,21 @@ function AboutSection({ tenantLabel }: { tenantLabel?: string }) {
 
 function Footer({ router }: { router: ReturnType<typeof useRouter> }) {
   return (
-    <footer className="border-t border-white/10 py-8 bg-[#0a0a14]/90 backdrop-blur-md">
+    <footer className="border-t border-dark-200/60 dark:border-dark-800 py-8 bg-dark-50 dark:bg-dark-950/90 backdrop-blur-md">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="text-center md:text-left">
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-faint">
               Kalivergo © {new Date().getFullYear()} - Class Management System
             </p>
           </div>
           <div className="flex items-center gap-6">
             {FOOTER_LINKS.map((link, index) => (
               <div key={link.href} className="flex items-center gap-6">
-                {index > 0 && <span className="text-gray-600">•</span>}
+                {index > 0 && <span className="text-faint">•</span>}
                 <button
                   onClick={() => router.push(link.href)}
-                  className="text-sm text-gray-400 hover:text-white transition-colors"
+                  className="text-sm text-faint hover:text-dark-900 dark:text-white transition-colors"
                 >
                   {link.label}
                 </button>
@@ -529,16 +528,16 @@ function OrganizationSection({
           )
         }
         className={cn(
-          "group relative rounded-2xl border border-white/10 p-6 text-center",
-          "bg-white/5 backdrop-blur-md",
-          "hover:bg-white/10 transition-all duration-300 hover:scale-105 hover:-translate-y-1",
+          "group relative rounded-2xl border border-dark-200/60 dark:border-dark-800 p-6 text-center",
+          "bg-dark-100/80 dark:bg-dark-800/70 backdrop-blur-md",
+          "hover:bg-dark-100/80 dark:bg-dark-800/70 transition-all duration-300 hover:scale-105 hover:-translate-y-1",
           "block no-underline w-full cursor-pointer",
         )}
       >
         <div className="relative mb-4">
           <div
             className={cn(
-              "mx-auto rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold shadow-lg",
+              "mx-auto rounded-full bg-gradient-to-br flex items-center justify-center text-dark-900 dark:text-white font-bold shadow-lg",
               "relative z-10 overflow-hidden",
               isLarge ? "h-24 w-24 text-3xl" : "h-20 w-20 text-2xl",
               config.color,
@@ -562,7 +561,7 @@ function OrganizationSection({
 
         <h3
           className={cn(
-            "font-bold text-white mt-3",
+            "font-bold text-dark-900 dark:text-white mt-3",
             isLarge ? "text-xl" : "text-lg",
           )}
         >
@@ -571,7 +570,7 @@ function OrganizationSection({
 
         <div className="flex items-center justify-center gap-1.5 mt-2">
           <Icon className="h-4 w-4 text-primary-400" />
-          <span className="font-medium text-sm text-gray-300">
+          <span className="font-medium text-sm text-muted">
             {config.label}
           </span>
         </div>
@@ -612,17 +611,17 @@ function OrganizationSection({
             <Crown className="h-6 w-6" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-dark-900 dark:text-white">
               Struktur Organisasi
             </h2>
-            <p className="text-sm text-gray-400"> Universitas Pamulang.</p>
+            <p className="text-sm text-faint"> Universitas Pamulang.</p>
           </div>
         </div>
 
         {isMembersLoading ? (
-          <div className="text-center text-gray-400 py-8">Memuat data anggota...</div>
+          <div className="text-center text-faint py-8">Memuat data anggota...</div>
         ) : leadership.length === 0 ? (
-          <div className="text-center text-gray-400 py-12 rounded-2xl border border-dashed border-white/10 bg-white/5">
+          <div className="text-center text-faint py-12 rounded-2xl border border-dashed border-dark-200/60 dark:border-dark-800 bg-dark-100/80 dark:bg-dark-800/70">
             Belum ada data pengurus.
           </div>
         ) : (
@@ -656,17 +655,17 @@ function OrganizationSection({
             <Users className="h-6 w-6" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-white">Anggota Kelas</h2>
-            <p className="text-sm text-gray-400">
+            <h2 className="text-2xl font-bold text-dark-900 dark:text-white">Anggota Kelas</h2>
+            <p className="text-sm text-faint">
               {regularMembers.length} anggota aktif
             </p>
           </div>
         </div>
 
         {isMembersLoading ? (
-          <div className="text-center text-gray-400 py-8">Memuat data anggota...</div>
+          <div className="text-center text-faint py-8">Memuat data anggota...</div>
         ) : regularMembers.length === 0 ? (
-          <div className="text-center text-gray-400 py-12 rounded-2xl border border-dashed border-white/10 bg-white/5">
+          <div className="text-center text-faint py-12 rounded-2xl border border-dashed border-dark-200/60 dark:border-dark-800 bg-dark-100/80 dark:bg-dark-800/70">
             Belum ada anggota yang terdaftar.
           </div>
         ) : (
@@ -685,10 +684,10 @@ function OrganizationSection({
                   type="button"
                   onClick={goToPrev}
                   aria-label="Slide sebelumnya"
-                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all"
+                  className="p-2 rounded-full bg-dark-100/80 dark:bg-dark-800/70 hover:bg-dark-200/80 dark:bg-dark-700/80 transition-all"
                 >
                   <svg
-                    className="w-6 h-6 text-white"
+                    className="w-6 h-6 text-dark-900 dark:text-white"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -713,7 +712,7 @@ function OrganizationSection({
                         "w-3 h-3 rounded-full transition-all",
                         idx === currentSlide
                           ? "bg-primary-400 scale-125"
-                          : "bg-white/30 hover:bg-white/50",
+                          : "bg-white/30 hover:bg-dark-100/80 dark:bg-dark-800/700",
                       )}
                     />
                   ))}
@@ -722,10 +721,10 @@ function OrganizationSection({
                   type="button"
                   onClick={goToNext}
                   aria-label="Slide berikutnya"
-                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all"
+                  className="p-2 rounded-full bg-dark-100/80 dark:bg-dark-800/70 hover:bg-dark-200/80 dark:bg-dark-700/80 transition-all"
                 >
                   <svg
-                    className="w-6 h-6 text-white"
+                    className="w-6 h-6 text-dark-900 dark:text-white"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

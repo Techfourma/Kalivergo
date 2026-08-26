@@ -1,6 +1,49 @@
-﻿@tailwind base;
+﻿@import "./themes/light.css";
+@import "./themes/dark.css";
+
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  .dark :where(.text-black, .text-gray-950, .text-gray-900, .text-gray-800,
+    .text-gray-700, .text-slate-950, .text-slate-900, .text-slate-800,
+    .text-slate-700, .text-zinc-950, .text-zinc-900, .text-zinc-800,
+    .text-zinc-700, .text-neutral-950, .text-neutral-900, .text-neutral-800,
+    .text-neutral-700, .text-stone-900, .text-stone-800) {
+    color: var(--text-primary);
+  }
+
+  .dark :where(.text-slate-600, .text-slate-500, .text-gray-600, .text-gray-500,
+    .text-zinc-600, .text-zinc-500, .text-neutral-600, .text-neutral-500) {
+    color: var(--text-muted);
+  }
+
+  .dark :where(.text-slate-400, .text-gray-400, .text-zinc-400, .text-neutral-400) {
+    color: var(--text-faint);
+  }
+
+  .dark :where(.bg-white) {
+    background-color: var(--bg-surface);
+  }
+  .dark :where(.bg-gray-50) {
+    background-color: var(--bg-page);
+  }
+  .dark :where(.bg-gray-100, .bg-slate-100) {
+    background-color: var(--bg-elevated);
+  }
+
+  .dark :where(.border-gray-200, .border-slate-200) {
+    border-color: var(--border-strong);
+  }
+  .dark :where(.border-gray-100) {
+    border-color: var(--border-subtle);
+  }
+
+  .dark ::placeholder {
+    color: var(--text-faint);
+  }
+}
 
 @layer base {
   html {
@@ -13,6 +56,35 @@
 }
 
 @layer components {
+  /* --- App-wide theme utils (light + dark in one place = clean code) --- */
+  .app-page {
+    @apply min-h-screen flex flex-col relative overflow-hidden bg-dark-50 text-dark-900 dark:bg-dark-950 dark:text-dark-100;
+  }
+
+  .nav-shell {
+    @apply border-b border-dark-200 bg-dark-50/80 backdrop-blur-md dark:border-dark-800 dark:bg-dark-950/80;
+  }
+
+  .footer-shell {
+    @apply border-t border-dark-200 bg-dark-50 text-dark-500 dark:border-dark-800 dark:bg-dark-950;
+  }
+
+  .text-muted {
+    @apply text-dark-500 dark:text-dark-400;
+  }
+
+  .text-faint {
+    @apply text-dark-400 dark:text-dark-500;
+  }
+
+  .surface-card {
+    @apply border border-dark-200 bg-white dark:border-dark-800 dark:bg-dark-900;
+  }
+
+  .field {
+    @apply w-full rounded-lg border border-dark-200 bg-white px-3 py-2 text-dark-900 placeholder:text-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 dark:border-dark-700 dark:bg-dark-900 dark:text-dark-100 dark:placeholder:text-dark-500;
+  }
+
   .glass {
     @apply bg-white/80 dark:bg-dark-800/60 backdrop-blur-xl border border-white/20 dark:border-dark-700;
   }
