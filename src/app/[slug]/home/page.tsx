@@ -5,7 +5,7 @@ import WeeklyTasks from "@/components/home/WeeklyTasks";
 import UnsubmittedList from "@/components/home/UnsubmittedList";
 
 import TenantNavbar from "@/components/layout/TenantNavbar";
-import WaveBackground from "@/components/ui/WaveBackground";
+import PageBackground from "@/components/ui/PageBackground";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { requireTenantPageAccess, resolveTenantFromRoute } from "@/lib/tenant";
@@ -41,11 +41,11 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
 
     if (!currentUser) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-[#0a0a14]">
-          <div className="text-white text-center">
+        <div className="min-h-screen flex items-center justify-center bg-dark-50 dark:bg-dark-950">
+          <div className="text-dark-900 dark:text-white text-center">
             <h2 className="text-2xl font-bold mb-4">Akses Ditolak</h2>
             <p>Silakan login untuk mengakses halaman ini.</p>
-            <Link href="/login" className="mt-4 inline-block px-6 py-2 bg-primary-600 rounded-lg">
+            <Link href="/login" className="mt-4 inline-block px-6 py-2 bg-primary-600 rounded-lg text-white">
               Login
             </Link>
           </div>
@@ -99,25 +99,24 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
 
     return (
       <>
-        <WaveBackground />
-        <div className="fixed inset-0 z-0 bg-gradient-to-b from-transparent via-[#0a0a14]/50 to-[#0a0a14] pointer-events-none" />
+        <PageBackground />
 
-        {/* TENANT NAVBAR - ISOLATED TO THIS TENANT ONLY */}
-        <div className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a14]/80 backdrop-blur-md border-b border-white/10">
-          <TenantNavbar
-            user={currentUser}
-            tenantPath={tenantPath}
-          />
-        </div>
+      {/* TENANT NAVBAR - ISOLATED TO THIS TENANT ONLY */}
+      <div className="fixed top-0 left-0 right-0 z-50 nav-shell">
+        <TenantNavbar
+          user={currentUser}
+          tenantPath={tenantPath}
+        />
+      </div>
 
         <main className="flex-1 py-8 pt-24 pb-28 relative z-10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-white font-display">Dashboard Home</h1>
-              <p className="text-gray-300 mt-2">
+              <h1 className="text-3xl font-bold text-dark-900 dark:text-white font-display">Dashboard Home</h1>
+              <p className="text-muted mt-2">
                 Kelas: {tenantContext.classSlug}
               </p>
-              <p className="text-gray-300">
+              <p className="text-muted">
                 Selamat datang, {currentUser.name}!{" "}
                 {currentUser.role &&
                   ` (${currentUser.role === "OWNER" ? "Owner" : currentUser.role})`}
@@ -138,6 +137,6 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
     );
   } catch (err) {
     console.error("Tenant HomePage: DB error (non-fatal):", err);
-    return <div className="text-white p-10">Terjadi kesalahan saat memuat data.</div>;
+    return <div className="text-dark-900 dark:text-white p-10">Terjadi kesalahan saat memuat data.</div>;
   }
 }

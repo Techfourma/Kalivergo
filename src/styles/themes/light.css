@@ -1,0 +1,12 @@
+:root {
+  --bg-page: #f8fafc;         /* slate-50 */
+  --bg-surface: #ffffff;      /* white */
+  --bg-elevated: #f1f5f9;     /* slate-100 */
+
+  --text-primary: #0f172a;    /* slate-900 */
+  --text-muted: #475569;      /* slate-600 */
+  --text-faint: #94a3b8;      /* slate-400 */
+
+  --border-strong: #e2e8f0;   /* slate-200 */
+  --border-subtle: #eef2f7;
+}

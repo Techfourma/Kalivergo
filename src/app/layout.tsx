@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import "@/styles/global.css";
 import Image from "next/image";
 import { AssistantWidget } from "@/features/ai-assistant";
+import ThemeProvider from "@/components/ThemeProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -48,16 +49,22 @@ export default function RootLayout({
   return (
     <html lang="id" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <head>
-        {/* Favicon */}
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/logo.jpg" />
-        <link rel="shortcut icon" href="/logo.jpg" type="image/jpeg" />
+        <link rel="shortcut icon" href="/logo.jpg" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('kalivergo-theme');document.documentElement.classList.toggle('dark',t!=='light');}catch(e){document.documentElement.classList.add('dark');}})();`,
+          }}
+        />
       </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
-        <div className="min-h-screen flex flex-col bg-dark-50 text-dark-900">
-          {children}
-          <AssistantWidget />
-        </div>
+        <ThemeProvider>
+          <div className="min-h-screen flex flex-col bg-dark-50 dark:bg-dark-950 text-dark-900 dark:text-dark-100">
+            {children}
+            <AssistantWidget />
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -70,7 +70,7 @@ export default async function TenantCmsLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-dark-950">
       <CacheGuard redirectTo="/unauthorized" />
       <Sidebar
         variant="cms"
