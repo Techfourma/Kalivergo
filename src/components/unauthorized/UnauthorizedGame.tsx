@@ -58,16 +58,7 @@ export default function UnauthorizedGame() {
     }
   }, []);
 
-  /* -------------------- responsive sizing --------------------
-     PENTING: tinggi box TIDAK boleh dihitung dari flex-1 lalu
-     di-observe balik oleh ResizeObserver pada elemen yang sama —
-     itu bikin loop tak berujung (tinggi mempengaruhi ruang
-     tersedia, ruang tersedia mempengaruhi tinggi, dst).
-     Solusi: tinggi dihitung deterministik dari window.innerHeight
-     dikurangi offset tetap (posisi box dari atas + reserved
-     footer), lebar tetap diukur via ResizeObserver (aman, karena
-     lebar murni ditentukan CSS container, bukan oleh state kita). */
-  const RESERVED_BELOW = 90; // ruang untuk tag "Kalivergo Security Protocol" + footer + padding
+  const RESERVED_BELOW = 90; 
 
   useEffect(() => {
     const el = wrapperRef.current;
@@ -91,7 +82,6 @@ export default function UnauthorizedGame() {
     };
   }, []);
 
-  // sync canvas buffer/style to the measured size (crisp, exact 1:1 — no scaling mismatch)
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -195,7 +185,6 @@ export default function UnauthorizedGame() {
     ctx.arc(headCx, headCy, headR, 0, Math.PI * 2);
     ctx.stroke();
 
-    // topi toga
     ctx.fillStyle = "#facc15";
     ctx.beginPath();
     ctx.moveTo(headCx - 10 * scale, headCy - 7 * scale);
@@ -441,14 +430,8 @@ export default function UnauthorizedGame() {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState]);
 
-  /* ============================================================
-     RENDER — semua teks (badge/judul/deskripsi) ada DI DALAM
-     layer game (overlay "ready"), bukan elemen terpisah di luar.
-     Game box mengisi lebar konten (tidak ada ruang kosong ekstra).
-     ============================================================ */
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div
