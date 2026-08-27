@@ -408,3 +408,53 @@ export async function deleteInformation(informationId: string) {
     return { error: 'Failed to delete information' };
   }
 }
+
+export async function getCmsInformation(tenantId: string) {
+  try {
+    const session = await getCurrentSessionUser();
+    if (!session?.id) {
+      return { error: 'Unauthorized' };
+    }
+
+    await requireTenantMembership(session.id, tenantId);
+
+    const informations = await prisma.information.findMany({
+      where: { tenantId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
+        readMarks: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+          },
+          orderBy: { readAt: 'desc' },
+        },
+        _count: {
+          select: {
+            comments: true,
+            reactions: true,
+            readMarks: true,
+          },
+        },
+      },
+    });
+
+    return { success: true, data: informations };
+  } catch (error) {
+    console.error('Error fetching CMS information:', error);
+    return { error: 'Failed to fetch information' };
+  }
+}
