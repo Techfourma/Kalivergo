@@ -104,7 +104,7 @@ export default function PlatformLandingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-dark-50 dark:bg-dark-950 relative overflow-hidden text-dark-900 dark:text-white">
       
-      
+     
       <PageBackground />
 
       <Loading
@@ -113,7 +113,7 @@ export default function PlatformLandingPage() {
         subMessage="Silakan tunggu sebentar..."
       />
 
-     
+      
       <div className="pointer-events-none absolute inset-0 z-[1]">
         <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-primary-600/20 blur-[140px]" />
         <div className="absolute top-1/3 -right-40 h-[450px] w-[450px] rounded-full bg-accent-600/20 blur-[140px]" />
@@ -223,7 +223,7 @@ export default function PlatformLandingPage() {
 
       <main className="flex-1 relative z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Hero */}
+          
           <section className="py-24 lg:py-32 text-center">
             <div className="inline-flex items-center gap-2 rounded-full bg-dark-100/80 dark:bg-dark-800/70 backdrop-blur-sm border border-dark-300 dark:border-dark-700 px-4 py-1.5 text-sm font-medium mb-8">
               <Sparkles className="h-4 w-4 text-primary-400" />
@@ -259,7 +259,7 @@ export default function PlatformLandingPage() {
               </button>
             </div>
 
-            {/* Stats */}
+            
             <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
               {STATS.map((stat) => {
                 const Icon = stat.icon;
@@ -277,7 +277,7 @@ export default function PlatformLandingPage() {
             </div>
           </section>
 
-          {/* Features */}
+          
           <section id="fitur" className="py-20">
             <div className="text-center max-w-2xl mx-auto mb-14">
               <p className="text-sm font-semibold text-primary-400 mb-2">
@@ -316,7 +316,7 @@ export default function PlatformLandingPage() {
             </div>
           </section>
 
-          {/* How it works */}
+          
           <section id="cara-kerja" className="py-20">
             <div className="text-center max-w-2xl mx-auto mb-14">
               <p className="text-sm font-semibold text-accent-400 mb-2">
@@ -355,7 +355,7 @@ export default function PlatformLandingPage() {
             </div>
           </section>
 
-          {/* Benefits */}
+         
           <section id="keunggulan" className="py-20">
             <div className="text-center max-w-2xl mx-auto mb-14">
               <p className="text-sm font-semibold text-green-400 mb-2">
@@ -391,7 +391,7 @@ export default function PlatformLandingPage() {
             </div>
           </section>
 
-          {/* CTA */}
+         
           <section className="py-20">
             <div className="relative overflow-hidden rounded-3xl border border-dark-200/60 dark:border-dark-800 bg-gradient-to-br from-primary-600/30 via-dark-800/40 to-accent-600/30 p-10 sm:p-16 text-center">
               <div className="pointer-events-none absolute -top-20 -right-20 h-64 w-64 rounded-full bg-primary-500/30 blur-[100px]" />
@@ -416,7 +416,7 @@ export default function PlatformLandingPage() {
         </div>
       </main>
 
-      {/* Footer */}
+     
       <footer className="border-t border-dark-200/60 dark:border-dark-800 py-8 bg-dark-50 dark:bg-dark-950/90 backdrop-blur-md relative z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
