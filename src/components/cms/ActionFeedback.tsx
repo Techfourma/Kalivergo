@@ -8,13 +8,15 @@ import {
   createTransaction,
   deleteTransaction,
   createCategory,
+  createInformation,
+  deleteInformation,
 } from "@/actions/cms";
 import Loading from "@/components/layout/Loading";
 import { CheckCircle2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, ReactNode, useRef, useState } from "react";
 
-type ActionType = "task" | "schedule" | "seminar" | "people" | "profile" | "portfolio" | "transaction" | "finance" | "category";
+type ActionType = "task" | "schedule" | "seminar" | "people" | "profile" | "portfolio" | "transaction" | "finance" | "category" | "information";
 
 type ActionResult = {
   success?: string | boolean;
@@ -31,6 +33,7 @@ const actions: Record<ActionType, (formData: FormData) => Promise<ActionResult>>
   profile: async () => ({ success: "Perubahan berhasil" }),
   portfolio: async () => ({ success: "Berhasil disimpan" }),
   category: createCategory,
+  information: createInformation,
 };
 
 const actionLabels: Record<ActionType, { loading: string; success: string }> = {
@@ -69,6 +72,10 @@ const actionLabels: Record<ActionType, { loading: string; success: string }> = {
   category: {
     loading: "Menyimpan kategori",
     success: "Kategori tersimpan",
+  },
+  information: {
+    loading: "Membuat postingan",
+    success: "Postingan berhasil dibuat",
   },
 };
 

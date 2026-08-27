@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { getCurrentSessionUser } from '@/server/auth/session';
 import { requireTenantMembership } from '@/lib/tenant';
 import { InformationType } from '@prisma/client';
+import PageBackground from '@/components/ui/PageBackground';
 
 export default async function InformationPage({
   params,
@@ -45,15 +46,27 @@ export default async function InformationPage({
   const CreatePostForm = (await import('@/components/information/CreatePostForm')).default;
   const InformationFeed = (await import('@/components/information/InformationFeed')).default;
 
+  const dbUser = await prisma.user.findUnique({
+    where: { id: session.id },
+    select: { id: true, name: true, image: true },
+  });
+
+  const currentUser = {
+    id: session.id,
+    name: dbUser?.name || session.name || 'User',
+    image: dbUser?.image || session.image,
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-6 text-center">Information Feed</h1>
+    <>
+      <PageBackground />
+      <div className="relative z-10">
+        <div className="max-w-3xl mx-auto px-4 py-6">
+          <CreatePostForm tenantId={tenant.id} currentUser={currentUser} />
 
-        <CreatePostForm tenantId={tenant.id} />
-
-        <InformationFeed tenantId={tenant.id} />
+          <InformationFeed tenantId={tenant.id} />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
