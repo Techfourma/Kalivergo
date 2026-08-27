@@ -1,7 +1,7 @@
 import { unstable_noStore as noStore } from "next/cache";
 
 import Footer from "@/components/layout/Footer";
-import WaveBackground from "@/components/ui/PageBackground";
+import PageBackground from "@/components/ui/PageBackground";
 import ProfileForm from "./ProfileForm";
 import CacheGuard from "@/components/security/CacheGuard";
 import { cookies } from "next/headers";
@@ -45,7 +45,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     if (!currentUser) {
       return (
         <>
-          <WaveBackground />
+          <PageBackground />
 
           <div className="fixed inset-0 z-0 bg-gradient-to-b from-transparent via-[#0a0a14]/50 to-[#0a0a14] pointer-events-none" />
 
@@ -63,12 +63,12 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         </>
       );
     }
-    
+
     return (
       <>
         <CacheGuard />
 
-        <WaveBackground />
+        <PageBackground />
 
         <div className="fixed inset-0 z-0 bg-gradient-to-b from-transparent via-[#0a0a14]/50 to-[#0a0a14] pointer-events-none" />
 
@@ -96,7 +96,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
     return (
       <>
-        <WaveBackground />
+        <PageBackground />
 
         <div className="relative z-10 min-h-screen flex items-center justify-center">
           <div className="text-white text-center">
