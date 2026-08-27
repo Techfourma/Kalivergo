@@ -60,6 +60,7 @@ export default function Sidebar({ variant, userRole, tenantPath, cmsModules }: S
   const [detectedRole, setDetectedRole] = useState<string | undefined>(userRole);
 
   const isCms = variant === "cms" || pathname?.startsWith("/cms") || !!tenantPath;
+  const sidebarIsCollapsed = !isCms && isCollapsed;
   const storageKey = isCms
     ? `cmsSidebarCollapsed${tenantPath ?? ""}`
     : "mainSidebarCollapsed";
@@ -128,7 +129,7 @@ export default function Sidebar({ variant, userRole, tenantPath, cmsModules }: S
 
   return (
     <>
-      {isCollapsed && (
+      {sidebarIsCollapsed && (
         <button
           onClick={toggleSidebar}
           className="fixed left-0 top-0 z-40 p-2 bg-white border border-dark-200 rounded-lg shadow-lg hover:bg-dark-50 transition-colors dark:bg-dark-950 dark:border-dark-800 dark:hover:bg-dark-900"
@@ -140,11 +141,11 @@ export default function Sidebar({ variant, userRole, tenantPath, cmsModules }: S
 
       <aside
         className={cn(
-          "shrink-0 bg-white border-r border-dark-200 min-h-screen transition-all duration-300 ease-in-out max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-40 dark:bg-dark-950 dark:border-dark-800",
-          isCollapsed ? "w-0" : "w-64"
+          "relative z-30 shrink-0 bg-white border-r border-dark-200 min-h-screen transition-all duration-300 ease-in-out md:static max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-40 dark:bg-dark-950 dark:border-dark-800",
+          sidebarIsCollapsed ? "w-0" : "w-64"
         )}
       >
-        {!isCollapsed && (
+        {!sidebarIsCollapsed && (
           <div className="p-4 h-screen sticky top-0 overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <p className="text-xs font-semibold uppercase tracking-wider text-dark-400">
