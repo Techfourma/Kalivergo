@@ -1,8 +1,7 @@
-import { AIAssistantConfig } from './config';
-import { buildAssistantUrl } from './url';
-import type { AIAssistantError } from '@/features/ai-assistant/types';
-
-export { buildAssistantUrl };
+import type { AIAssistantError } from "@/features/ai-assistant/types";
+import { AIAssistantConfig } from "./config";
+import { generateAnswer } from "./gemini";
+import { loadKnowledgeBase, retrieveRelevantContext } from "./knowledgeBase";
 
 export interface AIServerRequest {
   message: string;
@@ -19,182 +18,126 @@ export interface AIServerResponse {
   error?: AIAssistantError;
 }
 
+export interface AIServerResult {
+  success: boolean;
+  response?: AIServerResponse;
+  error?: Error;
+}
+
 function generateUuid(): string {
   if (
-    typeof crypto !== 'undefined' &&
-    typeof (crypto as { randomUUID?: () => string }).randomUUID === 'function'
+    typeof crypto !== "undefined" &&
+    typeof (crypto as { randomUUID?: () => string }).randomUUID === "function"
   ) {
     return (crypto as { randomUUID: () => string }).randomUUID();
   }
-
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function sendToAIAssistant(
-  request: AIServerRequest,
-  secret: string
-): Promise<{ success: boolean; response?: AIServerResponse; error?: Error }> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), AIAssistantConfig.timeoutMs);
+/** Development-only reply used when Gemini is not configured. */
+function getMockReply(message: string): string {
+  return `[MOCK MODE] Ini adalah respons simulasi. Pertanyaan Anda: "${message}". Dalam mode produksi, jawaban dihasilkan oleh Gemini dengan konteks dari dataset internal Kalivergo.`;
+}
 
+/**
+ * Process a user message entirely in-process: retrieve relevant context from
+ * the internal Kalivergo dataset and answer using Gemini. No external AI
+ * service is contacted.
+ */
+export async function sendToAIAssistant(
+  request: AIServerRequest
+): Promise<AIServerResult> {
   try {
-    const requestId = generateUuid();
     const conversationId =
       request.conversationId && UUID_RE.test(request.conversationId)
         ? request.conversationId
         : generateUuid();
 
-    const response = await fetch(buildAssistantUrl(AIAssistantConfig.url || ''), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${secret}`,
-      },
-      body: JSON.stringify({
-        requestId,
-        conversationId,
-        message: request.message,
-      }),
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      let backendMessage: string | undefined;
-      const errorData = (await response.json().catch(() => ({} as Record<string, unknown>))) as
-        | Record<string, unknown>
-        | undefined;
-      if (errorData && typeof errorData === 'object' && typeof errorData.message === 'string') {
-        backendMessage = errorData.message;
-      }
-
-      const aiError: AIAssistantError = {
-        code: `HTTP_${response.status}`,
-        message: backendMessage || mapHTTPErrorToMessage(response.status),
-        isRetryable: response.status >= 500 || response.status === 429,
-      };
-
+    if (!AIAssistantConfig.geminiApiKey) {
       return {
-        success: false,
-        error: new Error(aiError.message),
+        success: true,
         response: {
-          success: false,
-          error: aiError,
+          success: true,
+          data: { response: getMockReply(request.message), conversationId },
         },
       };
     }
 
-    const data = (await response.json()) as Record<string, unknown>;
+    await loadKnowledgeBase();
+    const retrieved = retrieveRelevantContext(request.message, 3);
 
-    if (data.success === false) {
-      const message =
-        typeof data.message === 'string' ? data.message : 'Terjadi masalah saat memproses pertanyaan.';
-      const code = typeof data.error === 'string' ? data.error : 'AI_BACKEND_ERROR';
-      const aiError: AIAssistantError = { code, message, isRetryable: false };
+    const answer = await generateAnswer(request.message, {
+      knowledge: retrieved?.context,
+    });
 
+    if (!answer) {
       return {
         success: false,
-        error: new Error(message),
-        response: { success: false, error: aiError },
+        error: new Error("AI gagal menghasilkan respons. Silakan coba lagi."),
       };
     }
-
-    const answer = typeof data.answer === 'string' ? data.answer : '';
 
     return {
       success: true,
       response: {
         success: true,
-        data: {
-          response: answer,
-          conversationId,
-        },
+        data: { response: answer, conversationId },
       },
     };
-  } catch (error) {
-    clearTimeout(timeoutId);
-
-    if (error instanceof Error && error.name === 'AbortError') {
-      return {
-        success: false,
-        error: new Error('AI Assistant timeout. Silakan coba lagi.'),
-      };
-    }
-
-    if (error instanceof Error) {
-      if (error.message.includes('fetch') || error.message.includes('network')) {
-        return {
-          success: false,
-          error: new Error('AI Assistant tidak tersedia. Silakan coba lagi nanti.'),
-        };
-      }
-
-      return {
-        success: false,
-        error,
-      };
-    }
-
+  } catch (err) {
+    const raw = err instanceof Error ? err.message : "";
+    const aiError: AIAssistantError = {
+      code: "AI_GENERATION_ERROR",
+      message: friendlyError(raw),
+      isRetryable: true,
+    };
     return {
       success: false,
-      error: new Error('Terjadi masalah saat menghubungi AI Assistant.'),
+      error: new Error(aiError.message),
+      response: { success: false, error: aiError },
     };
   }
 }
 
-function mapHTTPErrorToMessage(status: number): string {
-  switch (status) {
-    case 400:
-      return 'Permintaan tidak valid.';
-    case 401:
-      return 'Tidak diizinkan mengakses AI Assistant.';
-    case 429:
-      return 'AI Assistant sedang sibuk. Silakan tunggu beberapa saat.';
-    case 500:
-      return 'Terjadi kesalahan pada AI Assistant.';
-    case 503:
-      return 'AI Assistant tidak tersedia sementara.';
-    default:
-      return 'Terjadi masalah saat memproses pertanyaan.';
+function friendlyError(raw: string): string {
+  const lower = raw.toLowerCase();
+  if (lower.includes("api key")) {
+    return "AI belum dikonfigurasi dengan benar. Hubungi administrator.";
   }
+  if (lower.includes("rate limit") || lower.includes("429")) {
+    return "AI sedang sibuk. Silakan coba lagi beberapa saat.";
+  }
+  if (lower.includes("503") || lower.includes("unavailable")) {
+    return "Layanan AI tidak tersedia sementara. Silakan coba lagi nanti.";
+  }
+  return "Terjadi masalah saat memproses pertanyaan. Silakan coba lagi.";
 }
 
 export function validateAIResponse(data: unknown): data is AIServerResponse {
-  if (!data || typeof data !== 'object') {
-    return false;
-  }
+  if (!data || typeof data !== "object") return false;
 
   const obj = data as Record<string, unknown>;
 
-  if (typeof obj.success !== 'boolean') {
-    return false;
-  }
+  if (typeof obj.success !== "boolean") return false;
 
   if (obj.error !== undefined) {
-    if (typeof obj.error !== 'object' || obj.error === null) {
-      return false;
-    }
-    const error = obj.error as Record<string, unknown>;
-    if (typeof error.code !== 'string' || typeof error.message !== 'string') {
+    if (typeof obj.error !== "object" || obj.error === null) return false;
+    const err = obj.error as Record<string, unknown>;
+    if (typeof err.code !== "string" || typeof err.message !== "string") {
       return false;
     }
   }
 
   if (obj.data !== undefined) {
-    if (typeof obj.data !== 'object' || obj.data === null) {
-      return false;
-    }
-    const data = obj.data as Record<string, unknown>;
-    if (typeof data.response !== 'string') {
-      return false;
-    }
+    if (typeof obj.data !== "object" || obj.data === null) return false;
+    const d = obj.data as Record<string, unknown>;
+    if (typeof d.response !== "string") return false;
   }
 
   return true;
