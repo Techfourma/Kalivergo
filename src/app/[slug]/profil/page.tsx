@@ -64,11 +64,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         <CacheGuard />
 
         <PageBackground />
-        <div className="relative z-10">
-          <div className="nav-shell">
-            <TenantNavbar user={currentUser} tenantPath={tenantPath} />
-          </div>
-        </div>
         <main className="flex-1 py-12 relative z-10 min-h-screen">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div className="relative rounded-3xl border-2 border-dark-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/70 backdrop-blur-xl p-6 sm:p-10 shadow-[0_20px_50px_-15px_rgba(15,23,42,0.15)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.55)]">
