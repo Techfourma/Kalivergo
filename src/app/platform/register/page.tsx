@@ -1,11 +1,11 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Eye, EyeOff, ShieldCheck, UserPlus, Upload } from "lucide-react";
 import { registerPlatformAdmin } from "@/actions/platform-auth";
 import Loading from "@/components/layout/Loading";
+import PageBackground from "@/components/ui/PageBackground";
 
 export default function PlatformRegisterPage() {
   const router = useRouter();
@@ -20,7 +20,6 @@ export default function PlatformRegisterPage() {
     setIsLoading(true);
     setError("");
     setSuccess("");
-
     try {
       const result = await registerPlatformAdmin(formData);
       if (result?.error) {
@@ -49,42 +48,45 @@ export default function PlatformRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-dark-950 via-dark-900 to-primary-950 p-4 relative">
+    <div className="min-h-screen flex items-center justify-center bg-dark-50 dark:bg-dark-950 p-4 relative">
+      {/* Theme-aware background */}
+      <PageBackground />
+
       <Loading
         isVisible={isLoading}
         message="Mendaftarkan admin KYC"
         subMessage="Mohon tunggu sebentar..."
       />
 
-      <div className="relative z-10 bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg">
+      <div className="relative z-10 bg-white/80 dark:bg-dark-800/70 backdrop-blur-md border border-dark-200/60 dark:border-dark-700 p-8 rounded-2xl shadow-2xl w-full max-w-lg">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 text-white shadow-lg">
               <ShieldCheck className="h-8 w-8" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-dark-900 font-display">
+          <h1 className="text-2xl font-bold text-dark-900 dark:text-white font-display">
             Registrasi Admin KYC
           </h1>
-          <p className="text-dark-500 mt-2">
+          <p className="text-dark-500 dark:text-dark-400 mt-2">
             Buat akun ADMIN_KYC - menunggu approval dari SUPER_ADMIN_KYC
           </p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
         {success && (
-          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-sm text-green-700">{success}</p>
+          <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+            <p className="text-sm text-green-700 dark:text-green-400">{success}</p>
           </div>
         )}
 
         <form action={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
               Nama Lengkap
             </label>
             <input
@@ -92,13 +94,13 @@ export default function PlatformRegisterPage() {
               name="name"
               required
               disabled={isLoading || !!success}
-              className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+              className="w-full px-3 py-2 bg-white dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg text-dark-900 dark:text-dark-100 placeholder-dark-400 dark:placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
               placeholder="Nama lengkap admin"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
               Email (Gmail)
             </label>
             <input
@@ -106,13 +108,13 @@ export default function PlatformRegisterPage() {
               name="email"
               required
               disabled={isLoading || !!success}
-              className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+              className="w-full px-3 py-2 bg-white dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg text-dark-900 dark:text-dark-100 placeholder-dark-400 dark:placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
               placeholder="admin@gmail.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
               Alamat Lengkap
             </label>
             <textarea
@@ -120,13 +122,13 @@ export default function PlatformRegisterPage() {
               required
               disabled={isLoading || !!success}
               rows={3}
-              className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+              className="w-full px-3 py-2 bg-white dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg text-dark-900 dark:text-dark-100 placeholder-dark-400 dark:placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
               placeholder="Alamat lengkap tempat tinggal"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
               Nomor Telepon
             </label>
             <input
@@ -134,13 +136,13 @@ export default function PlatformRegisterPage() {
               name="phone"
               required
               disabled={isLoading || !!success}
-              className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+              className="w-full px-3 py-2 bg-white dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg text-dark-900 dark:text-dark-100 placeholder-dark-400 dark:placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
               placeholder="08xxxxxxxxxx"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
               Password
             </label>
             <div className="relative">
@@ -150,13 +152,13 @@ export default function PlatformRegisterPage() {
                 required
                 disabled={isLoading || !!success}
                 minLength={6}
-                className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 pr-10"
+                className="w-full px-3 py-2 bg-white dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg text-dark-900 dark:text-dark-100 placeholder-dark-400 dark:placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 pr-10"
                 placeholder="Minimal 6 karakter"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 hover:text-dark-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 dark:text-dark-500 hover:text-dark-600 dark:hover:text-dark-300"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -164,9 +166,8 @@ export default function PlatformRegisterPage() {
             </div>
           </div>
 
-
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
               Ulangi Password
             </label>
             <div className="relative">
@@ -175,13 +176,13 @@ export default function PlatformRegisterPage() {
                 name="confirmPassword"
                 required
                 disabled={isLoading || !!success}
-                className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 pr-10"
+                className="w-full px-3 py-2 bg-white dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg text-dark-900 dark:text-dark-100 placeholder-dark-400 dark:placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 pr-10"
                 placeholder="Ulangi password"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 hover:text-dark-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 dark:text-dark-500 hover:text-dark-600 dark:hover:text-dark-300"
                 tabIndex={-1}
               >
                 {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -190,10 +191,10 @@ export default function PlatformRegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
               Upload Foto KTP
             </label>
-            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dark-200 border-dashed rounded-lg hover:border-primary-500 transition-colors">
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dark-300 dark:border-dark-600 border-dashed rounded-lg hover:border-primary-500 transition-colors bg-dark-50 dark:bg-dark-700">
               <div className="space-y-1 text-center">
                 {ktpPreview ? (
                   <div className="relative">
@@ -212,11 +213,11 @@ export default function PlatformRegisterPage() {
                   </div>
                 ) : (
                   <>
-                    <Upload className="mx-auto h-12 w-12 text-dark-400" />
-                    <div className="flex text-sm text-dark-600">
+                    <Upload className="mx-auto h-12 w-12 text-dark-400 dark:text-dark-500" />
+                    <div className="flex text-sm text-dark-600 dark:text-dark-400">
                       <label
                         htmlFor="ktpFile"
-                        className="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500"
+                        className="relative cursor-pointer bg-white dark:bg-dark-600 rounded-md font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500"
                       >
                         <span>Upload file KTP</span>
                         <input
@@ -231,7 +232,7 @@ export default function PlatformRegisterPage() {
                         />
                       </label>
                     </div>
-                    <p className="text-xs text-dark-500">PNG, JPG, JPEG maksimal 5MB</p>
+                    <p className="text-xs text-dark-500 dark:text-dark-400">PNG, JPG, JPEG maksimal 5MB</p>
                   </>
                 )}
               </div>
@@ -239,15 +240,15 @@ export default function PlatformRegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
               Kode Registrasi{" "}
-              <span className="text-xs text-dark-400 font-normal">(opsional)</span>
+              <span className="text-xs text-dark-400 dark:text-dark-500 font-normal">(opsional)</span>
             </label>
             <input
               type="text"
               name="registrationCode"
               disabled={isLoading || !!success}
-              className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+              className="w-full px-3 py-2 bg-white dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg text-dark-900 dark:text-dark-100 placeholder-dark-400 dark:placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
               placeholder="Isi jika diatur oleh tim kalivergo"
             />
           </div>
@@ -263,18 +264,18 @@ export default function PlatformRegisterPage() {
         </form>
 
         <div className="mt-6 text-center space-y-2">
-          <p className="text-sm text-dark-500">
+          <p className="text-sm text-dark-500 dark:text-dark-400">
             Sudah punya akun admin?{" "}
             <Link
               href="/platform/login"
-              className="text-primary-600 hover:text-primary-700 font-medium"
+              className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
             >
               Login di sini
             </Link>
           </p>
           <Link
             href="/login"
-            className="inline-flex items-center gap-1 text-xs text-dark-400 hover:text-dark-600 transition-colors"
+            className="inline-flex items-center gap-1 text-xs text-dark-400 dark:text-dark-500 hover:text-dark-600 dark:hover:text-dark-300 transition-colors"
           >
             <ArrowLeft className="h-3 w-3" />
             Kembali ke login member
