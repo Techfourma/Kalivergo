@@ -1,6 +1,6 @@
 import Loading from "@/components/layout/Loading";
 
-export default function HomeLoading() {
+export default function SeminarLoading() {
   return (
     <Loading
       isVisible
