@@ -234,42 +234,42 @@ export default function CashFlowChart({
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200">
+        <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/30 dark:to-emerald-900/10 border-emerald-200 dark:border-emerald-800/40">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/25">
               <TrendingUp className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-emerald-600 font-medium">Pemasukan</p>
-              <p className="text-lg font-bold text-emerald-900">
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Pemasukan</p>
+              <p className="text-lg font-bold text-emerald-900 dark:text-emerald-300">
                 {formatCurrency(summary.totalIncome)}
               </p>
             </div>
           </div>
         </Card>
 
-        <Card className="bg-gradient-to-br from-red-50 to-red-100/50 border-red-200">
+        <Card className="bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/30 dark:to-red-900/10 border-red-200 dark:border-red-800/40">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500 text-white shadow-lg shadow-red-500/25">
               <TrendingDown className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-red-600 font-medium">Pengeluaran</p>
-              <p className="text-lg font-bold text-red-900">
+              <p className="text-xs text-red-600 dark:text-red-400 font-medium">Pengeluaran</p>
+              <p className="text-lg font-bold text-red-900 dark:text-red-300">
                 {formatCurrency(summary.totalExpense)}
               </p>
             </div>
           </div>
         </Card>
 
-        <Card className="bg-gradient-to-br from-primary-50 to-primary-100/50 border-primary-200">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/15 border-blue-200 dark:border-blue-800/50">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-500 text-white shadow-lg shadow-primary-500/25">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 text-white shadow-lg shadow-blue-500/25">
               <Wallet className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-primary-600 font-medium">Saldo</p>
-              <p className="text-lg font-bold text-primary-900">
+              <p className="text-xs text-blue-700 dark:text-blue-300 font-medium">Saldo</p>
+              <p className="text-lg font-bold text-blue-900 dark:text-white">
                 {formatCurrency(summary.balance)}
               </p>
             </div>
@@ -280,14 +280,14 @@ export default function CashFlowChart({
       <Card padding="md">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 text-primary-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
               <CalendarRange className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-dark-900">
+              <h3 className="text-base font-bold text-dark-900 dark:text-white">
                 Rentang Waktu Arus Kas
               </h3>
-              <p className="text-xs text-dark-500">
+              <p className="text-xs text-dark-500 dark:text-dark-400">
                 Pilih periode mulai &amp; selesai untuk memfilter arus kas.
               </p>
             </div>
@@ -295,7 +295,7 @@ export default function CashFlowChart({
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-dark-600">
+              <span className="text-xs font-medium text-dark-600 dark:text-dark-300">
                 Dari Tanggal
               </span>
               <input
@@ -303,11 +303,11 @@ export default function CashFlowChart({
                 value={startDate}
                 max={endDate || undefined}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="rounded-xl border border-dark-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900 text-dark-900 dark:text-dark-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-dark-600">
+              <span className="text-xs font-medium text-dark-600 dark:text-dark-300">
                 Sampai Tanggal
               </span>
               <input
@@ -315,13 +315,13 @@ export default function CashFlowChart({
                 value={endDate}
                 min={startDate || undefined}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="rounded-xl border border-dark-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900 text-dark-900 dark:text-dark-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </label>
             <button
               type="button"
               onClick={resetRange}
-              className="inline-flex items-center gap-2 rounded-xl border border-dark-200 px-4 py-2 text-sm font-medium text-dark-700 transition-colors hover:bg-dark-50 hover:text-dark-900"
+              className="inline-flex items-center gap-2 rounded-xl border border-dark-200 dark:border-dark-700 px-4 py-2 text-sm font-medium text-dark-700 dark:text-dark-300 transition-colors hover:bg-dark-50 dark:hover:bg-dark-800 hover:text-dark-900 dark:hover:text-white"
             >
               <RotateCcw className="h-4 w-4" />
               Reset
@@ -330,9 +330,9 @@ export default function CashFlowChart({
         </div>
 
         {hasFilter && (
-          <p className="mt-3 text-xs text-dark-500">
+          <p className="mt-3 text-xs text-dark-500 dark:text-dark-400">
             Menampilkan arus kas dari{" "}
-            <span className="font-semibold text-dark-800">
+            <span className="font-semibold text-dark-800 dark:text-dark-200">
               {startDate
                 ? new Date(`${startDate}T00:00:00`).toLocaleDateString("id-ID", {
                     day: "numeric",
@@ -342,7 +342,7 @@ export default function CashFlowChart({
                 : "awal"}
             </span>{" "}
             sampai{" "}
-            <span className="font-semibold text-dark-800">
+            <span className="font-semibold text-dark-800 dark:text-dark-200">
               {endDate
                 ? new Date(`${endDate}T00:00:00`).toLocaleDateString("id-ID", {
                     day: "numeric",
@@ -358,7 +358,7 @@ export default function CashFlowChart({
 
       <Card padding="lg">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-bold text-dark-900">Arus Kas</h3>
+          <h3 className="text-lg font-bold text-dark-900 dark:text-white">Arus Kas</h3>
           <button
             type="button"
             onClick={handleExportPDF}
@@ -381,26 +381,29 @@ export default function CashFlowChart({
                   <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-strong)" />
               <XAxis
                 dataKey="date"
-                stroke="#94a3b8"
+                stroke="var(--text-faint)"
                 fontSize={12}
                 tickLine={false}
               />
               <YAxis
-                stroke="#94a3b8"
+                stroke="var(--text-faint)"
                 fontSize={12}
                 tickLine={false}
                 tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "white",
-                  border: "1px solid #e2e8f0",
+                  backgroundColor: "var(--bg-surface)",
+                  border: "1px solid var(--border-strong)",
                   borderRadius: "12px",
                   boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                  color: "var(--text-primary)",
                 }}
+                labelStyle={{ color: "var(--text-primary)" }}
+                itemStyle={{ color: "var(--text-primary)" }}
                 formatter={(value: number, name: string, item: any) => {
                   const payload = item.payload;
                   let categoryInfo = "";
@@ -420,7 +423,7 @@ export default function CashFlowChart({
                   return [formatCurrency(value), name + categoryInfo];
                 }}
               />
-              <Legend />
+              <Legend wrapperStyle={{ color: "var(--text-muted)" }} />
               <Area
                 type="monotone"
                 dataKey="income"
@@ -445,14 +448,14 @@ export default function CashFlowChart({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card padding="lg">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
               <TrendingUp className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-dark-900">
+              <h3 className="text-base font-bold text-dark-900 dark:text-white">
                 Pemasukan per Kategori
               </h3>
-              <p className="text-xs text-dark-500">
+              <p className="text-xs text-dark-500 dark:text-dark-400">
                 Total {formatCurrency(summary.totalIncome)}
               </p>
             </div>
@@ -468,17 +471,17 @@ export default function CashFlowChart({
                 return (
                   <li key={`income-${item.category}`} className="space-y-1">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium text-dark-800">
+                      <span className="font-medium text-dark-800 dark:text-dark-200">
                         {item.category}
                       </span>
-                      <span className="font-semibold text-emerald-700">
+                      <span className="font-semibold text-emerald-700 dark:text-emerald-400">
                         {formatCurrency(item.amount)}
-                        <span className="ml-2 text-xs font-medium text-dark-500">
+                        <span className="ml-2 text-xs font-medium text-dark-500 dark:text-dark-400">
                           {pct}%
                         </span>
                       </span>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-dark-100">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-dark-100 dark:bg-dark-700">
                       <div
                         className="h-full rounded-full bg-emerald-500 transition-all"
                         style={{ width: `${pct}%` }}
@@ -489,7 +492,7 @@ export default function CashFlowChart({
               })}
             </ul>
           ) : (
-            <p className="text-sm text-dark-500">
+            <p className="text-sm text-dark-500 dark:text-dark-400">
               Belum ada data pemasukan pada rentang waktu ini.
             </p>
           )}
@@ -497,14 +500,14 @@ export default function CashFlowChart({
 
         <Card padding="lg">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100 text-red-600">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
               <TrendingDown className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-dark-900">
+              <h3 className="text-base font-bold text-dark-900 dark:text-white">
                 Pengeluaran per Kategori
               </h3>
-              <p className="text-xs text-dark-500">
+              <p className="text-xs text-dark-500 dark:text-dark-400">
                 Total {formatCurrency(summary.totalExpense)}
               </p>
             </div>
@@ -520,17 +523,17 @@ export default function CashFlowChart({
                 return (
                   <li key={`expense-${item.category}`} className="space-y-1">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium text-dark-800">
+                      <span className="font-medium text-dark-800 dark:text-dark-200">
                         {item.category}
                       </span>
-                      <span className="font-semibold text-red-700">
+                      <span className="font-semibold text-red-700 dark:text-red-400">
                         {formatCurrency(item.amount)}
-                        <span className="ml-2 text-xs font-medium text-dark-500">
+                        <span className="ml-2 text-xs font-medium text-dark-500 dark:text-dark-400">
                           {pct}%
                         </span>
                       </span>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-dark-100">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-dark-100 dark:bg-dark-700">
                       <div
                         className="h-full rounded-full bg-red-500 transition-all"
                         style={{ width: `${pct}%` }}
@@ -541,7 +544,7 @@ export default function CashFlowChart({
               })}
             </ul>
           ) : (
-            <p className="text-sm text-dark-500">
+            <p className="text-sm text-dark-500 dark:text-dark-400">
               Belum ada data pengeluaran pada rentang waktu ini.
             </p>
           )}
