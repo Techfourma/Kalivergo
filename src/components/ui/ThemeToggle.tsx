@@ -22,8 +22,8 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
       className={cn(
         "theme-toggle relative inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border shadow-sm backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2",
         isDark
-          ? "border-dark-700 bg-dark-900/95 text-amber-300 shadow-black/20 hover:bg-dark-800"
-          : "border-gray-200 bg-white/90 text-amber-500 hover:bg-gray-50",
+          ? "border-dark-700 bg-dark-900/95 text-amber-400 shadow-black/20 hover:bg-dark-800 hover:text-amber-300"
+          : "border-gray-200 bg-white/90 text-amber-700 hover:bg-gray-50 hover:text-amber-800",
         className
       )}
     >
