@@ -8,11 +8,6 @@ interface ThemeToggleProps {
   className?: string;
 }
 
-/**
- * Simple round toggle button that switches between light and dark mode.
- * Shows both the sun (matahari) and moon (bulan) icons; the icon that
- * matches the active mode is emphasized while the other is dimmed.
- */
 export default function ThemeToggle({ className }: ThemeToggleProps) {
   const theme = useThemeStore((s) => s.theme);
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
@@ -25,25 +20,35 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
       title={isDark ? "Light Mode" : "Dark Mode"}
       onClick={toggleTheme}
       className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-full font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500",
+        "theme-toggle relative inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border shadow-sm backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2",
         isDark
-          ? "bg-dark-200 text-dark-800 hover:bg-dark-300"
-          : "bg-gray-300 text-dark-800 hover:bg-gray-400",
+          ? "border-dark-700 bg-dark-900/95 text-amber-300 shadow-black/20 hover:bg-dark-800"
+          : "border-gray-200 bg-white/90 text-amber-500 hover:bg-gray-50",
         className
       )}
     >
-      <Moon
+      <span
+        key={isDark ? "dark" : "light"}
+        aria-hidden="true"
         className={cn(
-          "h-4 w-4 transition-opacity",
-          isDark ? "opacity-100" : "opacity-30"
+          "theme-toggle__handle",
+          isDark && "theme-toggle__handle--dark"
         )}
       />
-      <Sun
-        className={cn(
-          "h-4 w-4 transition-opacity",
-          isDark ? "opacity-30" : "opacity-100"
-        )}
-      />
+      <span className="theme-toggle__icons pointer-events-none" aria-hidden="true">
+        <Moon
+          className={cn(
+            "theme-toggle__icon",
+            isDark && "theme-toggle__icon--active"
+          )}
+        />
+        <Sun
+          className={cn(
+            "theme-toggle__icon",
+            !isDark && "theme-toggle__icon--active"
+          )}
+        />
+      </span>
     </button>
   );
 }
