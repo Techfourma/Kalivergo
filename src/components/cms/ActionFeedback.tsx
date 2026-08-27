@@ -149,11 +149,11 @@ export default function ActionFeedback({
 
       {(success || error) && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl">
+          <div className="relative w-full max-w-md rounded-2xl bg-white dark:bg-dark-900 dark:border dark:border-dark-700 p-8 text-center shadow-2xl">
             <button
               type="button"
               onClick={closeFeedback}
-              className="absolute right-4 top-4 rounded-lg p-1.5 text-dark-400 transition-colors hover:bg-dark-100 hover:text-dark-600"
+              className="absolute right-4 top-4 rounded-lg p-1.5 text-dark-400 dark:text-dark-500 transition-colors hover:bg-dark-100 dark:hover:bg-dark-800 hover:text-dark-600 dark:hover:text-dark-200"
               aria-label="Tutup"
             >
               <X className="h-5 w-5" />
@@ -161,8 +161,8 @@ export default function ActionFeedback({
 
             {success ? (
               <>
-                <CheckCircle2 className="mx-auto mb-4 h-16 w-16 text-green-600" />
-                <h2 className="text-xl font-bold text-dark-900">{labels.success}</h2>
+                <CheckCircle2 className="mx-auto mb-4 h-16 w-16 text-green-600 dark:text-green-400" />
+                <h2 className="text-xl font-bold text-dark-900 dark:text-white">{labels.success}</h2>
                 <button
                   type="button"
                   onClick={closeFeedback}
@@ -173,8 +173,8 @@ export default function ActionFeedback({
               </>
             ) : (
               <>
-                <h2 className="text-xl font-bold text-red-600">{errorTitle}</h2>
-                <p className="mt-2 text-sm text-dark-600">{error}</p>
+                <h2 className="text-xl font-bold text-red-600 dark:text-red-400">{errorTitle}</h2>
+                <p className="mt-2 text-sm text-dark-600 dark:text-dark-300">{error}</p>
                 <button
                   type="button"
                   onClick={closeFeedback}

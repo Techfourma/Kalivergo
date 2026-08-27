@@ -40,7 +40,7 @@ export default function WeeklyTasks({ tasks }: WeeklyTasksProps) {
         {sortedTasks.length === 0 ? (
           <div className="text-center py-8 text-dark-400">
             <CheckCircle2 className="h-10 w-10 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Tidak ada tugas minggu ini 🎉</p>
+            <p className="text-sm">Tidak ada tugas minggu ini</p>
           </div>
         ) : (
           sortedTasks.map((task, index) => {
