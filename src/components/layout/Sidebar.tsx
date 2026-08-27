@@ -60,7 +60,7 @@ export default function Sidebar({ variant, userRole, tenantPath, cmsModules }: S
   const [detectedRole, setDetectedRole] = useState<string | undefined>(userRole);
 
   const isCms = variant === "cms" || pathname?.startsWith("/cms") || !!tenantPath;
-  const sidebarIsCollapsed = !isCms && isCollapsed;
+  const sidebarIsCollapsed = isCollapsed;
   const storageKey = isCms
     ? `cmsSidebarCollapsed${tenantPath ?? ""}`
     : "mainSidebarCollapsed";
