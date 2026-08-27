@@ -118,7 +118,7 @@ export function ChatWindow({ isOpen, onClose }: ChatWindowProps) {
 
   return (
     <div className="fixed !bottom-20 !right-4 !top-auto !left-auto w-[calc(100%-2rem)] max-w-md z-50">
-      <div className="bg-dark-900 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden">
+      <div className="bg-dark-900 border border-dark-700 rounded-2xl shadow-2xl shadow-primary-950/60 ring-1 ring-primary-500/5 overflow-hidden">
       
         <div className="flex items-center justify-between px-4 py-3 bg-dark-800 border-b border-dark-700">
           <div className="flex items-center gap-2">
@@ -139,8 +139,11 @@ export function ChatWindow({ isOpen, onClose }: ChatWindowProps) {
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <MessageSquare className="w-12 h-12 text-dark-600 mb-3" />
-              <p className="text-dark-400 text-sm">
-                Halo! Tanyakan tentang akademik, KRS, jadwal kuliah, atau peraturan kampus.
+              <p className="text-dark-300 text-sm leading-relaxed max-w-[260px]">
+                Halo! Selamat datang di Kalivergo 👋<br />
+                Ada yang bisa saya bantu seputar
+                <strong className="text-primary-400 font-medium"> akademik, KRS, jadwal kuliah, </strong>
+                atau peraturan kampus?
               </p>
             </div>
           )}
