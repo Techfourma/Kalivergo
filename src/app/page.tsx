@@ -104,7 +104,7 @@ export default function PlatformLandingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-dark-50 dark:bg-dark-950 relative overflow-hidden text-dark-900 dark:text-white">
       
-      {/* ✅ 2. INTEGRASI 3D BACKGROUND DI SINI (Layer paling belakang) */}
+      
       <PageBackground />
 
       <Loading
@@ -113,7 +113,7 @@ export default function PlatformLandingPage() {
         subMessage="Silakan tunggu sebentar..."
       />
 
-      {/* ✅ 3. TAMBAHKAN z-[1] AGAR INLINE BLUR TETAP DI ATAS CANVAS 3D */}
+     
       <div className="pointer-events-none absolute inset-0 z-[1]">
         <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-primary-600/20 blur-[140px]" />
         <div className="absolute top-1/3 -right-40 h-[450px] w-[450px] rounded-full bg-accent-600/20 blur-[140px]" />
