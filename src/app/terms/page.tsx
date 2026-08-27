@@ -25,7 +25,6 @@ export default function TermsPage() {
   useEffect(() => {
     const handleScroll = () => {
       setShowBackToTop(window.scrollY > 400);
-
       const scrollPosition = window.scrollY + 100;
       for (const section of sections) {
         const element = document.getElementById(section.id);
@@ -39,7 +38,6 @@ export default function TermsPage() {
         }
       }
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -60,14 +58,9 @@ export default function TermsPage() {
 
   return (
     <div className="min-h-screen bg-dark-50 dark:bg-dark-950 relative overflow-hidden">
-      {/* Wave Background */}
       <PageBackground />
-      
-      {/* Overlay gradient untuk depth */}
 
-      {/* Content Wrapper */}
       <div className="relative z-10 flex flex-col min-h-screen">
-        {/* Header - Transparent Background */}
         <div className="relative z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div className="flex items-center gap-4 mb-4">
@@ -76,7 +69,7 @@ export default function TermsPage() {
               </div>
               <div>
                 <h1 className="text-4xl font-bold font-display text-dark-900 dark:text-white">Syarat dan Ketentuan</h1>
-                <p className="text-muted mt-1">Aturan penggunaan platform Kalivergo </p>
+                <p className="text-muted mt-1">Aturan penggunaan platform Kalivergo</p>
               </div>
             </div>
             <p className="text-muted mt-6 max-w-2xl">
@@ -87,7 +80,6 @@ export default function TermsPage() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1">
           <div className="flex gap-8">
-            {/* Table of Contents - Desktop */}
             <aside className="hidden lg:block w-64 flex-shrink-0">
               <div className="sticky top-8 bg-dark-100/80 dark:bg-dark-800/70 backdrop-blur-md rounded-2xl shadow-sm border border-dark-200/60 dark:border-dark-800 p-6">
                 <h3 className="font-semibold text-dark-900 dark:text-white mb-4 flex items-center gap-2">
@@ -116,8 +108,7 @@ export default function TermsPage() {
               </div>
             </aside>
 
-            {/* Mobile TOC Button */}
-            <div className="lg:hidden fixed bottom-6 right-6 z-40">
+            <div className="lg:hidden fixed bottom-24 right-6 z-40">
               <button
                 onClick={() => setMobileTocOpen(!mobileTocOpen)}
                 className="p-4 bg-accent-600 text-dark-900 dark:text-white rounded-full shadow-lg hover:bg-accent-700 transition-colors"
@@ -153,10 +144,8 @@ export default function TermsPage() {
               </div>
             )}
 
-            {/* Main Content */}
             <main className="flex-1 max-w-3xl">
               <div className="bg-dark-100/80 dark:bg-dark-800/70 backdrop-blur-md rounded-2xl shadow-sm border border-dark-200/60 dark:border-dark-800 p-8 sm:p-12">
-                {/* Acceptance */}
                 <section id="acceptance" className="mb-12 scroll-mt-20">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="p-3 bg-primary-500/20 rounded-xl">
@@ -179,7 +168,6 @@ export default function TermsPage() {
                   </div>
                 </section>
 
-                {/* Membership */}
                 <section id="membership" className="mb-12 scroll-mt-20">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="p-3 bg-blue-500/20 rounded-xl">
@@ -213,7 +201,6 @@ export default function TermsPage() {
                   </div>
                 </section>
 
-                {/* Responsibilities */}
                 <section id="responsibilities" className="mb-12 scroll-mt-20">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="p-3 bg-purple-500/20 rounded-xl">
@@ -244,7 +231,6 @@ export default function TermsPage() {
                   </div>
                 </section>
 
-                {/* Acceptable Use */}
                 <section id="acceptable-use" className="mb-12 scroll-mt-20">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="p-3 bg-green-500/20 rounded-xl">
@@ -274,7 +260,6 @@ export default function TermsPage() {
                   </div>
                 </section>
 
-                {/* Prohibited */}
                 <section id="prohibited" className="mb-12 scroll-mt-20">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="p-3 bg-red-500/20 rounded-xl">
@@ -312,7 +297,6 @@ export default function TermsPage() {
                   </div>
                 </section>
 
-                {/* Intellectual Property */}
                 <section id="intellectual" className="mb-12 scroll-mt-20">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="p-3 bg-orange-500/20 rounded-xl">
@@ -347,7 +331,6 @@ export default function TermsPage() {
                   </div>
                 </section>
 
-                {/* Liability */}
                 <section id="liability" className="mb-12 scroll-mt-20">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="p-3 bg-yellow-500/20 rounded-xl">
@@ -382,7 +365,6 @@ export default function TermsPage() {
                   </div>
                 </section>
 
-                {/* Termination */}
                 <section id="termination" className="mb-12 scroll-mt-20">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="p-3 bg-red-500/20 rounded-xl">
@@ -417,7 +399,6 @@ export default function TermsPage() {
                   </div>
                 </section>
 
-                {/* Changes */}
                 <section id="changes" className="mb-12 scroll-mt-20">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="p-3 bg-indigo-500/20 rounded-xl">
@@ -443,7 +424,6 @@ export default function TermsPage() {
                   </div>
                 </section>
 
-                {/* Dispute */}
                 <section id="dispute" className="mb-12 scroll-mt-20">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="p-3 bg-cyan-500/20 rounded-xl">
@@ -478,7 +458,6 @@ export default function TermsPage() {
                   </div>
                 </section>
 
-                {/* Contact */}
                 <section id="contact" className="scroll-mt-20">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="p-3 bg-primary-500/20 rounded-xl">
@@ -510,11 +489,10 @@ export default function TermsPage() {
           </div>
         </div>
 
-        {/* Back to Top Button */}
         {showBackToTop && (
           <button
             onClick={scrollToTop}
-            className="fixed bottom-6 right-6 p-3 bg-accent-600 text-dark-900 dark:text-white rounded-full shadow-lg hover:bg-accent-700 transition-all z-30"
+            className="fixed bottom-24 right-6 p-3 bg-accent-600 text-dark-900 dark:text-white rounded-full shadow-lg hover:bg-accent-700 transition-all z-30"
             aria-label="Kembali ke atas"
           >
             <ArrowUp className="h-5 w-5" />
