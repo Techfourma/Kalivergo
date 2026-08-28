@@ -59,7 +59,7 @@ function DeleteCategoryButton({
     >
       <button
         type="submit"
-        className="inline-flex items-center gap-1.5 text-sm text-red-600 hover:text-red-700 font-medium"
+        className="inline-flex items-center gap-1.5 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium"
       >
         <Trash2 className="h-4 w-4" /> Hapus
       </button>
@@ -133,15 +133,15 @@ export default function CategoryManager({
             <div
               className={`flex h-10 w-10 items-center justify-center rounded-xl ${
                 isIncome
-                  ? "bg-green-100 text-green-600"
-                  : "bg-red-100 text-red-600"
+                  ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                  : "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
               }`}
             >
               <Icon className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-dark-900">{title}</h2>
-              <p className="text-xs text-dark-500">{subtitle}</p>
+              <h2 className="text-base font-bold text-dark-900 dark:text-dark-50">{title}</h2>
+              <p className="text-xs text-dark-500 dark:text-dark-400">{subtitle}</p>
             </div>
           </div>
           <Button size="sm" onClick={() => openCreate(t)}>
@@ -150,9 +150,9 @@ export default function CategoryManager({
         </div>
 
         {items.length === 0 ? (
-          <p className="text-sm text-dark-500">Belum ada kategori {title}.</p>
+          <p className="text-sm text-dark-500 dark:text-dark-400">Belum ada kategori {title}.</p>
         ) : (
-          <div className="divide-y divide-dark-100">
+          <div className="divide-y divide-dark-100 dark:divide-dark-700/60">
             {items.map((cat) => (
               <div
                 key={cat.id}
@@ -161,10 +161,10 @@ export default function CategoryManager({
                 <div className="flex items-center gap-3">
                   <span
                     className={`inline-flex h-2.5 w-2.5 rounded-full ${
-                      isIncome ? "bg-green-500" : "bg-red-500"
+                      isIncome ? "bg-green-500 dark:bg-green-400" : "bg-red-500 dark:bg-red-400"
                     }`}
                   />
-                  <span className="text-sm font-medium text-dark-900">
+                  <span className="text-sm font-medium text-dark-900 dark:text-dark-50">
                     {cat.name}
                   </span>
                 </div>
@@ -172,7 +172,7 @@ export default function CategoryManager({
                   <button
                     type="button"
                     onClick={() => openEdit(cat)}
-                    className="inline-flex items-center gap-1.5 text-sm text-primary-600 hover:text-primary-700 font-medium"
+                    className="inline-flex items-center gap-1.5 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
                   >
                     <Pencil className="h-4 w-4" /> Ubah
                   </button>
@@ -226,13 +226,13 @@ export default function CategoryManager({
           className="space-y-4"
         >
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1.5">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1.5">
               Tipe Kategori
             </label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value as "INCOME" | "EXPENSE")}
-              className="w-full rounded-xl border border-dark-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-xl border border-dark-200 dark:border-dark-600 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
             >
               <option value="INCOME">Pemasukan</option>
               <option value="EXPENSE">Pengeluaran</option>
@@ -240,7 +240,7 @@ export default function CategoryManager({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1.5">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1.5">
               Nama Kategori
             </label>
             <input
@@ -249,7 +249,7 @@ export default function CategoryManager({
               onChange={(e) => setName(e.target.value)}
               placeholder="Contoh: Uang kas, Acara, Operasional..."
               required
-              className="w-full rounded-xl border border-dark-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-xl border border-dark-200 dark:border-dark-600 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-50 placeholder:text-dark-400 dark:placeholder:text-dark-500 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
 
