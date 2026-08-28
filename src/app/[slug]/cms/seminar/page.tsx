@@ -51,7 +51,7 @@ export default async function SeminarPage({
           <p className="text-dark-500 dark:text-dark-400 mt-1">Kelola seminar dan kegiatan kelas</p>
         </div>
 
-        
+        {/* Tambah Seminar */}
         <div className="relative rounded-2xl border-2 border-dark-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/70 backdrop-blur-xl p-6 shadow-[0_16px_40px_-12px_rgba(15,23,42,0.15)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.55)]">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-2xl bg-gradient-to-r from-transparent via-white/80 dark:via-white/10 to-transparent" />
 
@@ -78,7 +78,7 @@ export default async function SeminarPage({
                   type="date"
                   name="date"
                   required
-                  className="w-full px-4 py-2 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
+                  className="w-full px-4 py-2 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow [color-scheme:light] dark:[color-scheme:dark]"
                 />
               </div>
               <div>
@@ -115,7 +115,7 @@ export default async function SeminarPage({
           </ActionFeedback>
         </div>
 
-        
+        {/* Daftar Seminar */}
         <div className="relative rounded-2xl border-2 border-dark-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/70 backdrop-blur-xl overflow-hidden shadow-[0_16px_40px_-12px_rgba(15,23,42,0.15)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.55)]">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-2xl bg-gradient-to-r from-transparent via-white/80 dark:via-white/10 to-transparent" />
 

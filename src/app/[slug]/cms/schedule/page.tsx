@@ -81,7 +81,7 @@ export default async function SchedulePage({
                   type="date"
                   name="date"
                   required
-                  className="w-full px-4 py-2 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
+                  className="w-full px-4 py-2 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow [color-scheme:light] dark:[color-scheme:dark]"
                 />
               </div>
               <div>
@@ -92,7 +92,7 @@ export default async function SchedulePage({
                   type="time"
                   name="time"
                   required
-                  className="w-full px-4 py-2 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
+                  className="w-full px-4 py-2 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow [color-scheme:light] dark:[color-scheme:dark]"
                 />
               </div>
               <div>
