@@ -98,7 +98,7 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+    <div className="bg-white dark:bg-dark-900 rounded-xl shadow-sm border border-gray-200 dark:border-dark-700 mb-6">
       {!isExpanded ? (
         <div className="p-3">
           <div className="flex items-center gap-3">
@@ -110,36 +110,36 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
             />
             <button
               onClick={() => setIsExpanded(true)}
-              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-500 px-4 py-2.5 rounded-full text-left transition-colors text-sm"
+              className="flex-1 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-500 dark:text-dark-400 px-4 py-2.5 rounded-full text-left transition-colors text-sm"
             >
               What&apos;s on your mind?
             </button>
           </div>
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-dark-800">
             <div className="flex gap-1">
               <button
                 type="button"
                 onClick={() => { setType(InformationType.TEXT); setIsExpanded(true); }}
-                className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors"
               >
                 <span className="text-green-500 text-lg">📝</span>
-                <span className="text-sm text-gray-600 font-medium">Text</span>
+                <span className="text-sm text-gray-600 dark:text-dark-300 font-medium">Text</span>
               </button>
               <button
                 type="button"
                 onClick={() => { setType(InformationType.IMAGE); setIsExpanded(true); }}
-                className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors"
               >
                 <span className="text-green-500 text-lg">📷</span>
-                <span className="text-sm text-gray-600 font-medium">Photo</span>
+                <span className="text-sm text-gray-600 dark:text-dark-300 font-medium">Photo</span>
               </button>
               <button
                 type="button"
                 onClick={() => { setType(InformationType.VIDEO); setIsExpanded(true); }}
-                className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors"
               >
                 <span className="text-blue-500 text-lg">🎥</span>
-                <span className="text-sm text-gray-600 font-medium">Video</span>
+                <span className="text-sm text-gray-600 dark:text-dark-300 font-medium">Video</span>
               </button>
             </div>
           </div>
@@ -153,11 +153,11 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
               id={currentUser.id}
               size="md"
             />
-            <h3 className="font-semibold text-gray-900 text-base">Create Post</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white text-base">Create Post</h3>
           </div>
 
           {error && (
-            <div className="mb-3 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+            <div className="mb-3 p-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-lg text-sm">
               {error}
             </div>
           )}
@@ -168,7 +168,7 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-0 py-2 border-0 border-b border-gray-200 focus:outline-none focus:ring-0 focus:border-blue-500 text-lg font-semibold text-gray-900 placeholder:text-gray-400"
+                className="w-full bg-transparent dark:bg-transparent px-0 py-2 border-0 border-b border-gray-200 dark:border-dark-700 focus:outline-none focus:ring-0 focus:border-blue-500 text-lg font-semibold text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-dark-500"
                 placeholder="Post title"
               />
             </div>
@@ -181,14 +181,14 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
                 required={!file}
                 rows={isMediaMode ? 2 : 4}
                 maxLength={MAX_CONTENT_LENGTH + 100}
-                className={`w-full px-0 py-2 border-0 border-b focus:outline-none focus:ring-0 focus:border-blue-500 resize-none text-base text-gray-800 placeholder:text-gray-400 leading-relaxed ${
-                  isOverLimit ? 'border-red-500' : 'border-gray-200'
+                className={`w-full bg-transparent dark:bg-transparent px-0 py-2 border-0 border-b focus:outline-none focus:ring-0 focus:border-blue-500 resize-none text-base text-gray-800 dark:text-dark-100 placeholder:text-gray-400 dark:placeholder:text-dark-500 leading-relaxed ${
+                  isOverLimit ? 'border-red-500' : 'border-gray-200 dark:border-dark-700'
                 }`}
                 placeholder="What's on your mind?"
                 autoFocus
               />
               <div className="flex items-center justify-between mt-1">
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-400 dark:text-dark-500">
                   Be kind and respectful
                 </span>
                 <span className={`text-xs font-medium ${
@@ -196,7 +196,7 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
                     ? 'text-red-600'
                     : isNearLimit
                     ? 'text-amber-600'
-                    : 'text-gray-400'
+                    : 'text-gray-400 dark:text-dark-500'
                 }`}>
                   {remainingChars}
                 </span>
@@ -205,7 +205,7 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
 
             {isMediaMode && (
               <div>
-                <div className="relative border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-blue-400 transition-colors">
+                <div className="relative border-2 border-dashed border-gray-300 dark:border-dark-600 rounded-xl p-4 hover:border-blue-400 transition-colors">
                   <input
                     type="file"
                     id="file"
@@ -217,10 +217,10 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
                         : 'application/pdf'
                     }
                     onChange={handleFileChange}
-                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                    className="w-full text-sm text-gray-500 dark:text-dark-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-blue-900/30 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/50 cursor-pointer"
                   />
                   {file && (
-                    <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+                    <div className="mt-2 flex items-center gap-2 text-sm text-gray-600 dark:text-dark-300">
                       <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                       {file.name}
                     </div>
@@ -229,7 +229,7 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
               </div>
             )}
 
-            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+            <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-dark-800">
               <div className="flex gap-1">
                 <button
                   type="button"
@@ -237,7 +237,7 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
                     setType(InformationType.TEXT);
                     setFile(null);
                   }}
-                  className={`p-2 rounded-full hover:bg-gray-100 transition-colors ${!isMediaMode ? 'bg-gray-200' : ''}`}
+                  className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors ${!isMediaMode ? 'bg-gray-200 dark:bg-dark-700' : ''}`}
                   title="Text"
                 >
                   <span className="text-xl">📝</span>
@@ -248,7 +248,7 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
                     setType(InformationType.IMAGE);
                     setFile(null);
                   }}
-                  className={`p-2 rounded-full hover:bg-gray-100 transition-colors ${type === InformationType.IMAGE ? 'bg-gray-200' : ''}`}
+                  className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors ${type === InformationType.IMAGE ? 'bg-gray-200 dark:bg-dark-700' : ''}`}
                   title="Photo"
                 >
                   <span className="text-xl">📷</span>
@@ -259,7 +259,7 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
                     setType(InformationType.VIDEO);
                     setFile(null);
                   }}
-                  className={`p-2 rounded-full hover:bg-gray-100 transition-colors ${type === InformationType.VIDEO ? 'bg-gray-200' : ''}`}
+                  className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors ${type === InformationType.VIDEO ? 'bg-gray-200 dark:bg-dark-700' : ''}`}
                   title="Video"
                 >
                   <span className="text-xl">🎥</span>
@@ -270,7 +270,7 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
                 <button
                   type="button"
                   onClick={() => setIsExpanded(false)}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-full font-medium transition-colors text-sm"
+                  className="px-4 py-2 text-gray-600 dark:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-full font-medium transition-colors text-sm"
                 >
                   Cancel
                 </button>
