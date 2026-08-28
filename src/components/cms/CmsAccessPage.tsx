@@ -62,10 +62,10 @@ export default function CmsAccessPage({
         setAccessData(result.data);
         setLocalAccess(result.data);
       } else {
-        setError(result.error || "Failed to load access data");
+        setError(result.error || "Gagal memuat data akses");
       }
     } catch (err) {
-      setError("Failed to load access data");
+      setError("Gagal memuat data akses");
     } finally {
       setLoading(false);
     }
@@ -108,10 +108,10 @@ export default function CmsAccessPage({
         setSuccess(true);
         loadAccessData();
       } else {
-        setError(result.error || "Failed to save access settings");
+        setError(result.error || "Gagal menyimpan pengaturan akses");
       }
     } catch (err) {
-      setError("Failed to save access settings");
+      setError("Gagal menyimpan pengaturan akses");
     } finally {
       setSaving(false);
     }
@@ -122,7 +122,7 @@ export default function CmsAccessPage({
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading access settings...</p>
+          <p className="mt-4 text-gray-600">Memuat pengaturan akses...</p>
         </div>
       </div>
     );
@@ -130,20 +130,20 @@ export default function CmsAccessPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold text-gray-900">CMS Access Control</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Manage which roles can access specific CMS modules
+            Atur role yang dapat mengakses modul CMS tertentu
           </p>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex w-full shrink-0 items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto"
         >
           <Save className="h-4 w-4" />
-          {saving ? "Saving..." : "Save Changes"}
+          {saving ? "Menyimpan..." : "Simpan Perubahan"}
         </button>
       </div>
 
@@ -157,13 +157,13 @@ export default function CmsAccessPage({
       {success && (
         <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center gap-2">
           <Check className="h-5 w-5" />
-          Access settings saved successfully!
+          Pengaturan akses berhasil disimpan!
         </div>
       )}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="hidden overflow-x-auto md:block">
+          <table className="w-full min-w-[760px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50">
@@ -213,7 +213,7 @@ export default function CmsAccessPage({
                               ? "bg-primary-600"
                               : "bg-gray-200 hover:bg-gray-300"
                           }`}
-                          title={`${hasAccess ? "Revoke" : "Grant"} access to ${module.label}`}
+                          title={`${hasAccess ? "Cabut" : "Berikan"} akses ${module.label}`}
                         >
                           <span
                             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -229,18 +229,66 @@ export default function CmsAccessPage({
             </tbody>
           </table>
         </div>
+
+        <div className="divide-y divide-gray-200 md:hidden">
+          {CMS_ROLES.map((roleConfig) => (
+            <section key={roleConfig.value} className="p-4">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-600">
+                  <Shield className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-gray-900">{roleConfig.label}</p>
+                  <p className="text-xs text-gray-500">{roleConfig.value}</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {CMS_MODULES.map((module) => {
+                  const hasAccess = (localAccess[roleConfig.value] || []).includes(
+                    module.id
+                  );
+                  return (
+                    <div
+                      key={module.id}
+                      className="flex items-center justify-between gap-4 rounded-lg bg-gray-50 px-3 py-2.5"
+                    >
+                      <span className="min-w-0 text-sm font-medium text-gray-700">
+                        {module.label}
+                      </span>
+                      <button
+                        onClick={() => toggleModule(roleConfig.value, module.id)}
+                        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+                          hasAccess
+                            ? "bg-primary-600"
+                            : "bg-gray-200 hover:bg-gray-300"
+                        }`}
+                        title={`${hasAccess ? "Cabut" : "Berikan"} akses ${module.label}`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            hasAccess ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
+        </div>
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <div className="flex items-start gap-3">
           <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
           <div className="text-sm text-blue-800">
-            <p className="font-semibold mb-1">How it works:</p>
+            <p className="font-semibold mb-1">Cara kerja:</p>
             <ul className="list-disc list-inside space-y-1 text-blue-700">
-              <li>Toggle switches to grant or revoke access for each role</li>
-              <li>Only the tenant owner can modify these settings</li>
-              <li>Members with MEMBER role cannot access any CMS pages</li>
-              <li>Click "Save Changes" to apply your modifications</li>
+              <li>Gunakan tombol toggle untuk memberikan atau mencabut akses setiap role</li>
+              <li>Hanya owner kelas yang dapat mengubah pengaturan ini</li>
+              <li>Anggota dengan role MEMBER tidak dapat mengakses halaman CMS apa pun</li>
+              <li>Klik "Simpan Perubahan" untuk menerapkan perubahan</li>
             </ul>
           </div>
         </div>

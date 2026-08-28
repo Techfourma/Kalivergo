@@ -178,6 +178,18 @@ export default function SignupPage() {
           </div>
 
           <div>
+            <label className="block text-sm font-medium text-dark-700 mb-1">NIM</label>
+            <input
+              type="text"
+              name="nim"
+              required
+              disabled={isLoading || showPopup}
+              className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+              placeholder="Masukkan NIM Anda"
+            />
+          </div>
+
+          <div>
             <label className="block text-sm font-medium text-dark-700 mb-1">Email (Gmail)</label>
             <input
               type="email"
