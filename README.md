@@ -385,4 +385,3 @@ Kalivergo dikembangkan sebagai platform internal dan proprietary. Detail impleme
 **Proprietary & Confidential**
 
 Hak Cipta © 2026 Kalivergo. Semua hak dilindungi undang-undang. Penggunaan, penyalinan, distribusi, modifikasi, dan reverse engineering tanpa izin tertulis tidak diperbolehkan.
->>>>>>> 46b6ae498b77a39fd4a6d5212b1aa647e93d579a
