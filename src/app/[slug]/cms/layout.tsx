@@ -16,6 +16,7 @@ const ALL_CMS_MODULES = [
   "schedule",
   "seminar",
   "audit",
+  "information",
 ];
 
 export const dynamic = "force-dynamic";

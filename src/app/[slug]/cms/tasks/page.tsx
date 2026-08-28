@@ -74,7 +74,7 @@ export default async function TasksPage({ params }: TenantCmsTasksPageProps) {
                   type="datetime-local"
                   name="deadline"
                   required
-                  className="w-full px-4 py-2.5 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm md:text-base transition-shadow"
+                  className="w-full px-4 py-2.5 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm md:text-base transition-shadow [color-scheme:light] dark:[color-scheme:dark]"
                 />
               </div>
             </div>

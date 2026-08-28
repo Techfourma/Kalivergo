@@ -26,7 +26,8 @@ export function AssistantWidget() {
           "flex items-center justify-center",
           "bg-primary-600 text-white",
           "hover:bg-primary-700 transition-all duration-200",
-          "shadow-lg shadow-primary-600/30",
+          "shadow-lg shadow-primary-600/40",
+          "hover:shadow-xl hover:shadow-primary-500/50 hover:scale-105",
           "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-dark-900",
           "group"
         )}

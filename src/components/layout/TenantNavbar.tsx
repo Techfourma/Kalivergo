@@ -18,6 +18,7 @@ import {
   User,
   LayoutDashboard,
   FolderOpen,
+  FileText,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import ThemeToggle from "@/components/ui/ThemeToggle";
@@ -93,6 +94,12 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
 
   const navItems: NavItem[] = [
     { href: `${tenantPath}/home`, label: "Home", icon: Home },
+    {
+      href: `${tenantPath}/information`,
+      label: "Information",
+      icon: FileText,
+      requiresAuth: true
+    },
     {
       href: `${tenantPath}/dashboard`,
       label: "Dashboard",
