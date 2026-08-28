@@ -62,6 +62,12 @@ model User {
   submissions     Submission[]
   seminarSubmissions SeminarSubmission[]
 
+  // Information feed relations
+  informations    Information[]
+  comments        Comment[]
+  reactions       Reaction[]
+  readMarks       ReadMark[]
+
   @@map("users")
 }
 
@@ -126,6 +132,7 @@ model Tenant {
   categories       Category[]
   uangKasSchedules UangKasSchedule[]
   cmsAccessPermissions CmsAccessPermission[]
+  informations     Information[]
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt
 
@@ -401,4 +408,93 @@ model CmsAccessPermission {
   @@unique([tenantId, cmsRole, module])
   @@index([tenantId])
   @@map("cms_access_permissions")
+}
+
+// Information Feed Models
+enum InformationType {
+  IMAGE
+  VIDEO
+  PDF
+  TEXT
+}
+
+model Information {
+  id          String           @id @default(cuid())
+  tenantId    String
+  userId      String
+  title       String
+  content     String           @db.Text
+  type        InformationType
+  mediaUrl    String?
+  mediaPublicId String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments    Comment[]
+  reactions   Reaction[]
+  readMarks   ReadMark[]
+
+  @@index([tenantId])
+  @@index([createdAt])
+  @@map("informations")
+}
+
+model Comment {
+  id              String    @id @default(cuid())
+  informationId   String
+  userId          String
+  parentId        String?
+  content         String    @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  information     Information @relation(fields: [informationId], references: [id], onDelete: Cascade)
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent          Comment?    @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies         Comment[]   @relation("CommentReplies")
+
+  @@index([informationId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  LAUGH
+  WOW
+  SAD
+  ANGRY
+}
+
+model Reaction {
+  id            String        @id @default(cuid())
+  informationId String
+  userId        String
+  type          ReactionType
+  createdAt     DateTime      @default(now())
+
+  information   Information   @relation(fields: [informationId], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([informationId, userId])
+  @@index([informationId])
+  @@map("reactions")
+}
+
+model ReadMark {
+  id            String    @id @default(cuid())
+  informationId String
+  userId        String
+  readAt        DateTime  @default(now())
+
+  information   Information @relation(fields: [informationId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([informationId, userId])
+  @@index([informationId])
+  @@index([userId])
+  @@map("read_marks")
 }

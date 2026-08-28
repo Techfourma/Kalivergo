@@ -11,7 +11,7 @@ export const AIAssistantConfig = {
   maxMessageLength: 2000,
 
   generation: {
-    maxOutputTokens: 600,
+    maxOutputTokens: env.aiMaxOutputTokens,
     temperature: 0.3,
     topP: 0.8,
   },
