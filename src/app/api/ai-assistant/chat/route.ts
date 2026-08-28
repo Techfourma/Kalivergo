@@ -1,8 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { sendToAIAssistant, validateAIResponse } from '@/server/ai/client';
-import { AIAssistantConfig, validateAIAssistantConfig } from '@/server/ai/config';
-import { env } from '@/config/env';
-import { getCurrentSessionUser } from '@/server/auth/session';
+import { NextRequest, NextResponse } from "next/server";
+import { sendToAIAssistant, validateAIResponse } from "@/server/ai/client";
+import { AIAssistantConfig } from "@/server/ai/config";
+import { getCurrentSessionUser } from "@/server/auth/session";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,8 +12,8 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: {
-            code: 'UNAUTHENTICATED',
-            message: 'Anda harus login untuk menggunakan AI Assistant.',
+            code: "UNAUTHENTICATED",
+            message: "Anda harus login untuk menggunakan AI Assistant.",
           },
         },
         { status: 401 }
@@ -31,21 +30,21 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: {
-            code: 'INVALID_JSON',
-            message: 'Format permintaan tidak valid.',
+            code: "INVALID_JSON",
+            message: "Format permintaan tidak valid.",
           },
         },
         { status: 400 }
       );
     }
 
-    if (!body || typeof body !== 'object') {
+    if (!body || typeof body !== "object") {
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: 'INVALID_BODY',
-            message: 'Format permintaan tidak valid.',
+            code: "INVALID_BODY",
+            message: "Format permintaan tidak valid.",
           },
         },
         { status: 400 }
@@ -55,13 +54,13 @@ export async function POST(request: NextRequest) {
     const reqBody = body as Record<string, unknown>;
 
     const message = reqBody.message;
-    if (typeof message !== 'string') {
+    if (typeof message !== "string") {
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: 'MISSING_MESSAGE',
-            message: 'Pesan diperlukan.',
+            code: "MISSING_MESSAGE",
+            message: "Pesan diperlukan.",
           },
         },
         { status: 400 }
@@ -74,8 +73,8 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: {
-            code: 'EMPTY_MESSAGE',
-            message: 'Pesan tidak boleh kosong.',
+            code: "EMPTY_MESSAGE",
+            message: "Pesan tidak boleh kosong.",
           },
         },
         { status: 400 }
@@ -87,7 +86,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: {
-            code: 'MESSAGE_TOO_LONG',
+            code: "MESSAGE_TOO_LONG",
             message: `Pesan terlalu panjang. Maksimal ${AIAssistantConfig.maxMessageLength} karakter.`,
           },
         },
@@ -96,60 +95,33 @@ export async function POST(request: NextRequest) {
     }
 
     const conversationId = reqBody.conversationId;
-    if (conversationId !== undefined && typeof conversationId !== 'string') {
+    if (conversationId !== undefined && typeof conversationId !== "string") {
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: 'INVALID_CONVERSATION_ID',
-            message: 'ID percakapan tidak valid.',
+            code: "INVALID_CONVERSATION_ID",
+            message: "ID percakapan tidak valid.",
           },
         },
         { status: 400 }
       );
     }
 
-    const aiSecret = env.aiAssistantSecret;
-    const aiConfig = validateAIAssistantConfig();
-    if (!aiConfig.valid || !aiSecret) {
-      if (env.nodeEnv === 'development') {
-        return NextResponse.json({
-          success: true,
-          data: {
-            response: '[MOCK MODE] AI Assistant belum dikonfigurasi. Harap tambahkan AI_ASSISTANT_SECRET ke environment variables.',
-            conversationId: conversationId || `mock-${Date.now()}`,
-          },
-        });
-      }
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'CONFIGURATION_ERROR',
-            message: 'AI Assistant tidak dikonfigurasi dengan benar.',
-          },
-        },
-        { status: 500 }
-      );
-    }
-
-    const aiResult = await sendToAIAssistant(
-      {
-        message: trimmedMessage,
-        userId,
-        conversationId: typeof conversationId === "string" ? conversationId : "",
-      },
-      aiSecret
-    );
+    const aiResult = await sendToAIAssistant({
+      message: trimmedMessage,
+      userId,
+      conversationId: typeof conversationId === "string" ? conversationId : "",
+    });
 
     if (!aiResult.success) {
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: 'AI_BACKEND_ERROR',
-            message: aiResult.error?.message || 'Terjadi masalah saat memproses pertanyaan.',
+            code: "AI_BACKEND_ERROR",
+            message:
+              aiResult.error?.message || "Terjadi masalah saat memproses pertanyaan.",
           },
         },
         { status: 503 }
@@ -161,8 +133,8 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: {
-            code: 'INVALID_AI_RESPONSE',
-            message: 'Respons AI tidak valid.',
+            code: "INVALID_AI_RESPONSE",
+            message: "Respons AI tidak valid.",
           },
         },
         { status: 502 }
@@ -171,14 +143,17 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(aiResult.response);
   } catch (error) {
-    console.error('[AI Assistant] Unexpected error:', error instanceof Error ? error.message : error);
+    console.error(
+      "[AI Assistant] Unexpected error:",
+      error instanceof Error ? error.message : error
+    );
 
     return NextResponse.json(
       {
         success: false,
         error: {
-          code: 'INTERNAL_ERROR',
-          message: 'Terjadi masalah saat memproses pertanyaan. Silakan coba lagi.',
+          code: "INTERNAL_ERROR",
+          message: "Terjadi masalah saat memproses pertanyaan. Silakan coba lagi.",
         },
       },
       { status: 500 }

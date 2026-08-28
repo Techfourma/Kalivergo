@@ -22,6 +22,7 @@ import {
   LayoutDashboard,
   User,
   GraduationCapIcon,
+  FileText,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 
@@ -104,6 +105,7 @@ export default function Navbar({ user, onSignIn, onSignOut }: NavbarProps) {
         { href: "/cms/finance", label: "Finance", icon: Wallet },
         { href: "/cms/schedule", label: "Schedule", icon: Calendar },
         { href: "/cms/seminar", label: "Seminar", icon: GraduationCap },
+        { href: "/cms/information", label: "Information", icon: FileText },
       ];
     }
 

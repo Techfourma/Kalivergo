@@ -2,37 +2,23 @@ import "server-only";
 import { env } from "@/config/env";
 
 export const AIAssistantConfig = {
- 
-  url: env.aiAssistantUrl || 'http://localhost:4000',
+  geminiApiKey: env.geminiApiKey,
 
- 
-  timeoutMs: parseInt(env.aiAssistantTimeoutMs || '30000', 10),
+  geminiModel: env.geminiModel || "gemini-2.5-flash",
 
-  
+  knowledgeBaseDir: env.knowledgeBaseDir || "dataset",
+
   maxMessageLength: 2000,
 
-  
-  maxUserRetries: 3,
+  generation: {
+    maxOutputTokens: env.aiMaxOutputTokens,
+    temperature: 0.3,
+    topP: 0.8,
+  },
+
+  maxRetries: 2,
 } as const;
 
-export function validateAIAssistantConfig(): { valid: boolean; missing?: string[] } {
-  if (typeof window !== 'undefined') {
-   
-    return { valid: true };
-  }
-
-  const missing: string[] = [];
-
-  if (!env.aiAssistantUrl) {
-    missing.push('AI_ASSISTANT_URL');
-  }
-
-  if (!env.aiAssistantSecret) {
-    missing.push('AI_ASSISTANT_SECRET');
-  }
-
-  return {
-    valid: missing.length === 0,
-    missing: missing.length > 0 ? missing : undefined,
-  };
+export function isAIConfigured(): boolean {
+  return Boolean(AIAssistantConfig.geminiApiKey);
 }

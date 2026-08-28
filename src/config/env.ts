@@ -23,14 +23,18 @@ export const env = {
   get cloudinaryCloudName(): string | undefined {
     return process.env.CLOUDINARY_CLOUD_NAME;
   },
-  get aiAssistantUrl(): string | undefined {
-    return process.env.AI_ASSISTANT_URL;
+  get geminiApiKey(): string | undefined {
+    return process.env.GEMINI_API_KEY;
   },
-  get aiAssistantSecret(): string | undefined {
-    return process.env.AI_ASSISTANT_SECRET;
+  get geminiModel(): string | undefined {
+    return process.env.GEMINI_MODEL;
   },
-  get aiAssistantTimeoutMs(): string | undefined {
-    return process.env.AI_ASSISTANT_TIMEOUT_MS;
+  get knowledgeBaseDir(): string | undefined {
+    return process.env.KNOWLEDGE_BASE_DIR;
+  },
+  get aiMaxOutputTokens(): number {
+    const value = Number(process.env.AI_MAX_OUTPUT_TOKENS);
+    return Number.isFinite(value) && value > 0 ? value : 1500;
   },
   get brevoApiKey(): string | undefined {
     return process.env.BREVO_API_KEY;

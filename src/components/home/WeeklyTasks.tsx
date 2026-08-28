@@ -5,6 +5,7 @@ import Badge from "@/components/ui/Badge";
 import { CalendarDays, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { getDaysRemaining, formatDateTime } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface Task {
   id: string;
@@ -15,15 +16,23 @@ interface Task {
 
 interface WeeklyTasksProps {
   tasks: Task[];
+  tenantPath?: string;
 }
 
-export default function WeeklyTasks({ tasks }: WeeklyTasksProps) {
+export default function WeeklyTasks({ tasks, tenantPath }: WeeklyTasksProps) {
   const sortedTasks = [...tasks].sort(
     (a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
   );
 
-  return (
-    <Card>
+  const card = (
+    <Card
+      className={cn(
+        "transition-all duration-300",
+        tenantPath
+          ? "hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
+          : ""
+      )}
+    >
       <div className="flex items-center gap-3 mb-5">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
           <CalendarDays className="h-5 w-5" />
@@ -100,5 +109,13 @@ export default function WeeklyTasks({ tasks }: WeeklyTasksProps) {
         )}
       </div>
     </Card>
+  );
+
+  if (!tenantPath) return card;
+
+  return (
+    <Link href={`${tenantPath}/tasks`} className="block">
+      {card}
+    </Link>
   );
 }

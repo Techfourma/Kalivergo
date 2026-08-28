@@ -37,6 +37,7 @@ const cmsNavItems: CmsNavItem[] = [
   { href: "/cms/finance", label: "Finance", icon: Wallet, module: "finance" },
   { href: "/cms/schedule", label: "Schedule", icon: Calendar, module: "schedule" },
   { href: "/cms/seminar", label: "Seminar", icon: GraduationCap, module: "seminar" },
+  { href: "/cms/information", label: "Information", icon: FileText, module: "information" },
   { href: "/cms/audit", label: "Audit Log", icon: FileText, module: "audit" },
   { href: "/cms/access", label: "Access Control", icon: Shield, module: "access", ownerOnly: true },
 ];
@@ -140,12 +141,11 @@ export default function Sidebar({ variant, userRole, tenantPath, cmsModules }: S
 
       <aside
         className={cn(
-          "shrink-0 bg-white border-r border-dark-200 min-h-screen transition-all duration-300 ease-in-out max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-40 dark:bg-dark-950 dark:border-dark-800",
-          isCollapsed ? "w-0" : "w-64"
+          "relative z-10 w-64 min-w-[16rem] shrink-0 bg-white border-r border-dark-200 min-h-screen transition-all duration-300 ease-in-out max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-40 dark:bg-dark-950 dark:border-dark-800",
+          isCollapsed ? "w-0 min-w-0 overflow-hidden" : "w-64"
         )}
       >
-        {!isCollapsed && (
-          <div className="p-4 h-screen sticky top-0 overflow-y-auto">
+        <div className="p-4 h-screen sticky top-0 overflow-y-auto text-dark-900 dark:text-dark-100">
             <div className="flex items-center justify-between mb-6">
               <p className="text-xs font-semibold uppercase tracking-wider text-dark-400">
                 {sidebarTitle}
@@ -191,8 +191,7 @@ export default function Sidebar({ variant, userRole, tenantPath, cmsModules }: S
                 );
               })}
             </div>
-          </div>
-        )}
+        </div>
       </aside>
     </>
   );

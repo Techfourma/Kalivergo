@@ -4,6 +4,7 @@ import {
   listSeminarsByTenant,
   listSeminarsByTenantWithSubmissions,
   listUpcomingSeminarsByTenant,
+  listSeminarsInNext7Days as repoListSeminarsInNext7Days,
 } from "@/features/seminar/repositories/seminar.repository";
 
 export async function listSeminars(tenantId: string) {
@@ -16,4 +17,8 @@ export async function listSeminarsWithSubmissions(tenantId: string) {
 
 export async function listUpcomingSeminars(tenantId: string) {
   return listUpcomingSeminarsByTenant(tenantId);
+}
+
+export async function listSeminarsInNext7Days(tenantId: string) {
+  return repoListSeminarsInNext7Days(tenantId);
 }

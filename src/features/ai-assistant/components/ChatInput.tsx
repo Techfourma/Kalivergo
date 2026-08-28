@@ -22,7 +22,7 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
             "min-h-[48px] max-h-[120px]",
             className
           )}
-          placeholder="Tanyakan tentang akademik, KRS, jadwal, atau peraturan kampus..."
+          placeholder="Tulis pertanyaan tentang Kalivergo..."
           rows={1}
           disabled={isLoading}
           {...props}

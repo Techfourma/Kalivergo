@@ -50,6 +50,9 @@ interface CashFlowChartProps {
   programName?: string;
   className?: string;
   members?: MemberInfo[];
+  incomeCategories?: { id: string; name: string; type?: string }[];
+  expenseCategories?: { id: string; name: string; type?: string }[];
+  shouldLockFeatures?: boolean;
 }
 
 export default function CashFlowChart({
@@ -57,10 +60,20 @@ export default function CashFlowChart({
   universityName = "Universitas",
   programName = "Program",
   className = "Kelas",
-  members = []
+  members = [],
+  incomeCategories = [],
+  expenseCategories = [],
+  shouldLockFeatures: shouldLockFeaturesProp,
 }: CashFlowChartProps) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [showCategoryNotice, setShowCategoryNotice] = useState(false);
+
+  const hasIncomeCategories = incomeCategories.length > 0;
+  const hasExpenseCategories = expenseCategories.length > 0;
+  const onlyHasUangKas = hasIncomeCategories && !hasExpenseCategories && incomeCategories.some(cat => cat.name.toLowerCase().includes("uang kas"));
+  const computedShouldLockFeatures = onlyHasUangKas || (!hasIncomeCategories && !hasExpenseCategories);
+  const shouldLockFeatures = shouldLockFeaturesProp ?? computedShouldLockFeatures;
 
   const filtered = useMemo(() => {
     if (!startDate && !endDate) return transactions;
@@ -134,8 +147,8 @@ export default function CashFlowChart({
     return Array.from(map.values()).sort((a, b) => b.amount - a.amount);
   }, [filtered]);
 
-  const incomeCategories = categoryBreakdown.filter((c) => c.type === "INCOME");
-  const expenseCategories = categoryBreakdown.filter((c) => c.type === "EXPENSE");
+  const incomeCategoryBreakdown = categoryBreakdown.filter((c) => c.type === "INCOME");
+  const expenseCategoryBreakdown = categoryBreakdown.filter((c) => c.type === "EXPENSE");
 
   const resetRange = () => {
     setStartDate("");
@@ -277,7 +290,28 @@ export default function CashFlowChart({
         </Card>
       </div>
 
-      <Card padding="md">
+      {shouldLockFeatures && (
+        <Card padding="md" className="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/40">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-amber-900 dark:text-amber-200">Fitur Terkunci</h3>
+              <p className="text-sm text-amber-700 dark:text-amber-300/80 mt-1">
+                {onlyHasUangKas
+                  ? "Anda hanya memiliki kategori Uang Kas. Silakan tambahkan kategori Pemasukan dan Pengeluaran terlebih dahulu untuk membuka fitur Arus Kas dan Tunggakan Uang Kas."
+                  : "Silakan tambahkan kategori Pemasukan dan Pengeluaran terlebih dahulu untuk membuka fitur Arus Kas dan Tunggakan Uang Kas."
+                }
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      <Card padding="md" className={shouldLockFeatures ? "opacity-50 pointer-events-none" : ""}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
@@ -303,7 +337,8 @@ export default function CashFlowChart({
                 value={startDate}
                 max={endDate || undefined}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900 text-dark-900 dark:text-dark-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
+                disabled={shouldLockFeatures}
+                className="rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900 text-dark-900 dark:text-dark-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark] disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </label>
             <label className="flex flex-col gap-1">
@@ -315,13 +350,15 @@ export default function CashFlowChart({
                 value={endDate}
                 min={startDate || undefined}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900 text-dark-900 dark:text-dark-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
+                disabled={shouldLockFeatures}
+                className="rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900 text-dark-900 dark:text-dark-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark] disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </label>
             <button
               type="button"
               onClick={resetRange}
-              className="inline-flex items-center gap-2 rounded-xl border border-dark-200 dark:border-dark-700 px-4 py-2 text-sm font-medium text-dark-700 dark:text-dark-300 transition-colors hover:bg-dark-50 dark:hover:bg-dark-800 hover:text-dark-900 dark:hover:text-white"
+              disabled={shouldLockFeatures}
+              className="inline-flex items-center gap-2 rounded-xl border border-dark-200 dark:border-dark-700 px-4 py-2 text-sm font-medium text-dark-700 dark:text-dark-300 transition-colors hover:bg-dark-50 dark:hover:bg-dark-800 hover:text-dark-900 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <RotateCcw className="h-4 w-4" />
               Reset
@@ -356,13 +393,14 @@ export default function CashFlowChart({
         )}
       </Card>
 
-      <Card padding="lg">
+      <Card padding="lg" className={shouldLockFeatures ? "opacity-50 pointer-events-none" : ""}>
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-bold text-dark-900 dark:text-white">Arus Kas</h3>
           <button
             type="button"
             onClick={handleExportPDF}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
+            disabled={shouldLockFeatures}
+            className="inline-flex items-center gap-2 rounded-xl bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <FileDown className="h-4 w-4" />
             Export PDF
@@ -461,9 +499,9 @@ export default function CashFlowChart({
             </div>
           </div>
 
-          {incomeCategories.length > 0 ? (
+          {incomeCategoryBreakdown.length > 0 ? (
             <ul className="space-y-3">
-              {incomeCategories.map((item) => {
+              {incomeCategoryBreakdown.map((item) => {
                 const pct =
                   summary.totalIncome > 0
                     ? Math.round((item.amount / summary.totalIncome) * 100)
@@ -513,9 +551,9 @@ export default function CashFlowChart({
             </div>
           </div>
 
-          {expenseCategories.length > 0 ? (
+          {expenseCategoryBreakdown.length > 0 ? (
             <ul className="space-y-3">
-              {expenseCategories.map((item) => {
+              {expenseCategoryBreakdown.map((item) => {
                 const pct =
                   summary.totalExpense > 0
                     ? Math.round((item.amount / summary.totalExpense) * 100)

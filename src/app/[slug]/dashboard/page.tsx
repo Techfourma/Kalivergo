@@ -113,7 +113,20 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
   const finalExpectedPaymentDates = uangKasScheduleDates;
 
-const members = users.map((user) => {
+  const incomeCategoryNames = Array.from(new Set(
+    dbTransactions
+      .filter(t => t.type === "INCOME" && t.category?.name)
+      .map(t => t.category!.name.toLowerCase())
+  ));
+  const expenseCategoryNames = Array.from(new Set(
+    dbTransactions
+      .filter(t => t.type === "EXPENSE" && t.category?.name)
+      .map(t => t.category!.name.toLowerCase())
+  ));
+  const onlyHasUangKas = incomeCategoryNames.length > 0 && expenseCategoryNames.length === 0 && incomeCategoryNames.some(name => name.includes("uang kas"));
+  const shouldLockFeatures = onlyHasUangKas || (incomeCategoryNames.length === 0 && expenseCategoryNames.length === 0);
+
+  const members = users.map((user) => {
 
     const userPayments = user.cashPayments || [];
 
@@ -205,19 +218,13 @@ return {
         <div className="mb-8">
           <div className="flex items-center gap-3">
 
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-100 text-primary-600 dark:bg-primary-500/15 dark:text-primary-400">
-              <span className="text-2xl font-bold">
-                💰
-              </span>
-            </div>
-
             <div>
               <h1 className="text-3xl font-bold text-dark-900 dark:text-white font-display">
                 Dashboard Keuangan
               </h1>
 
               <p className="text-muted mt-1">
-                Monitoring uang kas kelas Kalivergo
+                Monitoring uang kas dan transaksi keuangan {tenantInfo?.university.name || "Universitas"} - {tenantInfo?.program.name || "Program"} - {tenantInfo?.name || "Kelas"}.
               </p>
             </div>
 
@@ -231,11 +238,13 @@ return {
             programName={tenantInfo?.program.name || "Program"}
             className={tenantInfo?.name || "Kelas"}
             members={users.map(u => ({ userId: u.id, userName: u.name }))}
+            shouldLockFeatures={shouldLockFeatures}
           />
 
           <ArrearsList
             members={finalMembers as any}
             hasUangKasSettings={finalExpectedPaymentDates.length > 0}
+            shouldLockFeatures={shouldLockFeatures}
           />
         </div>
 

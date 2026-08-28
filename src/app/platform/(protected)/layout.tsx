@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentSessionUserId } from "@/server/auth/session";
-import { ShieldCheck, Home, FileSearch, FileText } from "lucide-react";
+import { ShieldCheck, Home, FileSearch, FileText, Users } from "lucide-react";
 import PlatformLogoutButton from "@/components/platform/PlatformLogoutButton";
 
 export const dynamic = "force-dynamic";
@@ -62,6 +62,13 @@ export default async function PlatformProtectedLayout({
             >
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Audit KYC</span>
+            </Link>
+            <Link
+              href="/platform/user"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-dark-600 hover:bg-dark-100 hover:text-dark-900 transition-colors"
+            >
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Owner</span>
             </Link>
             <Link
               href="/"

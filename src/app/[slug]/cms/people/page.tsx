@@ -3,6 +3,7 @@ import { resolveTenantFromRoute } from '@/lib/tenant';
 import { notFound } from 'next/navigation';
 import { acceptUser, rejectUser, updateUserRole } from '@/actions/cms/people';
 import MemberReviewCard from '@/components/cms/MemberReviewCard';
+import DeleteUserButton from '@/components/cms/DeleteUserButton';
 import { env } from '@/config/env';
 
 import PageBackground from '@/components/ui/PageBackground';
@@ -174,17 +175,26 @@ export default async function PeoplePage({ params }: TenantCmsPeoplePageProps) {
                             </span>
                           )}
                         </td>
-                        <td className="px-6 py-4">
-                          {isPending ? (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700">
-                              Menunggu Approval
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">
-                              Aktif
-                            </span>
-                          )}
-                        </td>
+                         <td className="px-6 py-4">
+                           {isPending ? (
+                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700">
+                               Menunggu Approval
+                             </span>
+                           ) : (
+                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">
+                               Aktif
+                             </span>
+                           )}
+                           {!isPending && !isOwner && (
+                             <div className="mt-2">
+                               <DeleteUserButton
+                                 userId={user.id}
+                                 userName={user.name}
+                                 tenantId={tenantId}
+                               />
+                             </div>
+                           )}
+                         </td>
                       </tr>
                     );
                   })
