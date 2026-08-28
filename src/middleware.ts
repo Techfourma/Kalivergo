@@ -95,12 +95,17 @@ export async function middleware(req: NextRequest) {
 
   const isTenantRoute = tenantContext !== null;
 
-  const isProtectedPath =
-    isTenantRoute &&
-    (pathname.includes('/dashboard') ||
-      pathname.includes('/profil') ||
-      pathname.includes('/home') ||
-      !pathname.includes('/portofolio'));
+  // Landing `/{slug}` and member portfolios (`/{slug}/portofolio/...`) are
+  // public for guests/anonymous visitors. Every other tenant subpage
+  // (`/home`, `/dashboard`, `/tasks`, `/seminar`, `/information`, `/profil`)
+  // stays protected and only authenticated members of the tenant may access it.
+  const pathSegments = pathname.split('/').filter(Boolean);
+  const isTenantLandingPath = isTenantRoute && pathSegments.length === 1;
+  // Public tenant-facing pages: the landing `/{slug}` and member portfolios
+  // (`/{slug}/portofolio/...`) are viewable by guests/anonymous visitors.
+  const isTenantPublicPath = isTenantLandingPath || pathname.includes('/portofolio');
+
+  const isProtectedPath = isTenantRoute && !isTenantPublicPath;
 
   const sessionUser = parseSessionCookie(req.cookies.get('kalivergo_user')?.value);
 
