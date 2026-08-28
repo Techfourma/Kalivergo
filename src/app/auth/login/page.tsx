@@ -41,7 +41,7 @@ export default function LoginPage() {
           </div>
           <div className="flex items-center gap-2">
             <Shield className="h-3.5 w-3.5" />
-            <span>Gunakan halaman /home, /dashboard, /cms, /about, /project.</span>
+            <span>Gunakan halaman /home, /dashboard, /cms, /about.</span>
           </div>
           <div className="flex items-center gap-2">
             <Users className="h-3.5 w-3.5" />

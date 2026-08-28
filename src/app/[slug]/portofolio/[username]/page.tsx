@@ -2,37 +2,63 @@ import { notFound } from "next/navigation";
 import PortofolioView, { type PortfolioUser } from "@/features/portfolio/components/PortofolioView";
 import Footer from "@/components/layout/Footer";
 import PageBackground from "@/components/ui/PageBackground";
+import { prisma } from "@/server/db/prisma";
 import { getCurrentSessionUser } from "@/server/auth/session";
 import { findPortfolioById } from "@/features/portfolio/repositories/portfolio.repository";
-import {
-  getPortfolio,
-  getPortfolioInTenant,
-} from "@/features/portfolio/services/portfolio.service";
+import { getPortfolioInTenant } from "@/features/portfolio/services/portfolio.service";
+import { resolveTenantFromRoute } from "@/lib/tenant";
 
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
   params: Promise<{
+    slug: string;
     username: string;
-    university?: string;
-    program?: string;
-    class?: string;
+  }>;
+  searchParams?: Promise<{
+    uid?: string;
   }>;
 }
 
-export default async function PortfolioPage({ params }: PageProps) {
-  const { username, university, program, class: classSlug } = await params;
+export default async function PortfolioPage({ params, searchParams }: PageProps) {
+  const { slug, username } = await params;
+  const { uid } = (await searchParams) ?? {};
+
+  const tenantContext = await resolveTenantFromRoute({ slug });
+  if (!tenantContext) {
+    notFound();
+  }
 
   try {
     const decodedUsername = decodeURIComponent(username);
-    const portfolioUser = university && program && classSlug
-      ? await getPortfolioInTenant(decodedUsername, {
-          university,
-          program,
-          class: classSlug,
-        })
-      : await getPortfolio({ username: decodedUsername });
 
+    let portfolioUser: PortfolioUser | null = null;
+
+    // Prefer the exact user by id (sent from the tenant landing member card),
+    // but only if that user is actually a member of this tenant.
+    if (uid) {
+      const membership = await prisma.tenantMembership.findFirst({
+        where: { userId: uid, tenantId: tenantContext.tenantId },
+        select: { userId: true },
+      });
+      if (membership) {
+        portfolioUser = await findPortfolioById(uid);
+      }
+    }
+
+    // Fallback: resolve the portfolio scoped to this tenant by name so the
+    // member shown on the tenant landing opens that user's portfolio
+    // (public for guests).
+    if (!portfolioUser) {
+      portfolioUser =
+        await getPortfolioInTenant(decodedUsername, {
+          university: tenantContext.universitySlug,
+          program: tenantContext.programSlug,
+          class: tenantContext.classSlug,
+        });
+    }
+
+    // Strict tenant isolation: only members of this tenant are ever shown.
     if (!portfolioUser) {
       notFound();
     }

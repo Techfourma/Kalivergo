@@ -4,7 +4,6 @@ import {
   ArrowRight,
   Sparkles,
   Users,
-  FolderKanban,
   CheckCircle2,
   UserPlus,
   BookOpen,
@@ -26,7 +25,6 @@ import Loading from "@/components/layout/Loading";
 
 const STATS = [
   { label: "Anggota Aktif", value: "31", icon: Users, dynamicMemberCount: true },
-  { label: "Project", value: "15+", icon: FolderKanban },
   { label: "Tugas Selesai", value: "95%", icon: CheckCircle2 },
 ];
 
@@ -118,6 +116,8 @@ export interface TenantLandingProps {
   program?: string;
   classSlug?: string;
   customSlug?: string;
+  /** Real org/member data resolved server-side for public landing access. */
+  members?: OrgMember[];
 }
 
 export default function TenantLanding({
@@ -127,11 +127,12 @@ export default function TenantLanding({
   program,
   classSlug,
   customSlug,
+  members: serverMembers,
 }: TenantLandingProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [members, setMembers] = useState<OrgMember[]>([]);
-  const [isMembersLoading, setIsMembersLoading] = useState(true);
+  const [members, setMembers] = useState<OrgMember[]>(serverMembers ?? []);
+  const [isMembersLoading, setIsMembersLoading] = useState(!serverMembers);
 
   const tenantPath = customSlug ? `/${customSlug}` : "";
 
@@ -327,12 +328,6 @@ function HeroSection({
           Daftar Sekarang
           <ArrowRight className="h-5 w-5" />
         </button>
-        <button
-          onClick={() => navigateWithLoading(tenantPath ? `${tenantPath}/project` : "/project")}
-          className="flex items-center gap-2 rounded-xl border-2 border-white/30 bg-dark-100/80 dark:bg-dark-800/70 backdrop-blur-sm px-8 py-3.5 text-base font-semibold text-dark-900 dark:text-white hover:bg-dark-100/80 dark:bg-dark-800/70 hover:border-dark-200/60 dark:border-dark-8000 hover:scale-105 transition-all"
-        >
-          Lihat Project
-        </button>
       </div>
     </div>
   );
@@ -524,7 +519,9 @@ function OrganizationSection({
         aria-label={`Lihat portfolio ${member.fullName || member.name}`}
         onClick={() =>
           navigateWithLoading(
-            `${tenantPath ? `${tenantPath}/portofolio/` : "/portofolio/"}${encodeURIComponent(member.fullName || member.name)}`,
+            `${tenantPath ? `${tenantPath}/portofolio/` : "/portofolio/"}${encodeURIComponent(
+              member.fullName || member.name,
+            )}?uid=${encodeURIComponent(member.id)}`,
           )
         }
         className={cn(
