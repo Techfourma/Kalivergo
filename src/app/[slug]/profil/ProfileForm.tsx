@@ -320,15 +320,15 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         <div
           className={`p-4 rounded-xl ${
             message.type === "success"
-              ? "bg-green-500/10 border border-green-500/20 text-green-400"
-              : "bg-red-500/10 border border-red-500/20 text-red-400"
+              ? "bg-green-500/10 border border-green-500/20 text-green-700 dark:text-green-400"
+              : "bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-400"
           }`}
         >
           {message.text}
         </div>
       )}
 
-      <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+      <Card padding="lg" className="bg-white border-dark-200 dark:bg-dark-900 dark:border-dark-800">
         <div className="flex flex-col items-center space-y-4">
           <div className="relative group">
             <div
@@ -383,28 +383,28 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         </div>
       </Card>
 
-      <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+      <Card padding="lg" className="bg-white border-dark-200 dark:bg-dark-900 dark:border-dark-800">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Nama Lengkap</label>
-            <div className="px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-dark-900 dark:text-white">{user.name || "-"}</div>
+            <div className="px-4 py-3 bg-dark-50 dark:bg-dark-800/30 border border-dark-300 dark:border-dark-600 rounded-xl text-dark-900 dark:text-white">{user.name || "-"}</div>
           </div>
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Title / Jabatan</label>
-            <div className="px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-dark-900 dark:text-white">{getRoleDisplay(user.role || "MEMBER")}</div>
+            <div className="px-4 py-3 bg-dark-50 dark:bg-dark-800/30 border border-dark-300 dark:border-dark-600 rounded-xl text-dark-900 dark:text-white">{getRoleDisplay(user.role || "MEMBER")}</div>
           </div>
           <div>
             <label className="block text-sm font-medium text-muted mb-2">NIM</label>
-            <div className="px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-dark-900 dark:text-white">{user.nim || "-"}</div>
+            <div className="px-4 py-3 bg-dark-50 dark:bg-dark-800/30 border border-dark-300 dark:border-dark-600 rounded-xl text-dark-900 dark:text-white">{user.nim || "-"}</div>
           </div>
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Email</label>
-            <div className="px-4 py-3 bg-dark-800/30 border border-dark-600 rounded-xl text-dark-900 dark:text-white">{user.email || "-"}</div>
+            <div className="px-4 py-3 bg-dark-50 dark:bg-dark-800/30 border border-dark-300 dark:border-dark-600 rounded-xl text-dark-900 dark:text-white">{user.email || "-"}</div>
           </div>
         </div>
       </Card>
 
-      <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+      <Card padding="lg" className="bg-white border-dark-200 dark:bg-dark-900 dark:border-dark-800">
         <label htmlFor="bio" className="block text-sm font-medium text-muted mb-2">Tentang Saya</label>
         <textarea
           id="bio"
@@ -412,12 +412,12 @@ export default function ProfileForm({ user }: ProfileFormProps) {
           rows={4}
           value={formData.bio}
           onChange={handleInputChange}
-          className="w-full rounded-xl border border-dark-600 bg-white dark:bg-dark-800 px-4 py-3 text-dark-900 dark:text-white resize-none focus:outline-none focus:border-primary-500"
+          className="w-full rounded-xl border border-dark-300 bg-white dark:border-dark-600 dark:bg-dark-800 px-4 py-3 text-dark-900 dark:text-white resize-none focus:outline-none focus:border-primary-500"
           placeholder="Ceritakan tentang diri Anda..."
         />
       </Card>
 
-      <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+      <Card padding="lg" className="bg-white border-dark-200 dark:bg-dark-900 dark:border-dark-800">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-xl font-bold text-dark-900 dark:text-white">Pengalaman Kerja</h2>
@@ -429,21 +429,21 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         </div>
         <div className="space-y-4 mt-4">
           {formData.experiences.map((exp) => (
-            <div key={exp.id} className="rounded-2xl border border-dark-600 bg-[#0f172a]/70 p-4">
+            <div key={exp.id} className="rounded-2xl border border-dark-200 bg-dark-50 dark:border-dark-600 dark:bg-[#0f172a]/70 p-4">
               <div className="grid gap-3 md:grid-cols-2 mb-3">
                 <input
                   type="text"
                   value={exp.position}
                   onChange={(e) => handleExperienceChange(exp.id, "position", e.target.value)}
                   placeholder="Posisi"
-                  className="w-full rounded-xl border border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full rounded-xl border border-dark-300 bg-white dark:border-dark-600 dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 <input
                   type="text"
                   value={exp.company}
                   onChange={(e) => handleExperienceChange(exp.id, "company", e.target.value)}
                   placeholder="Perusahaan"
-                  className="w-full rounded-xl border border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full rounded-xl border border-dark-300 bg-white dark:border-dark-600 dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
               <div className="grid gap-3 md:grid-cols-2 mb-3">
@@ -451,13 +451,13 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                   type="month"
                   value={exp.startDate}
                   onChange={(e) => handleExperienceChange(exp.id, "startDate", e.target.value)}
-                  className="w-full rounded-xl border border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full rounded-xl border border-dark-300 bg-white dark:border-dark-600 dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 <input
                   type="month"
                   value={exp.endDate}
                   onChange={(e) => handleExperienceChange(exp.id, "endDate", e.target.value)}
-                  className="w-full rounded-xl border border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full rounded-xl border border-dark-300 bg-white dark:border-dark-600 dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
               <textarea
@@ -465,7 +465,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                 onChange={(e) => handleExperienceChange(exp.id, "description", e.target.value)}
                 rows={3}
                 placeholder="Deskripsi pengalaman"
-                className="w-full rounded-xl border border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                className="w-full rounded-xl border border-dark-300 bg-white dark:border-dark-600 dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
               />
               <button
                 type="button"
@@ -479,19 +479,19 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         </div>
       </Card>
 
-      <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+      <Card padding="lg" className="bg-white border-dark-200 dark:bg-dark-900 dark:border-dark-800">
         <h2 className="text-xl font-bold text-dark-900 dark:text-white mb-4">Keahlian</h2>
         <div className="flex flex-wrap gap-2 mb-4">
           {formData.skills.map((skill) => (
             <span
               key={skill.id}
-              className="inline-flex items-center gap-2 rounded-full bg-primary-500/10 px-3 py-1 text-sm text-primary-200"
+              className="inline-flex items-center gap-2 rounded-full bg-primary-500/20 border border-primary-500/30 px-3 py-1 text-sm text-primary-700 dark:text-primary-300"
             >
               {skill.name}
               <button
                 type="button"
                 onClick={() => removeSkill(skill.id)}
-                className="text-primary-300 hover:text-primary-100"
+                className="text-primary-600 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-100"
               >
                 ×
               </button>
@@ -504,7 +504,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
             value={newSkill}
             onChange={(e) => setNewSkill(e.target.value)}
             placeholder="Tambah keahlian baru"
-            className="flex-grow rounded-l-xl border border-dark-600 bg-white dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="flex-grow rounded-l-xl border border-dark-300 bg-white dark:border-dark-600 dark:bg-dark-800 px-3 py-2 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
           <button
             type="button"
@@ -516,7 +516,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         </div>
       </Card>
 
-      <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+      <Card padding="lg" className="bg-white border-dark-200 dark:bg-dark-900 dark:border-dark-800">
         <h2 className="text-xl font-bold text-dark-900 dark:text-white mb-4">Tautan Sosial</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
