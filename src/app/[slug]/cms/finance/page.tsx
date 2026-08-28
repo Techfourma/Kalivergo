@@ -7,6 +7,8 @@ import { getCurrentSessionUser } from "@/server/auth/session";
 import { getTransactionsWithSummary } from "@/features/finance/services/transaction.service";
 import { getUangKasSchedules } from "@/features/finance/services/uang-kas.service";
 import UangKasSettingsCard from "@/components/cms/UangKasSettingsCard";
+import { notFound, redirect } from "next/navigation";
+import type { CmsRole } from "@prisma/client";
 
 import PageBackground from '@/components/ui/PageBackground';
 
@@ -47,6 +49,34 @@ export default async function FinancePage({
     );
   }
 
+  const session = await getCurrentSessionUser();
+  let hasFinanceAccess = false;
+  if (session?.id) {
+    const membership = await prisma.tenantMembership.findFirst({
+      where: { userId: session.id, tenantId },
+      select: { role: true, cmsRole: true },
+    });
+
+    if (membership) {
+      if (membership.role === "OWNER") {
+        hasFinanceAccess = true;
+      } else if (membership.cmsRole) {
+        const permission = await prisma.cmsAccessPermission.findFirst({
+          where: {
+            tenantId,
+            cmsRole: membership.cmsRole as CmsRole,
+            module: "finance",
+          },
+        });
+        hasFinanceAccess = !!permission;
+      }
+    }
+  }
+
+  if (!hasFinanceAccess) {
+    redirect("/unauthorized");
+  }
+
   const categoryWhere = { tenantId };
   const { transactions, summary } = await getTransactionsWithSummary(tenantId);
   
@@ -70,7 +100,6 @@ export default async function FinancePage({
     orderBy: { name: "asc" },
   });
 
-  const session = await getCurrentSessionUser();
   const isOwner =
     !!session?.id &&
     (await prisma.tenantMembership.findFirst({
