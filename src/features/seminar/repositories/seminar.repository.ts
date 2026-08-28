@@ -67,3 +67,48 @@ export function listSeminarsInNext7Days(tenantId: string) {
 export function countSeminarsByTenant(tenantId: string) {
   return prisma.seminar.count({ where: { tenantId } });
 }
+
+export function findSeminarWithTenant(id: string) {
+  return prisma.seminar.findUnique({
+    where: { id },
+    select: { id: true, tenantId: true },
+  });
+}
+
+export function findTenantSeminarMembers(tenantId: string) {
+  return prisma.tenantMembership.findMany({
+    where: { tenantId },
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+    },
+    orderBy: { user: { name: "asc" } },
+  });
+}
+
+export function findTenantSeminarMemberIds(tenantId: string, userIds: string[]) {
+  return prisma.tenantMembership.findMany({
+    where: { tenantId, userId: { in: userIds } },
+    select: { userId: true },
+  });
+}
+
+export async function replaceSeminarSubmissions(
+  seminarId: string,
+  userIds: string[]
+) {
+  await prisma.seminarSubmission.deleteMany({ where: { seminarId } });
+  if (userIds.length > 0) {
+    await prisma.seminarSubmission.createMany({
+      data: userIds.map((userId) => ({ seminarId, userId, status: "SUBMITTED" })),
+      skipDuplicates: true,
+    });
+  }
+  return prisma.seminarSubmission.count({ where: { seminarId } });
+}
+
+export function findTenantRouteSlug(tenantId: string) {
+  return prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { customSlug: true },
+  });
+}

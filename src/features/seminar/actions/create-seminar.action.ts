@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireCmsActor, resolveTenantId } from "@/actions/cms/role-model";
 import { createSeminarForTenant } from "@/features/seminar/services/create-seminar.service";
+import { resolveTenantRouteSlugForTenant } from "@/features/seminar/services/update-seminar-submissions.service";
 import { createSeminarSchema } from "@/features/seminar/validators/seminar.schema";
 
 export async function createSeminar(formData: FormData) {
@@ -25,7 +26,11 @@ export async function createSeminar(formData: FormData) {
     if (!(await requireCmsActor(tenantId))) return { error: "Akses ditolak: hanya OWNER atau role CMS." };
 
     await createSeminarForTenant({ tenantId, title, description, date, location });
-    revalidatePath("/cms/seminar");
+    const slug = await resolveTenantRouteSlugForTenant(tenantId);
+    if (slug) {
+      revalidatePath(`/${slug}/cms/seminar`);
+      revalidatePath(`/${slug}/seminar`);
+    }
     return { success: "Seminar berhasil ditambahkan" };
   } catch (error: any) {
     console.error("Error creating seminar:", error);

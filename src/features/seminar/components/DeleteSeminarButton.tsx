@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { deleteSeminar } from "@/features/seminar/actions/delete-seminar.action";
 
 export default function DeleteSeminarButton({ 
@@ -9,9 +10,12 @@ export default function DeleteSeminarButton({
   id: string; 
   title: string; 
 }) {
+  const router = useRouter();
+
   const handleDelete = async () => {
     if (confirm(`Yakin ingin menghapus seminar "${title}"?`)) {
       await deleteSeminar(id);
+      router.refresh();
     }
   };
 
