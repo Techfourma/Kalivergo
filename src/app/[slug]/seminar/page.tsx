@@ -37,11 +37,14 @@ export default async function SeminarPage({ params }: SeminarPageProps) {
     currentUser = await loadCurrentUser(userCookie, tenantId);
 
     if (!currentUser) {
-      currentUser = {
-        name: "Guest",
-        email: "guest@kalivergo.id",
-        role: "MEMBER",
-      };
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-dark-50 dark:bg-dark-950">
+          <div className="text-dark-900 dark:text-white text-center">
+            <h2 className="text-2xl font-bold mb-4">Akses Ditolak</h2>
+            <p>Silakan login untuk mengakses halaman ini.</p>
+          </div>
+        </div>
+      );
     }
 
     const [seminars, allUsers] = await Promise.all([
