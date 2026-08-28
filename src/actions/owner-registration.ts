@@ -16,6 +16,7 @@ import {
 
 export async function registerOwner(formData: FormData) {
   const fullName = (formData.get("fullName")?.toString() || "").trim();
+  const nim = (formData.get("nim")?.toString() || "").trim();
   const email = (formData.get("email")?.toString() || "").trim().toLowerCase();
   const whatsapp = (formData.get("whatsapp")?.toString() || formData.get("phone")?.toString() || "").trim();
   const university = (formData.get("university")?.toString() || "").trim();
@@ -28,6 +29,10 @@ export async function registerOwner(formData: FormData) {
 
   if (!fullName || fullName.length < 2) {
     return { error: "Nama lengkap wajib diisi minimal 2 karakter.", field: "fullName" };
+  }
+
+  if (!nim) {
+    return { error: "NIM wajib diisi.", field: "nim" };
   }
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -77,6 +82,11 @@ export async function registerOwner(formData: FormData) {
     }
   }
 
+  const existingNimUser = await prisma.user.findFirst({ where: { nim } });
+  if (existingNimUser && existingNimUser.id !== existingUser?.id) {
+    return { error: "NIM ini sudah digunakan oleh akun lain. Silakan gunakan NIM yang berbeda.", field: "nim" };
+  }
+
   let userId: string;
 
   try {
@@ -103,12 +113,14 @@ export async function registerOwner(formData: FormData) {
           password: hashedPassword,
           isVerified: false,
           name: fullName,
+          nim,
         },
       });
     } else {
       const user = await prisma.user.create({
         data: {
           name: fullName,
+          nim,
           email,
           password: hashedPassword,
           isVerified: false,
