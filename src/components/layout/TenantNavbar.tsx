@@ -19,6 +19,7 @@ import {
   LayoutDashboard,
   FolderOpen,
   FileText,
+  ClipboardList,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import ThemeToggle from "@/components/ui/ThemeToggle";
@@ -94,6 +95,12 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
 
   const navItems: NavItem[] = [
     { href: `${tenantPath}/home`, label: "Home", icon: Home },
+    {
+      href: `${tenantPath}/tasks`,
+      label: "Tasks",
+      icon: ClipboardList,
+      requiresAuth: true
+    },
     {
       href: `${tenantPath}/information`,
       label: "Information",
