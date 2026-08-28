@@ -86,12 +86,12 @@ export default function FinanceInput({
       <Card>
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 text-primary-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
               <Wallet className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-dark-900">Input Transaksi</h2>
-              <p className="text-xs text-dark-500">Tambah pemasukan atau pengeluaran</p>
+              <h2 className="text-lg font-bold text-dark-900 dark:text-dark-50">Input Transaksi</h2>
+              <p className="text-xs text-dark-500 dark:text-dark-400">Tambah pemasukan atau pengeluaran</p>
             </div>
           </div>
           <Button onClick={handleOpenModal}>
@@ -150,13 +150,15 @@ export default function FinanceInput({
           className="space-y-4"
         >
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1.5">Tipe Transaksi</label>
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1.5">Tipe Transaksi</label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => { setType("INCOME"); setCategoryId(""); }}
                 className={`rounded-xl border-2 p-3 text-center text-sm font-medium transition-all ${
-                  type === "INCOME" ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-dark-200 text-dark-600 hover:border-dark-300"
+                  type === "INCOME"
+                    ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300"
+                    : "border-dark-200 dark:border-dark-600 text-dark-600 dark:text-dark-300 hover:border-dark-300 dark:hover:border-dark-500"
                 }`}
               >
                 Pemasukan
@@ -165,7 +167,9 @@ export default function FinanceInput({
                 type="button"
                 onClick={() => { setType("EXPENSE"); setCategoryId(""); }}
                 className={`rounded-xl border-2 p-3 text-center text-sm font-medium transition-all ${
-                  type === "EXPENSE" ? "border-red-500 bg-red-50 text-red-700" : "border-dark-200 text-dark-600 hover:border-dark-300"
+                  type === "EXPENSE"
+                    ? "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+                    : "border-dark-200 dark:border-dark-600 text-dark-600 dark:text-dark-300 hover:border-dark-300 dark:hover:border-dark-500"
                 }`}
               >
                 Pengeluaran
@@ -174,16 +178,26 @@ export default function FinanceInput({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1.5">Nama Anggota</label>
-            <select name="userId" required className="w-full rounded-xl border border-dark-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1.5">Nama Anggota</label>
+            <select
+              name="userId"
+              required
+              className="w-full rounded-xl border border-dark-200 dark:border-dark-600 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
+            >
               <option value="">Pilih anggota</option>
               {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1.5">Kategori</label>
-            <select name="categoryId" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required className="w-full rounded-xl border border-dark-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1.5">Kategori</label>
+            <select
+              name="categoryId"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              required
+              className="w-full rounded-xl border border-dark-200 dark:border-dark-600 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
+            >
               <option value="">Pilih kategori</option>
               {selectedCategories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
@@ -194,21 +208,39 @@ export default function FinanceInput({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1.5">Nominal</label>
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1.5">Nominal</label>
             {isUangKasIncome ? (
-              <input type="number" name="amount" value={uangKasAmount} readOnly required className="w-full rounded-xl border border-dark-200 bg-dark-50 px-4 py-2.5 text-sm text-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-not-allowed" />
+              <input
+                type="number"
+                name="amount"
+                value={uangKasAmount}
+                readOnly
+                required
+                className="w-full rounded-xl border border-dark-200 dark:border-dark-600 bg-dark-50 dark:bg-dark-800 px-4 py-2.5 text-sm text-dark-500 dark:text-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-not-allowed"
+              />
             ) : (
-              <input type="number" name="amount" min="0" step="0.01" required className="w-full rounded-xl border border-dark-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+              <input
+                type="number"
+                name="amount"
+                min="0"
+                step="0.01"
+                required
+                className="w-full rounded-xl border border-dark-200 dark:border-dark-600 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
             )}
             {isUangKasIncome && (
-              <p className="text-xs text-dark-500 mt-1">Nominal mengikuti pengaturan Uang Kelas.</p>
+              <p className="text-xs text-dark-500 dark:text-dark-400 mt-1">Nominal mengikuti pengaturan Uang Kelas.</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1.5">Tanggal</label>
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1.5">Tanggal</label>
             {isUangKasIncome ? (
-              <select name="date" required className="w-full rounded-xl border border-dark-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+              <select
+                name="date"
+                required
+                className="w-full rounded-xl border border-dark-200 dark:border-dark-600 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
+              >
                 <option value="">Pilih tanggal</option>
                 {uangKasDates.map((d) => (
                   <option key={d.value} value={d.value}>
@@ -224,21 +256,26 @@ export default function FinanceInput({
                 min={minDate}
                 max={maxDate}
                 defaultValue={maxDate}
-                className="w-full rounded-xl border border-dark-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full rounded-xl border border-dark-200 dark:border-dark-600 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
               />
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1.5">Deskripsi</label>
-            <textarea name="description" required rows={3} className="w-full rounded-xl border border-dark-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1.5">Deskripsi</label>
+            <textarea
+              name="description"
+              required
+              rows={3}
+              className="w-full rounded-xl border border-dark-200 dark:border-dark-600 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+            />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-700 mb-1.5">Invoice (Opsional)</label>
-            <label className="flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-dark-200 p-4 cursor-pointer hover:border-primary-400 hover:bg-primary-50/50 transition-all">
-              <Upload className="h-5 w-5 text-dark-400" />
-              <span className="text-sm text-dark-500">{invoiceFile ? invoiceFile.name : "Upload invoice..."}</span>
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1.5">Invoice (Opsional)</label>
+            <label className="flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-dark-200 dark:border-dark-600 p-4 cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-all">
+              <Upload className="h-5 w-5 text-dark-400 dark:text-dark-500" />
+              <span className="text-sm text-dark-500 dark:text-dark-400">{invoiceFile ? invoiceFile.name : "Upload invoice..."}</span>
               <input type="file" accept="image/*,.pdf" onChange={(e) => setInvoiceFile(e.target.files?.[0] || null)} className="hidden" />
             </label>
           </div>
