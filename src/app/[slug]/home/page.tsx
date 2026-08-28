@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/db";
-import Footer from "@/components/layout/Footer";
-import TaskTracker from "@/components/home/TaskTracker";
 import WeeklyTasks from "@/components/home/WeeklyTasks";
-import UnsubmittedList from "@/components/home/UnsubmittedList";
+import HomeFinanceCard from "@/components/home/HomeFinanceCard";
+import HomeInfoCard from "@/components/home/HomeInfoCard";
+import HomeUpcomingSeminars from "@/components/home/HomeUpcomingSeminars";
 
 import TenantNavbar from "@/components/layout/TenantNavbar";
 import PageBackground from "@/components/ui/PageBackground";
@@ -12,6 +12,7 @@ import { requireTenantPageAccess, resolveTenantFromRoute } from "@/lib/tenant";
 import { loadCurrentUser } from "@/lib/user-session";
 import { notFound } from "next/navigation";
 import { findTasksForTenant } from "@/features/task/services/task.service";
+import { listSeminarsInNext7Days } from "@/features/seminar/services/list-seminars.service";
 
 export const dynamic = 'force-dynamic';
 
@@ -55,8 +56,9 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
 
     const taskWhere = tenantId ? { tenantId } : {};
     const scheduleWhere = tenantId ? { tenantId } : {};
+    const transactionWhere = tenantId ? { tenantId } : {};
 
-    const [tasks, schedules, allUsers] = await Promise.all([
+    const [tasks, schedules, allUsers, transactions, latestInfo, upcomingSeminars] = await Promise.all([
       findTasksForTenant(tenantId!, {}),
 
       prisma.schedule.findMany({
@@ -74,6 +76,29 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
         },
         orderBy: { user: { name: "asc" } },
       }).then(memberships => memberships.map(m => m.user)),
+
+      prisma.transaction.findMany({
+        where: transactionWhere,
+        select: { type: true, amount: true },
+      }),
+
+      prisma.information.findFirst({
+        where: { tenantId: tenantId! },
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          type: true,
+          mediaUrl: true,
+          createdAt: true,
+          user: {
+            select: { name: true }
+          }
+        },
+      }),
+
+      listSeminarsInNext7Days(tenantId!),
     ]);
 
     const now = new Date();
@@ -87,13 +112,6 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
       const deadline = new Date(task.deadline);
       return deadline >= startOfWeek && deadline < endOfWeek;
     });
-
-    const tasksForUnsubmitted = tasks.map((t) => ({
-      id: t.id,
-      title: t.title,
-      deadline: t.deadline.toISOString(),
-      submissions: t.submissions.map((s) => ({ userId: s.userId })),
-    }));
 
     const tenantPath = `/${routeParams.slug}`;
 
@@ -112,7 +130,7 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
         <main className="flex-1 py-8 pt-24 pb-28 relative z-10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-dark-900 dark:text-white font-display">Dashboard Home</h1>
+              <h1 className="text-3xl font-bold text-dark-900 dark:text-white font-display">Home</h1>
               <p className="text-muted mt-2">
                 Kelas: {tenantContext.classSlug}
               </p>
@@ -122,13 +140,19 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
                   ` (${currentUser.role === "OWNER" ? "Owner" : currentUser.role})`}
               </p>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <TaskTracker tasks={tasks as any} />
-                <UnsubmittedList tasks={tasksForUnsubmitted} allUsers={allUsers} />
-              </div>
+
+            <div className="mb-6">
+              <HomeFinanceCard transactions={transactions as any} tenantPath={tenantPath} />
+            </div>
+
+            <div className="mb-6">
+              <HomeInfoCard post={latestInfo as any} tenantPath={tenantPath} />
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
               <div className="space-y-6">
-                <WeeklyTasks tasks={weeklyTasks as any} />
+                <WeeklyTasks tasks={weeklyTasks as any} tenantPath={tenantPath} />
+                <HomeUpcomingSeminars seminars={upcomingSeminars as any} tenantPath={tenantPath} />
               </div>
             </div>
           </div>
