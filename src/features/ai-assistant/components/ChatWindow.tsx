@@ -140,10 +140,8 @@ export function ChatWindow({ isOpen, onClose }: ChatWindowProps) {
             <div className="flex flex-col items-center justify-center h-full text-center">
               <MessageSquare className="w-12 h-12 text-dark-600 mb-3" />
               <p className="text-dark-300 text-sm leading-relaxed max-w-[260px]">
-                Halo! Selamat datang di Kalivergo 👋<br />
-                Ada yang bisa saya bantu seputar
-                <strong className="text-primary-400 font-medium"> akademik, KRS, jadwal kuliah, </strong>
-                atau peraturan kampus?
+                Ada yang bisa saya bantu terkait Kalivergo?<br />
+                Silakan tulis pertanyaan Anda di bawah ini, dan saya akan berusaha memberikan jawaban terbaik.
               </p>
             </div>
           )}
