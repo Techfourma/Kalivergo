@@ -37,30 +37,30 @@ const getModuleIcon = (module: string) => {
 const getModuleColor = (module: string) => {
   switch (module) {
     case 'FINANCE':
-      return 'bg-green-100 text-green-700';
+      return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
     case 'TASKS':
-      return 'bg-blue-100 text-blue-700';
+      return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
     case 'PEOPLE':
-      return 'bg-purple-100 text-purple-700';
+      return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300';
     case 'SCHEDULE':
-      return 'bg-orange-100 text-orange-700';
+      return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300';
     case 'SEMINAR':
-      return 'bg-red-100 text-red-700';
+      return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300';
     default:
-      return 'bg-gray-100 text-gray-700';
+      return 'bg-gray-100 text-gray-700 dark:bg-dark-700 dark:text-dark-300';
   }
 };
 
 const getActionColor = (action: string) => {
   switch (action) {
     case 'CREATE':
-      return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-700/40';
     case 'UPDATE':
-      return 'bg-blue-50 text-blue-700 border-blue-200';
+      return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-700/40';
     case 'DELETE':
-      return 'bg-red-50 text-red-700 border-red-200';
+      return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-700/40';
     default:
-      return 'bg-gray-50 text-gray-700 border-gray-200';
+      return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-dark-800 dark:text-dark-300 dark:border-dark-600';
   }
 };
 
@@ -138,43 +138,44 @@ export default function AuditLogTable({ logs }: AuditLogTableProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-dark-100 overflow-hidden">
-      <div className="p-6 border-b border-dark-100 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Riwayat Audit ({logs.length})</h2>
+    <div className="relative rounded-xl border-2 border-dark-100 dark:border-dark-700/60 bg-white/80 dark:bg-dark-900/70 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] overflow-hidden">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-400/60 to-transparent" />
+      <div className="p-6 border-b border-dark-100 dark:border-dark-700/60 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-dark-900 dark:text-dark-50">Riwayat Audit ({logs.length})</h2>
       </div>
 
       {logs.length === 0 ? (
         <div className="p-12 text-center">
-          <FileText className="h-12 w-12 text-dark-300 mx-auto mb-4" />
-          <p className="text-dark-500">Tidak ada perubahan pada modul yang dipilih dalam rentang tanggal ini.</p>
+          <FileText className="h-12 w-12 text-dark-300 dark:text-dark-600 mx-auto mb-4" />
+          <p className="text-dark-500 dark:text-dark-400">Tidak ada perubahan pada modul yang dipilih dalam rentang tanggal ini.</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-dark-100">
-            <thead className="bg-dark-50">
+          <table className="min-w-full divide-y divide-dark-100 dark:divide-dark-700/60">
+            <thead className="bg-dark-50 dark:bg-dark-800/60">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 dark:text-dark-300 uppercase tracking-wider">
                   Tanggal & Waktu
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 dark:text-dark-300 uppercase tracking-wider">
                   Module
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 dark:text-dark-300 uppercase tracking-wider">
                   Aksi
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 dark:text-dark-300 uppercase tracking-wider">
                   Deskripsi
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-dark-500 dark:text-dark-300 uppercase tracking-wider">
                   User
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-dark-100">
+            <tbody className="divide-y divide-dark-100 dark:divide-dark-700/60">
               {logs.map((log) => (
-                <tr key={log.id} className="hover:bg-dark-50 transition-colors">
+                <tr key={log.id} className="hover:bg-dark-50 dark:hover:bg-dark-800/40 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-dark-600">
+                    <span className="text-sm text-dark-600 dark:text-dark-300">
                       {formatDateTime(log.createdAt)}
                     </span>
                   </td>
@@ -192,12 +193,12 @@ export default function AuditLogTable({ logs }: AuditLogTableProps) {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-sm text-dark-900">{log.description}</p>
+                    <p className="text-sm text-dark-900 dark:text-dark-50">{log.description}</p>
                     {getVisibleMetadata(log.metadata).length > 0 && (
-                      <dl className="mt-2 space-y-1 text-xs text-dark-500">
+                      <dl className="mt-2 space-y-1 text-xs text-dark-500 dark:text-dark-400">
                         {getVisibleMetadata(log.metadata).map(([key, value]) => (
                           <div key={key} className="flex gap-2">
-                            <dt className="font-medium text-dark-600">{getMetadataLabel(key)}:</dt>
+                            <dt className="font-medium text-dark-600 dark:text-dark-300">{getMetadataLabel(key)}:</dt>
                             <dd>{formatMetadataValue(key, value)}</dd>
                           </div>
                         ))}
@@ -205,7 +206,7 @@ export default function AuditLogTable({ logs }: AuditLogTableProps) {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-dark-600">
+                    <span className="text-sm text-dark-600 dark:text-dark-300">
                       {log.userName || '-'}
                     </span>
                   </td>
