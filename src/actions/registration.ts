@@ -153,6 +153,7 @@ async function finalizeUserAccount(
 
 export async function registerOwnerClass(formData: FormData) {
   const fullName = (formData.get("fullName")?.toString() || "").trim();
+  const nim = (formData.get("nim")?.toString() || "").trim();
   const email = (formData.get("email")?.toString() || "").trim().toLowerCase();
   const password = (formData.get("password")?.toString() || "") as string;
   const confirmPassword = formData.get("confirmPassword")?.toString() || "";
@@ -167,6 +168,8 @@ export async function registerOwnerClass(formData: FormData) {
 
   if (!fullName || fullName.length < 2)
     return { error: "Nama lengkap wajib diisi.", field: "fullName" };
+  if (!nim)
+    return { error: "NIM wajib diisi.", field: "nim" };
   if (!email || !email.includes("@"))
     return { error: "Email wajib diisi dan harus valid.", field: "email" };
   if (password !== confirmPassword)
@@ -217,6 +220,13 @@ export async function registerOwnerClass(formData: FormData) {
       error: "Email ini sudah digunakan oleh akun yang terverifikasi. Silakan login atau gunakan email lain.",
       field: "email"
     };
+  }
+
+  const existingNimUser = await prisma.user.findFirst({
+    where: { nim },
+  });
+  if (existingNimUser) {
+    return { error: "NIM ini sudah digunakan oleh akun lain. Silakan gunakan NIM yang berbeda.", field: "nim" };
   }
 
   const normalizedUniversityName = universityName.toLowerCase().trim();
@@ -283,6 +293,7 @@ export async function registerOwnerClass(formData: FormData) {
     const newUser = await prisma.user.create({
       data: {
         name: fullName,
+        nim,
         email: email,
         password: hashedPassword,
         isVerified: false,
