@@ -9,6 +9,7 @@ import { generateVerificationToken, hashToken } from '@/lib/auth';
 import { sendVerificationEmail } from '@/lib/email';
 import { CmsRole } from '@prisma/client';
 import { env } from '@/config/env';
+import { deleteFromCloudinary, extractPublicIdFromUrl } from '@/server/storage/cloudinary';
 
 export async function addUser(formData: FormData) {
   try {
@@ -159,6 +160,11 @@ export async function rejectUser(formData: FormData) {
       return;
     }
 
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true, email: true },
+    });
+
     const application = await prisma.memberApplication.findFirst({
       where: { userId, tenantId },
       select: {
@@ -169,6 +175,15 @@ export async function rejectUser(formData: FormData) {
     });
 
     const membership = await prisma.tenantMembership.findFirst({ where: { userId, tenantId } });
+
+    if (user?.email) {
+      try {
+        const { sendMemberRejectionEmail } = await import('@/lib/email');
+        await sendMemberRejectionEmail(user.email, user.name || 'Anggota');
+      } catch (emailError) {
+        console.error('Error sending rejection email:', emailError);
+      }
+    }
 
     if (application) {
       await prisma.memberApplication.delete({ where: { id: application.id } });
@@ -243,5 +258,140 @@ export async function updateUserRole(formData: FormData) {
     revalidatePath('/cms/people');
   } catch (error) {
     console.error('Error updating user role:', error);
+  }
+}
+
+export async function deleteUser(formData: FormData) {
+  try {
+    const userId = formData.get('userId') as string;
+    const tenantId = (formData.get('tenantId') as string)?.trim() || await resolveTenantId();
+    if (!userId || !tenantId) return;
+
+    const session = await readSessionUser();
+    if (!session?.id || !(await hasCmsAccess(session.id, tenantId))) {
+      return { error: 'Akses ditolak: hanya OWNER atau role CMS yang dapat menghapus anggota.' };
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        ktpStorageKey: true,
+        tenantMemberships: {
+          where: { tenantId },
+          select: { role: true },
+        },
+        memberApplications: {
+          where: { tenantId },
+          select: {
+            profilePhotoStorageKey: true,
+            ktmPhotoStorageKey: true,
+          },
+        },
+        ownerApplications: {
+          select: {
+            selfieStorageKey: true,
+            ktmStorageKey: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return { error: 'User tidak ditemukan' };
+    }
+
+    const isOwner = user.tenantMemberships.some(m => m.role === 'OWNER');
+    if (isOwner) {
+      return { error: 'Tidak dapat menghapus akun OWNER kelas.' };
+    }
+
+    if (user.id === session.id) {
+      return { error: 'Tidak dapat menghapus akun sendiri.' };
+    }
+
+    const cloudName = env.cloudinaryCloudName;
+
+    if (user.image && cloudName) {
+      const publicId = extractPublicIdFromUrl(user.image);
+      if (publicId) {
+        try {
+          await deleteFromCloudinary(publicId, 'image');
+        } catch (err) {
+          console.error('Failed to delete profile image from Cloudinary:', err);
+        }
+      }
+    }
+
+    if (user.ktpStorageKey && cloudName) {
+      try {
+        await deleteFromCloudinary(user.ktpStorageKey, 'image');
+      } catch (err) {
+        console.error('Failed to delete KTP from Cloudinary:', err);
+      }
+    }
+
+    for (const app of user.memberApplications) {
+      if (app.profilePhotoStorageKey && cloudName) {
+        try {
+          await deleteFromCloudinary(app.profilePhotoStorageKey, 'image');
+        } catch (err) {
+          console.error('Failed to delete member profile photo from Cloudinary:', err);
+        }
+      }
+      if (app.ktmPhotoStorageKey && cloudName) {
+        try {
+          await deleteFromCloudinary(app.ktmPhotoStorageKey, 'image');
+        } catch (err) {
+          console.error('Failed to delete member KTM from Cloudinary:', err);
+        }
+      }
+    }
+
+    for (const app of user.ownerApplications) {
+      if (app.selfieStorageKey && cloudName) {
+        try {
+          await deleteFromCloudinary(app.selfieStorageKey, 'image');
+        } catch (err) {
+          console.error('Failed to delete owner selfie from Cloudinary:', err);
+        }
+      }
+      if (app.ktmStorageKey && cloudName) {
+        try {
+          await deleteFromCloudinary(app.ktmStorageKey, 'image');
+        } catch (err) {
+          console.error('Failed to delete owner KTM from Cloudinary:', err);
+        }
+      }
+    }
+
+    await prisma.transaction.deleteMany({
+      where: { userId: user.id, tenantId },
+    });
+
+    await prisma.auditLog.deleteMany({
+      where: { actorUserId: user.id },
+    });
+
+    await prisma.user.delete({
+      where: { id: user.id },
+    });
+
+    await createAuditLog(
+      'PEOPLE',
+      'DELETE',
+      `Menghapus anggota: ${user.name} (${user.email}) dari kelas`,
+      session.id,
+      { userId: user.id, tenantId }
+    );
+
+    revalidatePath('/cms/people');
+    return { success: 'Akun berhasil dihapus beserta seluruh datanya.' };
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    return { error: 'Gagal menghapus akun. Silakan coba lagi.' };
   }
 }

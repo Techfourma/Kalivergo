@@ -13,7 +13,7 @@ export {
   createUangKasSchedule,
   deleteUangKasSchedule,
 } from './cms/finance';
-export { addUser, acceptUser, rejectUser } from './cms/people';
+export { addUser, acceptUser, rejectUser, deleteUser } from './cms/people';
 export { createSchedule, deleteSchedule } from './cms/schedule';
 export {
   createTaskAction as createTask,

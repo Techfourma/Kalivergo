@@ -169,3 +169,52 @@ export async function sendForgotPasswordVerificationEmail(
 
   await transporter.sendMail(mailOptions);
 }
+
+export async function sendMemberRejectionEmail(
+  to: string,
+  name: string
+): Promise<void> {
+  const apiKey = env.brevoApiKey;
+
+  if (!apiKey) {
+    throw new Error("BREVO_API_KEY tidak ditemukan di environment variables (.env)");
+  }
+
+  const safeName = escapeHtml(name);
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto;">
+      <h2>Pendaftaran Anggota Ditolak</h2>
+      <p>Halo ${safeName},</p>
+      <p>Maaf, pendaftaran anggota Anda di Kalivergo telah ditolak oleh pengelola kelas.</p>
+      <p>Jika Anda memiliki pertanyaan, silakan hubungi pengelola kelas terkait.</p>
+      <p>Terima kasih.</p>
+    </div>
+  `;
+
+  const fromAddress = env.emailFrom ?? "Kalivergo <noreply@smtp-brevo.com>";
+  const from = parseFromAddress(fromAddress);
+
+  const payload = {
+    sender: { name: from.name, email: from.email },
+    to: [{ email: to, name: name }],
+    subject: "Pendaftaran Anggota Ditolak - Kalivergo",
+    htmlContent: html,
+  };
+
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "accept": "application/json",
+      "content-type": "application/json",
+      "api-key": apiKey,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("BREVO_SEND_ERROR:", response.status, errorText);
+    throw new Error(`Gagal mengirim email penolakan anggota (Status: ${response.status})`);
+  }
+}
