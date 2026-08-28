@@ -26,7 +26,7 @@ export default function MemberReviewCard({ review, tenantId }: MemberReviewCardP
 
   return (
     <>
-      <article className="overflow-hidden rounded-2xl border border-dark-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary-300 hover:shadow-md">
+      <article className="overflow-hidden rounded-2xl border border-dark-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary-300 hover:shadow-md dark:border-dark-700 dark:bg-dark-800 dark:hover:border-primary-500/60">
         <button
           type="button"
           onClick={() => setShowDetails(true)}
@@ -34,7 +34,7 @@ export default function MemberReviewCard({ review, tenantId }: MemberReviewCardP
         >
           <div className="flex items-center gap-4 p-5">
             {review.profilePhotoUrl ? (
-              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-dark-200 bg-dark-50">
+              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-dark-200 bg-dark-50 dark:border-dark-700 dark:bg-dark-800">
                 <Image
                   src={review.profilePhotoUrl}
                   alt={`Foto profil ${review.fullName}`}
@@ -44,26 +44,26 @@ export default function MemberReviewCard({ review, tenantId }: MemberReviewCardP
                 />
               </div>
             ) : (
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-dark-100 text-sm text-dark-400">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-dark-100 text-sm text-dark-400 dark:bg-dark-700 dark:text-dark-300">
                 Foto
               </div>
             )}
             <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-3">
-                <h3 className="truncate font-bold text-dark-900">{review.fullName}</h3>
-                <span className="shrink-0 rounded-full bg-yellow-50 px-2.5 py-1 text-xs font-medium text-yellow-700">
+                <h3 className="truncate font-bold text-dark-900 dark:text-dark-50">{review.fullName}</h3>
+                <span className="shrink-0 rounded-full bg-yellow-50 px-2.5 py-1 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300">
                   Pending
                 </span>
               </div>
-              <p className="mt-1 truncate text-sm text-dark-500">{review.email || '-'}</p>
+              <p className="mt-1 truncate text-sm text-dark-500 dark:text-dark-300">{review.email || '-'}</p>
               <p className="mt-1 text-xs text-dark-400">NIM: {review.nim || '-'}</p>
             </div>
           </div>
-          <div className="flex items-center justify-between border-t border-dark-100 px-5 py-3 text-sm">
+          <div className="flex items-center justify-between border-t border-dark-100 px-5 py-3 text-sm dark:border-dark-700/60">
             <span className="text-dark-400">
               Didaftarkan {new Date(review.createdAt).toLocaleDateString('id-ID')}
             </span>
-            <span className="inline-flex items-center gap-1.5 font-medium text-primary-600">
+            <span className="inline-flex items-center gap-1.5 font-medium text-primary-600 dark:text-primary-400">
               <Eye className="h-4 w-4" /> Detail
             </span>
           </div>
@@ -72,16 +72,16 @@ export default function MemberReviewCard({ review, tenantId }: MemberReviewCardP
 
       {showDetails && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 backdrop-blur-sm sm:p-4">
-          <div className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-dark-200 px-4 py-3 sm:px-6">
+          <div className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-dark-800">
+            <div className="flex items-center justify-between border-b border-dark-200 px-4 py-3 sm:px-6 dark:border-dark-700">
               <div>
-                <h3 className="text-lg font-bold text-dark-900">Detail Pendaftaran Anggota</h3>
-                <p className="text-sm text-dark-500">{review.fullName}</p>
+                <h3 className="text-lg font-bold text-dark-900 dark:text-dark-50">Detail Pendaftaran Anggota</h3>
+                <p className="text-sm text-dark-500 dark:text-dark-400">{review.fullName}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowDetails(false)}
-                className="rounded-lg p-2 text-dark-500 hover:bg-dark-100 hover:text-dark-900"
+                className="rounded-lg p-2 text-dark-500 hover:bg-dark-100 hover:text-dark-900 dark:text-dark-400 dark:hover:bg-dark-700 dark:hover:text-dark-100"
                 aria-label="Tutup detail"
               >
                 <X className="h-5 w-5" />
@@ -91,20 +91,20 @@ export default function MemberReviewCard({ review, tenantId }: MemberReviewCardP
             <div className="flex-1 space-y-5 overflow-y-auto p-4 sm:p-6">
               <dl className="grid gap-3 text-sm sm:grid-cols-2">
                 <div>
-                  <dt className="text-dark-400">Nama lengkap</dt>
-                  <dd className="font-medium text-dark-900">{review.fullName}</dd>
+                  <dt className="text-dark-400 dark:text-dark-300">Nama lengkap</dt>
+                  <dd className="font-medium text-dark-900 dark:text-dark-50">{review.fullName}</dd>
                 </div>
                 <div>
-                  <dt className="text-dark-400">NIM</dt>
-                  <dd className="font-medium text-dark-900">{review.nim || '-'}</dd>
+                  <dt className="text-dark-400 dark:text-dark-300">NIM</dt>
+                  <dd className="font-medium text-dark-900 dark:text-dark-50">{review.nim || '-'}</dd>
                 </div>
                 <div>
-                  <dt className="text-dark-400">Email</dt>
-                  <dd className="break-all font-medium text-dark-900">{review.email || '-'}</dd>
+                  <dt className="text-dark-400 dark:text-dark-300">Email</dt>
+                  <dd className="break-all font-medium text-dark-900 dark:text-dark-50">{review.email || '-'}</dd>
                 </div>
                 <div>
-                  <dt className="text-dark-400">Waktu pendaftaran</dt>
-                  <dd className="font-medium text-dark-900">{new Date(review.createdAt).toLocaleString('id-ID')}</dd>
+                  <dt className="text-dark-400 dark:text-dark-300">Waktu pendaftaran</dt>
+                  <dd className="font-medium text-dark-900 dark:text-dark-50">{new Date(review.createdAt).toLocaleString('id-ID')}</dd>
                 </div>
               </dl>
 
@@ -114,13 +114,13 @@ export default function MemberReviewCard({ review, tenantId }: MemberReviewCardP
                   ['Foto KTM', review.ktmPhotoUrl, `KTM ${review.fullName}`],
                 ].map(([label, url, alt]) => (
                   <div key={label}>
-                    <p className="mb-2 text-sm font-medium text-dark-700">{label}</p>
+                    <p className="mb-2 text-sm font-medium text-dark-700 dark:text-dark-300">{label}</p>
                     {url ? (
-                      <div className="relative aspect-[4/5] overflow-hidden rounded-lg border border-dark-200 bg-dark-50">
+                      <div className="relative aspect-[4/5] overflow-hidden rounded-lg border border-dark-200 bg-dark-50 dark:border-dark-700 dark:bg-dark-800">
                         <Image src={url} alt={alt} fill className="object-contain" sizes="(max-width: 640px) 100vw, 320px" />
                       </div>
                     ) : (
-                      <div className="flex aspect-[4/5] items-center justify-center rounded-lg border border-dashed border-dark-200 text-sm text-dark-400">
+                      <div className="flex aspect-[4/5] items-center justify-center rounded-lg border border-dashed border-dark-200 text-sm text-dark-400 dark:border-dark-700 dark:text-dark-400">
                         Foto tidak tersedia
                       </div>
                     )}
@@ -128,7 +128,7 @@ export default function MemberReviewCard({ review, tenantId }: MemberReviewCardP
                 ))}
               </div>
 
-              <div className="flex gap-3 border-t border-dark-100 pt-5">
+              <div className="flex gap-3 border-t border-dark-100 pt-5 dark:border-dark-700/60">
                 <form action={acceptUser} className="flex-1">
                   <input type="hidden" name="userId" value={review.userId} />
                   <input type="hidden" name="tenantId" value={tenantId} />
