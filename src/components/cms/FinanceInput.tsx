@@ -40,6 +40,7 @@ export default function FinanceInput({
   const [type, setType] = useState("INCOME");
   const [categoryId, setCategoryId] = useState("");
   const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
+  const [showCategoryNotice, setShowCategoryNotice] = useState(false);
 
   const today = new Date();
   const maxDate = today.toISOString().split("T")[0];
@@ -49,6 +50,18 @@ export default function FinanceInput({
 
   const selectedCategory = selectedCategories.find((cat) => cat.id === categoryId);
   const isUangKasIncome = type === "INCOME" && selectedCategory?.name.toLowerCase() === "uang kas";
+
+  const hasIncomeCategories = incomeCategories.length > 0;
+  const hasExpenseCategories = expenseCategories.length > 0;
+  const onlyHasUangKas = hasIncomeCategories && !hasExpenseCategories && incomeCategories.some(cat => cat.name.toLowerCase().includes("uang kas"));
+
+  const handleOpenModal = () => {
+    if (onlyHasUangKas || (!hasIncomeCategories && !hasExpenseCategories)) {
+      setShowCategoryNotice(true);
+    } else {
+      setIsOpen(true);
+    }
+  };
 
   const handleSubmit = async (formData: FormData) => {
     formData.set("type", type);
@@ -81,12 +94,48 @@ export default function FinanceInput({
               <p className="text-xs text-dark-500">Tambah pemasukan atau pengeluaran</p>
             </div>
           </div>
-          <Button onClick={() => setIsOpen(true)}>
+          <Button onClick={handleOpenModal}>
             <Plus className="h-4 w-4" />
             Tambah
           </Button>
         </div>
       </Card>
+
+      {showCategoryNotice && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-md rounded-2xl bg-white dark:bg-dark-900 dark:border dark:border-dark-700 p-8 text-center shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setShowCategoryNotice(false)}
+              className="absolute right-4 top-4 rounded-lg p-1.5 text-dark-400 dark:text-dark-500 transition-colors hover:bg-dark-100 dark:hover:bg-dark-800 hover:text-dark-600 dark:hover:text-dark-200"
+              aria-label="Tutup"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-dark-900 dark:text-white">Kategori Belum Lengkap</h2>
+            <p className="mt-2 text-sm text-dark-600 dark:text-dark-300">
+              {onlyHasUangKas
+                ? "Anda hanya memiliki kategori Uang Kas. Silakan tambahkan kategori Pemasukan dan Pengeluaran terlebih dahulu sebelum melakukan input transaksi."
+                : "Silakan tambahkan kategori Pemasukan dan Pengeluaran terlebih dahulu sebelum melakukan input transaksi."
+              }
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowCategoryNotice(false)}
+              className="mt-6 rounded-lg bg-primary-600 px-6 py-2.5 font-medium text-white transition-colors hover:bg-primary-700"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
 
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Tambah Transaksi" size="md">
         <ActionFeedback

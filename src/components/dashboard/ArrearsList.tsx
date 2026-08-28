@@ -24,9 +24,10 @@ interface MemberArrears {
 interface ArrearsListProps {
   members: MemberArrears[];
   hasUangKasSettings?: boolean;
+  shouldLockFeatures?: boolean;
 }
 
-export default function ArrearsList({ members, hasUangKasSettings = true }: ArrearsListProps) {
+export default function ArrearsList({ members, hasUangKasSettings = true, shouldLockFeatures = false }: ArrearsListProps) {
   const [selectedMember, setSelectedMember] = useState<string>("all");
 
   const allMemberNames = useMemo(() => {
@@ -49,7 +50,7 @@ export default function ArrearsList({ members, hasUangKasSettings = true }: Arre
 
   if (selectedMember === "all") {
     return (
-      <Card padding="lg">
+      <Card padding="lg" className={shouldLockFeatures ? "opacity-50 pointer-events-none" : ""}>
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-lg font-bold text-dark-900 dark:text-white">Tunggakan Uang Kas</h3>
@@ -61,6 +62,17 @@ export default function ArrearsList({ members, hasUangKasSettings = true }: Arre
             {membersWithArrears.length} anggota menunggak
           </Badge>
         </div>
+
+        {shouldLockFeatures && (
+          <div className="flex items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 px-4 py-3 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <p className="text-sm text-amber-800 dark:text-amber-200">
+              Silahkan melakukan input Kategori Pemasukan dan Pengeluaran untuk membuka fitur ini.
+            </p>
+          </div>
+        )}
 
         {!hasUangKasSettings ? (
           <div className="rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/30 p-5 text-center">
@@ -77,7 +89,8 @@ export default function ArrearsList({ members, hasUangKasSettings = true }: Arre
             <select
               value={selectedMember}
               onChange={(e) => setSelectedMember(e.target.value)}
-              className="appearance-none bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg px-4 py-2 pr-10 text-sm text-dark-900 dark:text-dark-100 focus:outline-none focus:border-primary-500"
+              disabled={shouldLockFeatures}
+              className="appearance-none bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg px-4 py-2 pr-10 text-sm text-dark-900 dark:text-dark-100 focus:outline-none focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="all">Semua Anggota</option>
               {allMemberNames.map((name) => (
@@ -174,7 +187,8 @@ export default function ArrearsList({ members, hasUangKasSettings = true }: Arre
             <select
               value={selectedMember}
               onChange={(e) => setSelectedMember(e.target.value)}
-              className="appearance-none bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg px-4 py-2 pr-10 text-sm text-dark-900 dark:text-dark-100 focus:outline-none focus:border-primary-500"
+              disabled={shouldLockFeatures}
+              className="appearance-none bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg px-4 py-2 pr-10 text-sm text-dark-900 dark:text-dark-100 focus:outline-none focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="all">Semua Anggota</option>
               {allMemberNames.map((name) => (
