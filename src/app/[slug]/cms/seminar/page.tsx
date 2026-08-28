@@ -1,7 +1,8 @@
 import DeleteSeminarButton from '@/features/seminar/components/DeleteSeminarButton';
+import SeminarSubmissionManager from '@/features/seminar/components/SeminarSubmissionManager';
 import ActionFeedback from '@/components/cms/ActionFeedback';
 import { resolveTenantFromRoute } from '@/lib/tenant';
-import { listSeminars } from '@/features/seminar/services/list-seminars.service';
+import { getSeminarManagementData } from '@/features/seminar/services/list-seminars.service';
 
 import PageBackground from '@/components/ui/PageBackground';
 
@@ -35,7 +36,7 @@ export default async function SeminarPage({
     );
   }
 
-  const seminars = await listSeminars(tenantId);
+  const { seminars, allUsers } = await getSeminarManagementData(tenantId);
 
   return (
     <>
@@ -128,29 +129,39 @@ export default async function SeminarPage({
                 Belum ada seminar. Tambahkan seminar pertama Anda!
               </div>
             ) : (
-              seminars.map((seminar) => (
-                <div key={seminar.id} className="p-6 flex items-center justify-between hover:bg-dark-50 dark:hover:bg-dark-800/40 transition-colors">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-dark-900 dark:text-white">{seminar.title}</h3>
-                    <p className="text-sm text-dark-600 dark:text-dark-300 mt-1">{seminar.description}</p>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-dark-500 dark:text-dark-400">
-                      <span>📅 {new Date(seminar.date).toLocaleDateString('id-ID', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}</span>
-                      <span>📍 {seminar.location}</span>
+              seminars.map((seminar) => {
+                const submittedUserIds = seminar.submissions.map((s) => s.userId);
+                return (
+                  <div key={seminar.id} className="p-6 flex items-center justify-between hover:bg-dark-50 dark:hover:bg-dark-800/40 transition-colors">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-dark-900 dark:text-white">{seminar.title}</h3>
+                      <p className="text-sm text-dark-600 dark:text-dark-300 mt-1">{seminar.description}</p>
+                      <div className="flex items-center gap-4 mt-2 text-sm text-dark-500 dark:text-dark-400">
+                        <span>📅 {new Date(seminar.date).toLocaleDateString('id-ID', {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}</span>
+                        <span>📍 {seminar.location}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <SeminarSubmissionManager
+                        seminarId={seminar.id}
+                        seminarTitle={seminar.title}
+                        submittedUserIds={submittedUserIds}
+                        allUsers={allUsers}
+                        submissionCount={seminar.submissions.length}
+                      />
+                      <DeleteSeminarButton
+                        id={seminar.id}
+                        title={seminar.title}
+                      />
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <DeleteSeminarButton
-                      id={seminar.id}
-                      title={seminar.title}
-                    />
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

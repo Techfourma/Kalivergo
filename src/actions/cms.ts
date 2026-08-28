@@ -22,6 +22,7 @@ export {
 } from '@/features/task/actions/task.action';
 export { createSeminar } from '@/features/seminar/actions/create-seminar.action';
 export { deleteSeminar } from '@/features/seminar/actions/delete-seminar.action';
+export { updateSeminarSubmissionsAction as updateSeminarSubmissions } from '@/features/seminar/actions/update-seminar-submissions.action';
 export {
   createInformation,
   deleteInformation,

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireCmsActor, resolveTenantId } from "@/actions/cms/role-model";
 import { deleteSeminarForTenant } from "@/features/seminar/services/delete-seminar.service";
+import { resolveTenantRouteSlugForTenant } from "@/features/seminar/services/update-seminar-submissions.service";
 
 export async function deleteSeminar(id: string) {
   try {
@@ -13,7 +14,11 @@ export async function deleteSeminar(id: string) {
     const result = await deleteSeminarForTenant(id, tenantId);
     if ("error" in result) return result;
 
-    revalidatePath("/cms/seminar");
+    const slug = await resolveTenantRouteSlugForTenant(tenantId);
+    if (slug) {
+      revalidatePath(`/${slug}/cms/seminar`);
+      revalidatePath(`/${slug}/seminar`);
+    }
     return { success: "Seminar berhasil dihapus" };
   } catch (error: any) {
     console.error("Error deleting seminar:", error);

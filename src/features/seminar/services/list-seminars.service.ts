@@ -5,6 +5,7 @@ import {
   listSeminarsByTenantWithSubmissions,
   listUpcomingSeminarsByTenant,
   listSeminarsInNext7Days as repoListSeminarsInNext7Days,
+  findTenantSeminarMembers,
 } from "@/features/seminar/repositories/seminar.repository";
 
 export async function listSeminars(tenantId: string) {
@@ -13,6 +14,14 @@ export async function listSeminars(tenantId: string) {
 
 export async function listSeminarsWithSubmissions(tenantId: string) {
   return listSeminarsByTenantWithSubmissions(tenantId);
+}
+
+export async function getSeminarManagementData(tenantId: string) {
+  const [seminars, memberships] = await Promise.all([
+    listSeminarsByTenantWithSubmissions(tenantId),
+    findTenantSeminarMembers(tenantId),
+  ]);
+  return { seminars, allUsers: memberships.map((membership) => membership.user) };
 }
 
 export async function listUpcomingSeminars(tenantId: string) {
