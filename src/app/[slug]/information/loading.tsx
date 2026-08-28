@@ -1,10 +1,10 @@
 import Loading from "@/components/layout/Loading";
 
-export default function SeminarLoading() {
+export default function InformationLoading() {
   return (
     <Loading
       isVisible
-      message="Memuat Halaman Seminar"
+      message="Memuat Halaman Information"
       subMessage="Silakan tunggu sebentar..."
     />
   );
