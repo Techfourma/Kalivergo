@@ -2,7 +2,6 @@
   <img src="public/logo.jpg" alt="Logo Kalivergo" width="120" />
 </p>
 
-<<<<<<< HEAD
 # Kalivergo
 
 Kalivergo adalah platform manajemen kelas berbasis web untuk mengelola anggota, tugas, keuangan kelas, jadwal, seminar, dan portofolio anggota dalam konteks tenant kelas. Aplikasi juga menyediakan panel platform untuk verifikasi KYC dan pengelolaan aplikasi pembuatan kelas.
