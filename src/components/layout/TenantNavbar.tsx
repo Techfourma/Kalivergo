@@ -18,7 +18,7 @@ import {
   User,
   LayoutDashboard,
   FolderOpen,
-  FileText,
+  Newspaper,
   ClipboardList,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
@@ -104,7 +104,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
     {
       href: `${tenantPath}/information`,
       label: "Information",
-      icon: FileText,
+      icon: Newspaper,
       requiresAuth: true
     },
     {

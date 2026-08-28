@@ -18,6 +18,7 @@ import {
   Users,
   FolderOpen,
   FileText,
+  Newspaper,
   Shield,
 } from "lucide-react";
 
@@ -37,7 +38,7 @@ const cmsNavItems: CmsNavItem[] = [
   { href: "/cms/finance", label: "Finance", icon: Wallet, module: "finance" },
   { href: "/cms/schedule", label: "Schedule", icon: Calendar, module: "schedule" },
   { href: "/cms/seminar", label: "Seminar", icon: GraduationCap, module: "seminar" },
-  { href: "/cms/information", label: "Information", icon: FileText, module: "information" },
+  { href: "/cms/information", label: "Information", icon: Newspaper, module: "information" },
   { href: "/cms/audit", label: "Audit Log", icon: FileText, module: "audit" },
   { href: "/cms/access", label: "Access Control", icon: Shield, module: "access", ownerOnly: true },
 ];
