@@ -27,7 +27,7 @@ export default function HomeUpcomingSeminars({
 }: HomeUpcomingSeminarsProps) {
   return (
     <Link href={`${tenantPath}/seminar`} className="block">
-      {/* WRAPPER UTAMA - TIDAK ADA HOVER */}
+     
       <Card
         className={cn(
           "relative overflow-hidden",
@@ -36,7 +36,7 @@ export default function HomeUpcomingSeminars({
           "backdrop-blur-md"
         )}
       >
-        {/* HEADER - TIDAK ADA HOVER */}
+        
         <div className="mb-5 flex items-center gap-3">
           <div
             className={cn(
@@ -64,7 +64,7 @@ export default function HomeUpcomingSeminars({
           </div>
         </div>
 
-        {/* ISI SEMINAR */}
+        
         <div className="space-y-3">
           {seminars.length === 0 ? (
             <div className="py-8 text-center text-slate-500 dark:text-slate-400">
@@ -90,32 +90,32 @@ export default function HomeUpcomingSeminars({
                 <div
                   key={seminar.id}
                   className={cn(
-                    // Base card seminar
+                    
                     "group rounded-xl border p-4",
 
-                    // LIGHT MODE
+                    
                     "border-slate-200",
                     "bg-gradient-to-r from-accent-50/70 to-primary-50/70",
 
-                    // DARK MODE
+                   
                     "dark:border-[#263b5c]",
                     "dark:from-[#17243a]",
                     "dark:to-[#142238]",
 
-                    // HANYA SEMINAR INI YANG HOVER
+                   
                     "transition-all duration-300 ease-out",
                     "hover:-translate-y-0.5",
                     "hover:border-primary-500",
                     "hover:shadow-md hover:shadow-primary-500/10",
 
-                    // Dark mode hover
+                    
                     "dark:hover:border-blue-500",
                     "dark:hover:shadow-blue-500/10"
                   )}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      {/* JUDUL SEMINAR - BERUBAH BIRU SAAT SEMINAR DI-HOVER */}
+                      
                       <h3
                         className={cn(
                           "font-semibold",
@@ -128,7 +128,7 @@ export default function HomeUpcomingSeminars({
                         {seminar.title}
                       </h3>
 
-                      {/* DESKRIPSI - TIDAK BERUBAH WARNA */}
+                     
                       <p
                         className={cn(
                           "mt-1 line-clamp-2 text-sm",
@@ -140,16 +140,16 @@ export default function HomeUpcomingSeminars({
                       </p>
                     </div>
 
-                    {/* STATUS */}
+                   
                     <span
                       className={cn(
                         "shrink-0 rounded-full px-2 py-1",
                         "text-[10px] font-medium",
 
-                        // Light mode
+                        
                         "bg-accent-100 text-accent-700",
 
-                        // Dark mode
+                        
                         "dark:bg-blue-500/15 dark:text-blue-300"
                       )}
                     >
@@ -161,7 +161,7 @@ export default function HomeUpcomingSeminars({
                     </span>
                   </div>
 
-                  {/* TANGGAL & LOKASI */}
+                 
                   <div
                     className={cn(
                       "mt-3 flex items-center gap-4",
