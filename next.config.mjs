@@ -1,3 +1,4 @@
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -11,8 +12,10 @@ const nextConfig = {
       },
     ],
   },
-  serverActions: {
-    bodySizeLimit: '20mb',
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '20mb',
+    },
   },
   async headers() {
     return [
@@ -28,4 +31,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
