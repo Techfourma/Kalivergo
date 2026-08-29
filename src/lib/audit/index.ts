@@ -11,16 +11,6 @@ export async function createAuditLog(
   metadata?: Record<string, any>
 ): Promise<void> {
   try {
-    let userName: string | undefined;
-
-    if (actorUserId) {
-      const user = await prisma.user.findUnique({
-        where: { id: actorUserId },
-        select: { name: true },
-      });
-      userName = user?.name;
-    }
-
     await prisma.auditLog.create({
       data: {
         actorUserId: actorUserId ?? null,

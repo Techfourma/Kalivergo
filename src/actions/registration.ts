@@ -1,5 +1,6 @@
 "use server";
 
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { hash } from "bcryptjs";
 import { createAuditLog } from "@/server/audit";
@@ -7,9 +8,6 @@ import { validateSelfieFile } from "@/server/kyc/validation";
 import { generateSlug } from "@/lib/tenant";
 import { generateVerificationToken, hashToken } from "@/lib/auth";
 import { sendVerificationEmail } from "@/lib/email";
-import {
-  createOwnerApplication,
-} from "@/features/owner/services/owner-application.service";
 import {
   deleteKtmFromKYC,
   deleteSelfieFromKYC,
@@ -290,16 +288,6 @@ export async function registerOwnerClass(formData: FormData) {
   try {
     const hashedPassword = await hash(password, 12);
 
-    const newUser = await prisma.user.create({
-      data: {
-        name: fullName,
-        nim,
-        email: email,
-        password: hashedPassword,
-        isVerified: false,
-      },
-    });
-
     const buffer = Buffer.from(await selfieFile.arrayBuffer());
     const upload = await uploadSelfieForKYC(buffer, selfieFile.name);
     if (!upload.success || !upload.publicId) {
@@ -313,29 +301,75 @@ export async function registerOwnerClass(formData: FormData) {
       return { error: ktmUpload.error || "Gagal mengunggah foto KTM.", field: "ktmFile" };
     }
 
-    const app = await createOwnerApplication({
-      userId: newUser.id,
-      universityName,
-      programName,
-      className,
-      customSlug: normalizedCustomSlug,
-      selfieStorageKey: upload.publicId,
-      ktmStorageKey: ktmUpload.publicId,
-      whatsappNumber: phone,
-    });
+    let applicationId: string;
 
-    if (!app.success) {
+    try {
+      const result = await prisma.$transaction(async (tx) => {
+        const user = await tx.user.upsert({
+          where: { email: email },
+          update: {
+            name: fullName,
+            nim: nim,
+            password: hashedPassword,
+            isVerified: false,
+          },
+          create: {
+            name: fullName,
+            nim: nim,
+            email: email,
+            password: hashedPassword,
+            isVerified: false,
+          },
+        });
+
+        const app = await tx.ownerApplication.create({
+          data: {
+            userId: user.id,
+            universityName,
+            programName,
+            className,
+            customSlug: normalizedCustomSlug || undefined,
+            selfieStorageKey: upload.publicId,
+            ktmStorageKey: ktmUpload.publicId,
+            whatsappNumber: phone || undefined,
+            status: "PENDING_EMAIL",
+            submittedAt: new Date(),
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            actorUserId: user.id,
+            action: "SUBMIT",
+            entityType: "OWNER_REGISTRATION",
+            entityId: app.id,
+            metadata: {
+              applicationId: app.id,
+              universityName,
+              programName,
+              className,
+            },
+          },
+        });
+
+        return { applicationId: app.id };
+      });
+
+      applicationId = result.applicationId;
+    } catch (error: any) {
       await deleteSelfieFromKYC(upload.publicId);
       await deleteKtmFromKYC(ktmUpload.publicId);
-      return { error: app.error || "Gagal membuat pengajuan kelas.", field: "className" };
-    }
 
-    await createAuditLog("OWNER_REGISTRATION", "SUBMIT", `Pengajuan kelas ${className}`, newUser.id, {
-      applicationId: app.applicationId,
-      universityName,
-      programName,
-      className,
-    });
+      if (error.code === 'P2002') {
+        return {
+          error: "Pendaftaran gagal: data sudah ada. Anda mungkin sudah mengajukan sebelumnya.",
+          field: "email",
+        };
+      }
+
+      console.error("Error in owner registration transaction:", error);
+      return { error: "Terjadi kesalahan sistem saat registrasi. Silakan coba lagi." };
+    }
 
     return {
       success: "Pengajuan berhasil dikirim. Data Anda sudah masuk ke antrian KYC dan akan diproses admin dalam 1x24 jam. Setelah disetujui, email autentikasi akan dikirim ke Gmail Anda.",
@@ -391,10 +425,11 @@ export async function registerMember(formData: FormData) {
   if (password.length < 6)
     return { error: "Password minimal 6 karakter", field: "password" };
 
-  const verifiedUser = await prisma.user.findFirst({
-    where: { isVerified: true, email: email },
+  const verifiedUser = await prisma.user.findUnique({
+    where: { email },
   });
-  if (verifiedUser) {
+
+  if (verifiedUser?.isVerified) {
     return {
       error: "Email ini sudah terdaftar dan terverifikasi. Silakan login atau gunakan email lain.",
       field: "email",
@@ -414,32 +449,6 @@ export async function registerMember(formData: FormData) {
   try {
     const hashedPassword = await hash(password, 12);
 
-    let user = await prisma.user.findFirst({
-      where: { email: email },
-    });
-
-    if (user) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          name: fullName,
-          nim: nim,
-          password: hashedPassword,
-          isVerified: false,
-        },
-      });
-    } else {
-      user = await prisma.user.create({
-        data: {
-          name: fullName,
-          nim: nim,
-          email: email,
-          password: hashedPassword,
-          isVerified: false,
-        },
-      });
-    }
-
     const profileBuffer = Buffer.from(await profilePhotoFile.arrayBuffer());
     const ktmBuffer = Buffer.from(await ktmPhotoFile.arrayBuffer());
 
@@ -454,33 +463,69 @@ export async function registerMember(formData: FormData) {
       return { error: ktmUpload.error || "Gagal mengunggah foto KTM.", field: "ktmPhoto" };
     }
 
-    await prisma.memberApplication.create({
-      data: {
-        userId: user.id,
-        tenantId: tenant.id,
-        fullName: fullName,
-        nim: nim,
-        email: email,
-        profilePhotoStorageKey: profileUpload.publicId,
-        ktmPhotoStorageKey: ktmUpload.publicId,
-        status: "PENDING_APPROVAL",
-      },
-    });
+    try {
+      await prisma.$transaction(async (tx) => {
+        const user = await tx.user.upsert({
+          where: { email },
+          update: {
+            name: fullName,
+            nim: nim,
+            password: hashedPassword,
+            isVerified: false,
+          },
+          create: {
+            name: fullName,
+            nim: nim,
+            email: email,
+            password: hashedPassword,
+            isVerified: false,
+          },
+        });
 
-    await createAuditLog(
-      "MEMBER_REGISTRATION",
-      "JOIN",
-      `Anggota bergabung ke kelas ${tenant.name} (menunggu persetujuan)`,
-      user.id,
-      {
-        tenantId: tenant.id,
-        universityName: tenant.university.name,
-        programName: tenant.program.name,
-        className: tenant.name,
-        role: "MEMBER",
-        status: "PENDING_APPROVAL",
+        await tx.memberApplication.create({
+          data: {
+            userId: user.id,
+            tenantId: tenant.id,
+            fullName: fullName,
+            nim: nim,
+            email: email,
+            profilePhotoStorageKey: profileUpload.publicId,
+            ktmPhotoStorageKey: ktmUpload.publicId,
+            status: "PENDING_APPROVAL",
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            actorUserId: user.id,
+            action: "JOIN",
+            entityType: "MEMBER_REGISTRATION",
+            entityId: null,
+            metadata: {
+              tenantId: tenant.id,
+              universityName: tenant.university.name,
+              programName: tenant.program.name,
+              className: tenant.name,
+              role: "MEMBER",
+              status: "PENDING_APPROVAL",
+            },
+          },
+        });
+      });
+    } catch (error: any) {
+      await deleteSelfieFromKYC(profileUpload.publicId);
+      await deleteKtmFromKYC(ktmUpload.publicId);
+
+      if (error.code === 'P2002') {
+        return {
+          error: "Pendaftaran gagal: data sudah ada. Anda mungkin sudah mendaftar sebelumnya.",
+          field: "email",
+        };
       }
-    );
+
+      console.error("Error in member registration transaction:", error);
+      return { error: "Terjadi kesalahan sistem saat registrasi. Silakan coba lagi." };
+    }
 
     return {
       success: "Pendaftaran berhasil! Pendaftaran Anda sedang menunggu persetujuan admin/owner kelas. Setelah disetujui, link verifikasi akan dikirim ke email Anda.",
@@ -516,7 +561,7 @@ export interface RegistrationUniversity {
   programs: RegistrationProgram[];
 }
 
-export async function getRegistrationData(): Promise<RegistrationUniversity[]> {
+async function loadRegistrationData(): Promise<RegistrationUniversity[]> {
   try {
     const universities = await prisma.university.findMany({
       where: { tenants: { some: { status: "ACTIVE" } } },
@@ -558,3 +603,9 @@ export async function getRegistrationData(): Promise<RegistrationUniversity[]> {
     return [];
   }
 }
+
+export const getRegistrationData = unstable_cache(
+  loadRegistrationData,
+  ["registration-data"],
+  { revalidate: 300, tags: ["registration-data"] }
+);
