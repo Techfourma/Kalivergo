@@ -5,9 +5,6 @@ import { hash } from "bcryptjs";
 import { createAuditLog } from "@/server/audit";
 import { validateSelfieFile } from "@/server/kyc/validation";
 import {
-  createOwnerApplication,
-} from "@/features/owner/services/owner-application.service";
-import {
   deleteKtmFromKYC,
   deleteSelfieFromKYC,
   uploadKtmForKYC,
@@ -101,56 +98,76 @@ export async function registerOwner(formData: FormData) {
     const ktmBuffer = Buffer.from(await ktmFile.arrayBuffer());
     const ktmUpload = await uploadKtmForKYC(ktmBuffer, ktmFile.name);
     if (!ktmUpload.success || !ktmUpload.publicId) {
-      await deleteSelfieFromKYC(selfieUpload.publicId!);
+      await deleteSelfieFromKYC(selfieUpload.publicId);
       return { error: ktmUpload.error || "Gagal mengunggah foto KTM.", field: "ktmFile" };
     }
 
-    if (existingUser) {
-      userId = existingUser.id;
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          password: hashedPassword,
-          isVerified: false,
-          name: fullName,
-          nim,
-        },
+    try {
+      const result = await prisma.$transaction(async (tx) => {
+        const user = await tx.user.upsert({
+          where: { email: email },
+          update: {
+            name: fullName,
+            nim: nim,
+            password: hashedPassword,
+            isVerified: false,
+          },
+          create: {
+            name: fullName,
+            nim: nim,
+            email: email,
+            password: hashedPassword,
+            isVerified: false,
+          },
+        });
+
+        const app = await tx.ownerApplication.create({
+          data: {
+            userId: user.id,
+            universityName: university,
+            programName: program,
+            className: className,
+            selfieStorageKey: selfieUpload.publicId,
+            ktmStorageKey: ktmUpload.publicId,
+            whatsappNumber: whatsapp || undefined,
+            status: "PENDING_EMAIL",
+            submittedAt: new Date(),
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            actorUserId: user.id,
+            action: "SUBMIT",
+            entityType: "OWNER_REGISTRATION",
+            entityId: app.id,
+            metadata: {
+              applicationId: app.id,
+              universityName: university,
+              programName: program,
+              className: className,
+            },
+          },
+        });
+
+        return { userId: user.id, applicationId: app.id };
       });
-    } else {
-      const user = await prisma.user.create({
-        data: {
-          name: fullName,
-          nim,
-          email,
-          password: hashedPassword,
-          isVerified: false,
-        },
-      });
-      userId = user.id;
+
+      userId = result.userId;
+    } catch (error: any) {
+      await deleteSelfieFromKYC(selfieUpload.publicId);
+      await deleteKtmFromKYC(ktmUpload.publicId);
+
+      if (error.code === 'P2002') {
+        return {
+          error: "Pendaftaran gagal: data sudah ada. Anda mungkin sudah mengajukan sebelumnya.",
+          field: "email",
+        };
+      }
+
+      console.error("Error in owner registration transaction:", error);
+      return { error: "Terjadi kesalahan sistem saat registrasi. Silakan coba lagi." };
     }
-
-    const app = await createOwnerApplication({
-      userId,
-      universityName: university,
-      programName: program,
-      className,
-      selfieStorageKey: selfieUpload.publicId,
-      ktmStorageKey: ktmUpload.publicId,
-      whatsappNumber: whatsapp,
-    });
-
-    if (!app.success) {
-      await deleteSelfieFromKYC(selfieUpload.publicId!);
-      await deleteKtmFromKYC(ktmUpload.publicId!);
-      return { error: app.error || "Gagal membuat pengajuan owner.", field: "className" };
-    }
-
-    await createAuditLog("OWNER_REGISTRATION", "SUBMIT", `Pengajuan owner ${className}`, userId, {
-      applicationId: app.applicationId,
-      universityName: university,
-      programName: program,
-      className,
-    });
 
     return {
       success: "Pendaftaran berhasil. Data Anda sudah masuk ke antrian KYC dan akan diproses admin dalam 1x24 jam. Setelah disetujui, email autentikasi akan dikirim ke Gmail Anda.",
