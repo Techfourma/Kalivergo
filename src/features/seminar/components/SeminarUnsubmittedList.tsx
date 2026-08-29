@@ -3,12 +3,14 @@
 import { useState, useMemo } from "react";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
+import Avatar from "@/components/ui/Avatar";
 import { UserX, AlertTriangle, ChevronDown, GraduationCap } from "lucide-react";
 
 interface User {
   id: string;
   name: string;
   email?: string | null;
+  image?: string | null;
 }
 
 interface SeminarSubmission {
@@ -116,9 +118,7 @@ export default function SeminarUnsubmittedList({ seminars, allUsers }: SeminarUn
               key={user.id}
               className="flex items-center gap-3 rounded-xl border border-transparent bg-dark-50 dark:bg-dark-800/50 dark:border-dark-700/50 p-3 hover:bg-red-50 dark:hover:bg-red-950/20 dark:hover:border-red-900/40 transition-colors"
             >
-              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-red-400 to-orange-400 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm shadow-red-500/20">
-                {user.name.charAt(0).toUpperCase()}
-              </div>
+              <Avatar src={user.image} name={user.name} id={user.id} size="sm" />
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-dark-900 dark:text-white text-sm truncate">
                   {user.name}

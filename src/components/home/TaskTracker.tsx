@@ -11,6 +11,7 @@ interface Task {
   id: string;
   title: string;
   description: string;
+  startDate?: string;
   deadline: string;
   submissions?: any[];
 }
@@ -105,6 +106,12 @@ export default function TaskTracker({ tasks }: TaskTrackerProps) {
                   </Badge>
                 </div>
                 <div className="flex items-center gap-4 mt-3 text-xs text-dark-400 dark:text-dark-500">
+                  {task.startDate && (
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      Mulai {formatDateTime(task.startDate)}
+                    </span>
+                  )}
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     {formatDateTime(task.deadline)}

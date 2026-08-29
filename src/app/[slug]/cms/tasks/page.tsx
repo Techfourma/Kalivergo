@@ -66,16 +66,29 @@ export default async function TasksPage({ params }: TenantCmsTasksPageProps) {
                   placeholder="Contoh: Algoritma Pemograman II"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                  Deadline
-                </label>
-                <input
-                  type="datetime-local"
-                  name="deadline"
-                  required
-                  className="w-full px-4 py-2.5 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm md:text-base transition-shadow [color-scheme:light] dark:[color-scheme:dark]"
-                />
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Start Date Time (WIB)
+                  </label>
+                  <input
+                    type="datetime-local"
+                    name="startDate"
+                    required
+                    className="w-full px-4 py-2.5 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm md:text-base transition-shadow"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Deadline (WIB)
+                  </label>
+                  <input
+                    type="datetime-local"
+                    name="deadline"
+                    required
+                    className="w-full px-4 py-2.5 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm md:text-base transition-shadow"
+                  />
+                </div>
               </div>
             </div>
             <div>
@@ -128,17 +141,30 @@ export default async function TasksPage({ params }: TenantCmsTasksPageProps) {
                       <p className="text-sm text-dark-600 dark:text-dark-300 mt-1 break-words">
                         {task.description}
                       </p>
-                      <p className="text-xs md:text-sm text-primary-600 dark:text-primary-400 mt-2">
-                        Deadline:{' '}
-                        {new Date(task.deadline).toLocaleDateString('id-ID', {
-                          weekday: 'long',
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </p>
+                      <div className="text-xs md:text-sm text-dark-500 dark:text-dark-400 mt-2 space-y-1">
+                        <p className="text-primary-600 dark:text-primary-400">
+                          Start:{' '}
+                          {new Date(task.startDate).toLocaleDateString('id-ID', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                        <p className="text-red-600 dark:text-red-400">
+                          Deadline:{' '}
+                          {new Date(task.deadline).toLocaleDateString('id-ID', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
                     </div>
                     <div className="flex flex-row items-center justify-between md:justify-end gap-3 w-full md:w-auto pt-2 md:pt-0 border-t md:border-0 border-dark-100 dark:border-dark-800">
                       <TaskSubmissionManager

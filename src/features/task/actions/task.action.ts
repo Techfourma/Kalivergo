@@ -33,7 +33,16 @@ export async function createTaskAction(formData: FormData) {
 
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
+  const startDate = new Date(formData.get("startDate") as string);
   const deadline = new Date(formData.get("deadline") as string);
+
+  if (isNaN(startDate.getTime()) || isNaN(deadline.getTime())) {
+    return { error: "Start Date Time dan Deadline harus diisi dengan waktu yang valid." };
+  }
+
+  if (deadline <= startDate) {
+    return { error: "Deadline harus setelah Start Date Time." };
+  }
 
   const tenantId = await getTenantIdFromCookie();
   if (!tenantId) {
@@ -45,10 +54,11 @@ export async function createTaskAction(formData: FormData) {
     return { error: "Akses ditolak: hanya OWNER atau role CMS." };
   }
 
-  const task = await createTaskForTenant({ tenantId, title, description, deadline });
+  const task = await createTaskForTenant({ tenantId, title, description, startDate, deadline });
   await createAuditLog("TASKS", "CREATE", `Menambahkan tugas: ${title}`, "System", {
     taskId: task.id,
     title,
+    startDate: startDate.toISOString(),
     deadline: deadline.toISOString(),
     tenantId,
   });

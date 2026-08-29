@@ -15,6 +15,7 @@ export async function createTaskForTenant(input: {
   tenantId: string;
   title: string;
   description: string;
+  startDate: Date;
   deadline: Date;
 }) {
   return createTaskForTenantRepository(input);

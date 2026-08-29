@@ -8,6 +8,7 @@ export function findTasksForTenant(
 ) {
   const where: {
     tenantId: string;
+    startDate?: { lt?: Date };
     deadline?: { gte?: Date; lte?: Date; lt?: Date };
   } = { tenantId };
 
@@ -18,7 +19,8 @@ export function findTasksForTenant(
     startOfWeek.setHours(0, 0, 0, 0);
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 7);
-    where.deadline = { gte: startOfWeek, lt: endOfWeek };
+    where.startDate = { lt: endOfWeek };
+    where.deadline = { gte: startOfWeek };
   } else if (filters.startDate && filters.endDate) {
     where.deadline = { gte: filters.startDate, lte: filters.endDate };
   }
@@ -38,6 +40,7 @@ export function createTaskForTenant(data: {
   tenantId: string;
   title: string;
   description: string;
+  startDate: Date;
   deadline: Date;
 }) {
   return prisma.task.create({ data });

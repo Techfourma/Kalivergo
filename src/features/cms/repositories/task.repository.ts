@@ -6,6 +6,7 @@ export function createTask(data: {
   tenantId: string;
   title: string;
   description: string;
+  startDate: Date;
   deadline: Date;
 }) {
   return prisma.task.create({ data });

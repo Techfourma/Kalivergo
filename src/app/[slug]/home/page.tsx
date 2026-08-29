@@ -109,8 +109,9 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
     endOfWeek.setDate(startOfWeek.getDate() + 7);
 
     const weeklyTasks = tasks.filter((task) => {
+      const startDate = new Date(task.startDate);
       const deadline = new Date(task.deadline);
-      return deadline >= startOfWeek && deadline < endOfWeek;
+      return startDate < endOfWeek && deadline >= startOfWeek;
     });
 
     const tenantPath = `/${routeParams.slug}`;

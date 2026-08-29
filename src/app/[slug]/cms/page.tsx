@@ -14,7 +14,6 @@ import { resolveTenantFromRoute } from '@/lib/tenant';
 import { notFound } from 'next/navigation';
 import { getCurrentSessionUser } from '@/server/auth/session';
 import type { CmsRole } from '@prisma/client';
-import TaskProgressChart from '@/components/cms/TaskProgressChart';
 
 import PageBackground from '@/components/ui/PageBackground';
 
@@ -87,41 +86,6 @@ export default async function CMSOverviewPage({
     prisma.seminar.count({ where: seminarWhere }),
     prisma.user.count({ where: memberWhere }),
   ]);
-
-  const tasks = await prisma.task.findMany({
-    where: taskWhere,
-    include: {
-      submissions: {
-        include: {
-          user: {
-            select: { id: true, name: true },
-          },
-        },
-      },
-    },
-  });
-
-  const userStatsMap = new Map<string, { name: string; total: number; submitted: number; pending: number }>();
-  for (const task of tasks) {
-    for (const submission of task.submissions) {
-      const existing = userStatsMap.get(submission.userId) ?? { name: submission.user.name, total: 0, submitted: 0, pending: 0 };
-      existing.total += 1;
-      if (submission.status === 'PENDING') {
-        existing.pending += 1;
-      } else {
-        existing.submitted += 1;
-      }
-      userStatsMap.set(submission.userId, existing);
-    }
-  }
-
-  const userStats = Array.from(userStatsMap.values()).map((stat) => ({
-    name: stat.name,
-    total: stat.total,
-    submitted: stat.submitted,
-    pending: stat.pending,
-    completionRate: stat.total > 0 ? Math.round((stat.submitted / stat.total) * 100) : 0,
-  }));
 
   const totalIncome = transactions
     .filter(t => t.type === 'INCOME')
@@ -256,11 +220,6 @@ export default async function CMSOverviewPage({
           </div>
         </div>
         )}
-
-        {hasTasksAccess && tasks.length > 0 && (
-          <TaskProgressChart userStats={userStats} />
-        )}
-
       </div>
     </>
   );

@@ -57,19 +57,32 @@ export default async function TasksPage({ params }: TasksPageProps) {
         where: { tenantId: tenantId! },
         include: {
           user: {
-            select: { id: true, name: true, email: true }
+            select: { id: true, name: true, email: true, image: true }
           }
         },
         orderBy: { user: { name: "asc" } },
       }).then(memberships => memberships.map(m => m.user)),
     ]);
 
-    const tasksForUnsubmitted = tasks.map((t) => ({
-      id: t.id,
-      title: t.title,
-      deadline: t.deadline.toISOString(),
-      submissions: t.submissions.map((s) => ({ userId: s.userId })),
-    }));
+    const tasksForUnsubmitted = tasks.map((t) => {
+      const submissionMap = new Map(t.submissions.map((s) => [s.userId, s]));
+
+      const submissions = allUsers.map((user) => {
+        const existing = submissionMap.get(user.id);
+        if (existing) {
+          return { userId: user.id, status: existing.status };
+        }
+        return { userId: user.id, status: "PENDING" };
+      });
+
+      return {
+        id: t.id,
+        title: t.title,
+        startDate: t.startDate.toISOString(),
+        deadline: t.deadline.toISOString(),
+        submissions,
+      };
+    });
 
     const tenantPath = `/${routeParams.slug}`;
 

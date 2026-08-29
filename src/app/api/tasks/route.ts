@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, description, deadline } = body;
+    const { title, description, startDate, deadline } = body;
 
     const tenantContext = await getCurrentTenantForUser(session.id);
     const tenantId = tenantContext?.tenantId;
@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
       tenantId,
       title,
       description,
+      startDate: startDate ? new Date(startDate) : new Date(),
       deadline: new Date(deadline),
     });
 
