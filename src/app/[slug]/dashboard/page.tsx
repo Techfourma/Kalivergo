@@ -182,10 +182,11 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
     const arrears = Math.max(0, totalExpected - totalPaid);
 
-return {
+  return {
       userId: user.id,
       userName: user.name,
       userEmail: user.email,
+      userImage: user.image,
       totalPaid,
       totalExpected,
       arrears,
@@ -248,6 +249,7 @@ return {
             members={finalMembers as any}
             hasUangKasSettings={finalExpectedPaymentDates.length > 0}
             shouldLockFeatures={shouldLockFeatures}
+            uangKasDates={uangKasScheduleDates}
           />
         </div>
 

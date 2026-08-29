@@ -73,26 +73,15 @@ export default async function SchedulePage({
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                  Tanggal
+                  Waktu Kegiatan (WIB)
                 </label>
                 <input
-                  type="date"
-                  name="date"
+                  type="datetime-local"
+                  name="dateTime"
                   required
-                  className="w-full px-4 py-2 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow [color-scheme:light] dark:[color-scheme:dark]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                  Waktu
-                </label>
-                <input
-                  type="time"
-                  name="time"
-                  required
-                  className="w-full px-4 py-2 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow [color-scheme:light] dark:[color-scheme:dark]"
+                  className="w-full px-4 py-2 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
                 />
               </div>
               <div>

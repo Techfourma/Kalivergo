@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
+import Avatar from "@/components/ui/Avatar";
 import { AlertCircle, CheckCircle2, ChevronDown, CalendarDays, User, FileText } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
@@ -10,6 +11,7 @@ interface MemberArrears {
   userId: string;
   userName: string;
   userEmail: string;
+  userImage?: string | null;
   totalPaid: number;
   totalExpected: number;
   arrears: number;
@@ -25,10 +27,16 @@ interface ArrearsListProps {
   members: MemberArrears[];
   hasUangKasSettings?: boolean;
   shouldLockFeatures?: boolean;
+  uangKasDates?: Array<{ id: string; date: string; formattedDate: string; amount: number; description: string | null }>;
 }
 
-export default function ArrearsList({ members, hasUangKasSettings = true, shouldLockFeatures = false }: ArrearsListProps) {
+function getTodayString() {
+  return new Date().toISOString().split("T")[0];
+}
+
+export default function ArrearsList({ members, hasUangKasSettings = true, shouldLockFeatures = false, uangKasDates = [] }: ArrearsListProps) {
   const [selectedMember, setSelectedMember] = useState<string>("all");
+  const [selectedDate, setSelectedDate] = useState<string>(getTodayString());
 
   const allMemberNames = useMemo(() => {
     return Array.from(new Set(members.map((m) => m.userName))).sort((a, b) =>
@@ -41,12 +49,33 @@ export default function ArrearsList({ members, hasUangKasSettings = true, should
     return members.find((m) => m.userName === selectedMember) || null;
   }, [members, selectedMember]);
 
-  const filteredMembers = useMemo(() => {
-    return members.filter((m) => m.arrears > 0);
-  }, [members]);
+  const availableDates = useMemo(() => uangKasDates ?? [], [uangKasDates]);
 
-  const totalArrears = filteredMembers.reduce((sum, m) => sum + m.arrears, 0);
-  const membersWithArrears = filteredMembers.filter((m) => m.arrears > 0);
+  const activeDate = useMemo(() => {
+    if (!selectedDate) return "";
+    const exists = availableDates.some((d) => d.date === selectedDate);
+    return exists ? selectedDate : "";
+  }, [selectedDate, availableDates]);
+
+  const selectedDateLabel = useMemo(() => {
+    if (!activeDate) return "Semua Tanggal";
+    const match = availableDates.find((d) => d.date === activeDate);
+    return match?.formattedDate ?? activeDate;
+  }, [activeDate, availableDates]);
+
+  const dateFilteredMembers = useMemo(() => {
+    if (!activeDate) return members.filter((m) => m.arrears > 0);
+    return members.filter((m) => {
+      const detail = m.paymentByDate?.[activeDate];
+      return !detail?.paid;
+    });
+  }, [members, activeDate]);
+
+  const totalArrears = dateFilteredMembers.reduce((sum, m) => {
+    if (!activeDate) return sum + m.arrears;
+    const detail = m.paymentByDate?.[activeDate];
+    return sum + (detail ? Number(detail.amount) : 0);
+  }, 0);
 
   if (selectedMember === "all") {
     return (
@@ -55,11 +84,11 @@ export default function ArrearsList({ members, hasUangKasSettings = true, should
           <div>
             <h3 className="text-lg font-bold text-dark-900 dark:text-white">Tunggakan Uang Kas</h3>
             <p className="text-sm text-dark-500 dark:text-dark-400 mt-1">
-              Total tunggakan: {formatCurrency(totalArrears)}
+              {activeDate ? `Tunggakan ${selectedDateLabel}: ${formatCurrency(totalArrears)}` : `Total tunggakan: ${formatCurrency(totalArrears)}`}
             </p>
           </div>
           <Badge variant="danger">
-            {membersWithArrears.length} anggota menunggak
+            {dateFilteredMembers.length} anggota menunggak
           </Badge>
         </div>
 
@@ -74,7 +103,7 @@ export default function ArrearsList({ members, hasUangKasSettings = true, should
           </div>
         )}
 
-        {!hasUangKasSettings ? (
+        {!hasUangKasSettings || availableDates.length === 0 ? (
           <div className="rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/30 p-5 text-center">
             <AlertCircle className="mx-auto mb-2 h-8 w-8 text-amber-600 dark:text-amber-400" />
             <p className="font-medium text-amber-900 dark:text-amber-200">Silakan lakukan pendataan Uang Kelas terlebih dahulu.</p>
@@ -82,7 +111,26 @@ export default function ArrearsList({ members, hasUangKasSettings = true, should
           </div>
         ) : (
         <>
-       
+        <div className="mb-4 flex flex-wrap gap-2 items-center">
+          <label className="text-sm text-dark-500 dark:text-dark-400">Tanggal:</label>
+          <div className="relative">
+            <select
+              value={activeDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              disabled={shouldLockFeatures}
+              className="appearance-none bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg px-4 py-2 pr-10 text-sm text-dark-900 dark:text-dark-100 focus:outline-none focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <option value="">Semua Tanggal</option>
+              {availableDates.map((d) => (
+                <option key={d.date} value={d.date}>
+                  {d.formattedDate}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-dark-400 dark:text-dark-500 pointer-events-none" />
+          </div>
+        </div>
+
         <div className="mb-4 flex flex-wrap gap-2 items-center">
           <label className="text-sm text-dark-500 dark:text-dark-400">Filter Nama:</label>
           <div className="relative">
@@ -104,52 +152,45 @@ export default function ArrearsList({ members, hasUangKasSettings = true, should
         </div>
 
         <div className="space-y-2">
-          {membersWithArrears.length === 0 ? (
+          {dateFilteredMembers.length === 0 ? (
             <div className="text-center py-12 text-dark-400 dark:text-dark-500">
               <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-emerald-500 dark:text-emerald-400" />
-              <p className="font-medium">Semua anggota sudah lunas! 🎉</p>
+              <p className="font-medium">
+                {activeDate ? "Semua anggota sudah lunas untuk tanggal ini! 🎉" : "Semua anggota sudah lunas! 🎉"}
+              </p>
             </div>
           ) : (
-            membersWithArrears.map((member) => (
-              <div
-                key={member.userId}
-                className="flex items-center gap-4 rounded-xl border border-red-100 dark:border-red-900/40 bg-red-50/50 dark:bg-red-950/20 p-4 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-              >
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-red-400 to-orange-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                  {member.userName.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-dark-900 dark:text-white text-sm">
-                    {member.userName}
-                  </p>
-                  <p className="text-xs text-dark-500 dark:text-dark-400 truncate">{member.userEmail}</p>
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {member.unpaidDates.slice(0, 3).map((date) => (
-                      <span
-                        key={date}
-                        className="rounded-md bg-red-100 dark:bg-red-950/50 px-2 py-0.5 text-[10px] font-medium text-red-700 dark:text-red-300"
-                      >
-                        {date}
-                      </span>
-                    ))}
-                    {member.unpaidDates.length > 3 && (
-                      <span className="rounded-md bg-dark-100 dark:bg-dark-700 px-2 py-0.5 text-[10px] font-medium text-dark-600 dark:text-dark-300">
-                        +{member.unpaidDates.length - 3} lainnya
-                      </span>
-                    )}
+            dateFilteredMembers.map((member) => {
+              const detail = member.paymentByDate?.[activeDate];
+              const amount = detail ? Number(detail.amount) : member.arrears;
+              return (
+                <div
+                  key={member.userId}
+                  className="flex items-center gap-4 rounded-xl border border-red-100 dark:border-red-900/40 bg-red-50/50 dark:bg-red-950/20 p-4 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                >
+                  <Avatar src={member.userImage} name={member.userName} id={member.userId} size="sm" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-dark-900 dark:text-white text-sm">
+                      {member.userName}
+                    </p>
+                    <p className="text-xs text-dark-500 dark:text-dark-400 truncate">{member.userEmail}</p>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {activeDate && (
+                        <span className="rounded-md bg-red-100 dark:bg-red-950/50 px-2 py-0.5 text-[10px] font-medium text-red-700 dark:text-red-300">
+                          {selectedDateLabel}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-xs text-dark-500 dark:text-dark-400 mt-1">
-                    Menunggak {member.unpaidCount} dari {member.totalExpectedCount} kali pembayaran
-                  </p>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-bold text-red-700 dark:text-red-400">
+                      {formatCurrency(amount)}
+                    </p>
+                    <p className="text-[10px] text-dark-400 dark:text-dark-500">tunggakan</p>
+                  </div>
                 </div>
-                <div className="text-right shrink-0">
-                  <p className="text-sm font-bold text-red-700 dark:text-red-400">
-                    {formatCurrency(member.arrears)}
-                  </p>
-                  <p className="text-[10px] text-dark-400 dark:text-dark-500">tunggakan</p>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
         </>
@@ -161,6 +202,9 @@ export default function ArrearsList({ members, hasUangKasSettings = true, should
   if (selectedMemberData) {
     const schedules = selectedMemberData.schedules || [];
     const paymentByDate = selectedMemberData.paymentByDate || {};
+    const filteredSchedules = activeDate
+      ? schedules.filter((s: any) => s.date === activeDate)
+      : schedules;
 
     return (
       <Card padding="lg">
@@ -180,7 +224,28 @@ export default function ArrearsList({ members, hasUangKasSettings = true, should
           </div>
         </div>
 
-        
+        {availableDates.length > 0 && (
+          <div className="mb-4 flex flex-wrap gap-2 items-center">
+            <label className="text-sm text-dark-500 dark:text-dark-400">Tanggal:</label>
+            <div className="relative">
+              <select
+                value={activeDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                disabled={shouldLockFeatures}
+                className="appearance-none bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg px-4 py-2 pr-10 text-sm text-dark-900 dark:text-dark-100 focus:outline-none focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="">Semua Tanggal</option>
+                {availableDates.map((d) => (
+                  <option key={d.date} value={d.date}>
+                    {d.formattedDate}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-dark-400 dark:text-dark-500 pointer-events-none" />
+            </div>
+          </div>
+        )}
+
         <div className="mb-4 flex flex-wrap gap-2 items-center">
           <label className="text-sm text-dark-500 dark:text-dark-400">Filter Nama:</label>
           <div className="relative">
@@ -202,13 +267,15 @@ export default function ArrearsList({ members, hasUangKasSettings = true, should
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {schedules.length === 0 ? (
+          {filteredSchedules.length === 0 ? (
             <div className="col-span-full text-center py-12 text-dark-400 dark:text-dark-500">
               <CalendarDays className="h-12 w-12 mx-auto mb-3 text-dark-300 dark:text-dark-600" />
-              <p className="font-medium">Belum ada jadwal uang kas.</p>
+              <p className="font-medium">
+                {activeDate ? "Tidak ada jadwal uang kas untuk tanggal ini." : "Belum ada jadwal uang kas."}
+              </p>
             </div>
           ) : (
-            schedules.map((schedule: any) => {
+            filteredSchedules.map((schedule: any) => {
               const detail = paymentByDate[schedule.date] || {
                 date: schedule.date,
                 formattedDate: schedule.formattedDate,

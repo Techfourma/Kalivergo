@@ -3,21 +3,25 @@
 import { useState, useMemo } from "react";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
-import { UserX, AlertTriangle, ChevronDown, ClipboardList } from "lucide-react";
+import Avatar from "@/components/ui/Avatar";
+import { AlertTriangle, ChevronDown, ClipboardList, CheckCircle2, UserX } from "lucide-react";
 
 interface User {
   id: string;
   name: string;
   email?: string | null;
+  image?: string | null;
 }
 
 interface Submission {
   userId: string;
+  status?: string;
 }
 
 interface Task {
   id: string;
   title: string;
+  startDate?: string;
   deadline: string;
   submissions: Submission[];
 }
@@ -28,9 +32,8 @@ interface UnsubmittedListProps {
 }
 
 export default function UnsubmittedList({ tasks, allUsers }: UnsubmittedListProps) {
-  const [selectedTaskId, setSelectedTaskId] = useState<string>(
-    tasks.length > 0 ? tasks[0].id : ""
-  );
+  const [selectedTaskId, setSelectedTaskId] = useState<string>("");
+  const [selectedMember, setSelectedMember] = useState<string>("all");
 
   const selectedTask = useMemo(
     () => tasks.find((t) => t.id === selectedTaskId) ?? null,
@@ -38,64 +41,125 @@ export default function UnsubmittedList({ tasks, allUsers }: UnsubmittedListProp
   );
 
   const submittedUserIds = useMemo(
-    () => new Set(selectedTask?.submissions.map((s) => s.userId) ?? []),
+    () => new Set(selectedTask?.submissions.filter((s) => s.status !== "PENDING").map((s) => s.userId) ?? []),
     [selectedTask]
   );
 
-  const notSubmittedUsers = useMemo(
-    () => allUsers.filter((u) => !submittedUserIds.has(u.id)),
-    [allUsers, submittedUserIds]
-  );
+  const allMemberNames = useMemo(() => {
+    return Array.from(new Set(allUsers.map((u) => u.name))).sort((a, b) =>
+      a.localeCompare(b)
+    );
+  }, [allUsers]);
+
+  const usersForSelectedTask = useMemo(() => {
+    if (!selectedTask) return [];
+    let result = allUsers.map((user) => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      image: user.image,
+      submitted: submittedUserIds.has(user.id),
+    }));
+    if (selectedMember !== "all") {
+      result = result.filter((u) => u.name === selectedMember);
+    }
+    return result;
+  }, [allUsers, selectedTask, submittedUserIds, selectedMember]);
+
+  const submittedCount = usersForSelectedTask.filter((u) => u.submitted).length;
+  const notSubmittedCount = usersForSelectedTask.filter((u) => !u.submitted).length;
 
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
-          <AlertTriangle className="h-5 w-5" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
+          <ClipboardList className="h-5 w-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-bold text-dark-900 dark:text-white">Belum Mengumpulkan</h2>
+          <h2 className="text-lg font-bold text-dark-900 dark:text-white">Pengumpulan Tugas</h2>
           <p className="text-xs text-dark-400 dark:text-dark-500">
             {selectedTask
-              ? `${notSubmittedUsers.length} anggota belum submit`
+              ? `${submittedCount} sudah mengumpulkan, ${notSubmittedCount} belum`
               : "Pilih tugas untuk melihat data"}
           </p>
         </div>
       </div>
 
-      {}
       {tasks.length > 0 ? (
-        <div className="relative mb-4">
-          <div className="flex items-center gap-2 mb-1">
-            <ClipboardList className="h-3.5 w-3.5 text-dark-500 dark:text-dark-400" />
-            <span className="text-xs font-medium text-dark-500 dark:text-dark-400 uppercase tracking-wide">
-              Pilih Tugas
-            </span>
+        <div className="space-y-3 mb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <ClipboardList className="h-3.5 w-3.5 text-dark-500 dark:text-dark-400" />
+              <span className="text-xs font-medium text-dark-500 dark:text-dark-400 uppercase tracking-wide">
+                Pilih Tugas
+              </span>
+            </div>
+            <div className="relative">
+              <select
+                value={selectedTaskId}
+                onChange={(e) => setSelectedTaskId(e.target.value)}
+                className="w-full appearance-none pl-3 pr-9 py-2.5 border border-dark-200 dark:border-dark-700 rounded-xl text-sm text-dark-900 dark:text-white bg-white dark:bg-dark-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none cursor-pointer font-medium"
+              >
+                <option value="">-- Pilih Tugas --</option>
+                {tasks.map((task) => (
+                  <option key={task.id} value={task.id} className="text-dark-900 dark:text-white bg-white dark:bg-dark-900">
+                    {task.title}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-dark-400 dark:text-dark-500 pointer-events-none" />
+            </div>
+            {selectedTask && (
+              <div className="text-xs text-dark-400 dark:text-dark-500 mt-1 pl-1 space-y-0.5">
+                {selectedTask.startDate && (
+                  <p>
+                    Mulai:{" "}
+                    {new Date(selectedTask.startDate).toLocaleDateString("id-ID", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                )}
+                <p>
+                  Deadline:{" "}
+                  {new Date(selectedTask.deadline).toLocaleDateString("id-ID", {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
+            )}
           </div>
-          <div className="relative">
-            <select
-              value={selectedTaskId}
-              onChange={(e) => setSelectedTaskId(e.target.value)}
-              className="w-full appearance-none pl-3 pr-9 py-2.5 border border-dark-200 dark:border-dark-700 rounded-xl text-sm text-dark-900 dark:text-white bg-white dark:bg-dark-900 focus:ring-2 focus:ring-red-400 focus:border-transparent outline-none cursor-pointer font-medium"
-            >
-              {tasks.map((task) => (
-                <option key={task.id} value={task.id} className="text-dark-900 dark:text-white bg-white dark:bg-dark-900">
-                  {task.title}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-dark-400 dark:text-dark-500 pointer-events-none" />
-          </div>
+
           {selectedTask && (
-            <p className="text-xs text-dark-400 dark:text-dark-500 mt-1 pl-1">
-              Deadline:{" "}
-              {new Date(selectedTask.deadline).toLocaleDateString("id-ID", {
-                weekday: "short",
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })}
-            </p>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-medium text-dark-500 dark:text-dark-400 uppercase tracking-wide">
+                  Filter Nama
+                </span>
+              </div>
+              <div className="relative">
+                <select
+                  value={selectedMember}
+                  onChange={(e) => setSelectedMember(e.target.value)}
+                  className="w-full appearance-none pl-3 pr-9 py-2.5 border border-dark-200 dark:border-dark-700 rounded-xl text-sm text-dark-900 dark:text-white bg-white dark:bg-dark-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none cursor-pointer font-medium"
+                >
+                  <option value="all">Semua Anggota</option>
+                  {allMemberNames.map((name) => (
+                    <option key={name} value={name} className="text-dark-900 dark:text-white bg-white dark:bg-dark-900">
+                      {name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-dark-400 dark:text-dark-500 pointer-events-none" />
+              </div>
+            </div>
           )}
         </div>
       ) : (
@@ -104,22 +168,28 @@ export default function UnsubmittedList({ tasks, allUsers }: UnsubmittedListProp
         </div>
       )}
 
-      {}
       <div className="space-y-2">
-        {!selectedTask ? null : notSubmittedUsers.length === 0 ? (
-          <div className="text-center py-8 text-dark-400 dark:text-dark-500">
+        {!selectedTask ? (
+          <div className="text-center py-10 text-dark-400 dark:text-dark-500">
+            <AlertTriangle className="h-10 w-10 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">Silakan pilih tugas terlebih dahulu</p>
+          </div>
+        ) : usersForSelectedTask.length === 0 ? (
+          <div className="text-center py-10 text-dark-400 dark:text-dark-500">
             <UserX className="h-10 w-10 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Semua anggota sudah mengumpulkan! 🎉</p>
+            <p className="text-sm">Tidak ada anggota yang cocok dengan filter ini</p>
           </div>
         ) : (
-          notSubmittedUsers.map((user) => (
+          usersForSelectedTask.map((user) => (
             <div
               key={user.id}
-              className="flex items-center gap-3 rounded-xl bg-dark-50 dark:bg-dark-800/50 p-3 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+              className={`flex items-center gap-3 rounded-xl p-3 transition-colors ${
+                user.submitted
+                  ? "border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/60 dark:bg-emerald-950/20"
+                  : "bg-dark-50 dark:bg-dark-800/50 hover:bg-red-50 dark:hover:bg-red-950/20"
+              }`}
             >
-              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-red-400 to-orange-400 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                {user.name.charAt(0).toUpperCase()}
-              </div>
+              <Avatar src={user.image} name={user.name} id={user.id} size="sm" />
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-dark-900 dark:text-white text-sm truncate">
                   {user.name}
@@ -128,7 +198,9 @@ export default function UnsubmittedList({ tasks, allUsers }: UnsubmittedListProp
                   <p className="text-xs text-dark-500 dark:text-dark-400 truncate">{user.email}</p>
                 )}
               </div>
-              <Badge variant="danger">Pending</Badge>
+              <Badge variant={user.submitted ? "success" : "danger"}>
+                {user.submitted ? "Sudah Mengumpulkan" : "Belum Mengumpulkan"}
+              </Badge>
             </div>
           ))
         )}

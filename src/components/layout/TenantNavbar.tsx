@@ -20,6 +20,7 @@ import {
   FolderOpen,
   Newspaper,
   ClipboardList,
+  BarChart3,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import ThemeToggle from "@/components/ui/ThemeToggle";
@@ -27,7 +28,7 @@ import ThemeToggle from "@/components/ui/ThemeToggle";
 interface TenantNavbarProps {
   user?: {
     name: string;
-    email: string;
+    email?: string | null;
     image?: string | null;
     role?: string;
     cmsRole?: string | null;
@@ -111,6 +112,12 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
       href: `${tenantPath}/dashboard`,
       label: "Dashboard",
       icon: LayoutDashboard,
+      requiresAuth: true
+    },
+    {
+      href: `${tenantPath}/statistics`,
+      label: "Statistics",
+      icon: BarChart3,
       requiresAuth: true
     },
     {

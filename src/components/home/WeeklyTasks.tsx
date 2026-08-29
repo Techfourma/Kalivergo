@@ -11,6 +11,7 @@ interface Task {
   id: string;
   title: string;
   description: string;
+  startDate?: string;
   deadline: string;
 }
 
@@ -86,6 +87,16 @@ export default function WeeklyTasks({ tasks, tenantPath }: WeeklyTasksProps) {
                     {task.description}
                   </p>
                   <div className="flex items-center gap-2 mt-2">
+                    {task.startDate && (
+                      <>
+                        <CalendarDays className="h-3 w-3 text-dark-400 dark:text-dark-500" />
+                        <span className="text-xs text-dark-400 dark:text-dark-500">
+                          Mulai: {formatDateTime(task.startDate)}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
                     <Clock className="h-3 w-3 text-dark-400 dark:text-dark-500" />
                     <span className="text-xs text-dark-400 dark:text-dark-500">
                       {formatDateTime(task.deadline)}

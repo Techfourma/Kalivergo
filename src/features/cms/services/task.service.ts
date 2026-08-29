@@ -12,12 +12,14 @@ export async function createTaskForTenant(input: {
   tenantId: string;
   title: string;
   description: string;
+  startDate: Date;
   deadline: Date;
 }) {
   const task = await createTask(input);
   await createAuditLog("TASKS", "CREATE", `Menambahkan tugas: ${input.title}`, "System", {
     taskId: task.id,
     title: input.title,
+    startDate: input.startDate.toISOString(),
     deadline: input.deadline.toISOString(),
     tenantId: input.tenantId,
   });

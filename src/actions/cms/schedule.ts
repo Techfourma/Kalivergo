@@ -8,19 +8,20 @@ import { createAuditLog } from './audit';
 export async function createSchedule(formData: FormData) {
   try {
     const title = formData.get('title') as string;
-    const date = formData.get('date') as string;
-    const time = formData.get('time') as string;
+    const dateTimeStr = formData.get('dateTime') as string;
     const location = formData.get('location') as string;
     const type = formData.get('type') as string;
 
-    const dateTime = time ? new Date(`${date}T${time}`) : new Date(date);
+    const dateTime = dateTimeStr ? new Date(dateTimeStr) : new Date();
+    const datePart = dateTimeStr ? dateTimeStr.split('T')[0] : '';
+    const timePart = dateTimeStr ? dateTimeStr.split('T')[1]?.substring(0, 5) : '';
 
     const tenantId = await resolveTenantId();
     if (!tenantId) return { error: 'Konteks kelas tidak ditemukan. Silakan buka kelas melalui URL /[universitas]/[prodi]/[kelas].' };
     if (!(await requireCmsActor(tenantId))) return { error: 'Akses ditolak: hanya OWNER atau role CMS.' };
 
     const schedule = await prisma.schedule.create({
-      data: { tenantId, title, date: dateTime, time, location, type },
+      data: { tenantId, title, date: dateTime, time: timePart, location, type },
     });
 
     await createAuditLog('SCHEDULE', 'CREATE', `Menambahkan jadwal: ${title}`, 'System', {
