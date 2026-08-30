@@ -64,6 +64,17 @@ export function deleteTaskById(id: string) {
   return prisma.task.delete({ where: { id } });
 }
 
+export function updateTaskById(id: string, data: {
+  title?: string;
+  description?: string;
+  url?: string | null;
+  category?: string;
+  startDate?: Date;
+  deadline?: Date;
+}) {
+  return prisma.task.update({ where: { id }, data });
+}
+
 export function findTaskSubmissions(taskId: string) {
   return prisma.submission.findMany({
     where: { taskId },

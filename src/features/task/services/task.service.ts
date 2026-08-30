@@ -9,6 +9,7 @@ import {
   findTasksForTenant,
   deleteTaskById,
   replaceTaskSubmissions,
+  updateTaskById,
 } from "@/features/task/repositories/task.repository";
 
 export async function createTaskForTenant(input: {
@@ -37,7 +38,6 @@ export async function getTaskManagementData(tenantId: string) {
   ]);
   return { tasks, allUsers: memberships.map((membership) => membership.user) };
 }
-
 export async function deleteTaskForTenant(id: string, tenantId: string) {
   const task = await findTaskWithTenant(id);
   if (!task) return { error: "Tugas tidak ditemukan" } as const;
@@ -46,6 +46,26 @@ export async function deleteTaskForTenant(id: string, tenantId: string) {
   }
   await deleteTaskById(id);
   return { success: true } as const;
+}
+
+export async function updateTaskForTenant(id: string, tenantId: string, data: {
+  title: string;
+  description: string;
+  url?: string | null;
+  category: string;
+  startDate: Date;
+  deadline: Date;
+}) {
+  const task = await findTaskWithTenant(id);
+  if (!task) return { error: "Tugas tidak ditemukan" } as const;
+  if (task.tenantId !== tenantId) {
+    return { error: "Akses ditolak: Tugas bukan milik kelas Anda" } as const;
+  }
+  if (data.deadline <= data.startDate) {
+    return { error: "Deadline harus setelah Start Date Time." } as const;
+  }
+  const updated = await updateTaskById(id, data);
+  return { task: updated } as const;
 }
 
 export async function getTaskSubmissionsForTenant(
