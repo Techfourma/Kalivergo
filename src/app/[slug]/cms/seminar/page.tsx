@@ -111,6 +111,17 @@ export default async function SeminarPage({
                 placeholder="Deskripsi seminar..."
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                URL
+              </label>
+              <input
+                type="url"
+                name="url"
+                className="w-full px-4 py-2.5 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white placeholder:text-dark-400 dark:placeholder:text-dark-500 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm md:text-base transition-shadow"
+                placeholder="Contoh: https://event.unpam.ac.id"
+              />
+            </div>
             <button
               type="submit"
               className="w-full md:w-auto px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 shadow-lg shadow-primary-600/25 hover:shadow-xl hover:shadow-primary-600/30 hover:-translate-y-0.5 active:translate-y-0 transition-all font-medium"

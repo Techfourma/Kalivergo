@@ -7,6 +7,7 @@ export async function createSeminarForTenant(input: {
   tenantId: string;
   title: string;
   description: string;
+  url?: string | null;
   date: Date;
   location: string;
 }) {

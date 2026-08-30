@@ -13,19 +13,20 @@ export async function createSeminar(formData: FormData) {
       description: formData.get("description"),
       date: formData.get("date"),
       location: formData.get("location"),
+      url: formData.get("url"),
     });
 
     if (!parsed.success) {
       return { error: parsed.error.errors[0]?.message ?? "Data seminar tidak valid" };
     }
 
-    const { title, description, date, location } = parsed.data;
+    const { title, description, date, location, url } = parsed.data;
 
     const tenantId = await resolveTenantId();
     if (!tenantId) return { error: "Konteks kelas tidak ditemukan. Silakan buka kelas melalui URL /[universitas]/[prodi]/[kelas]." };
     if (!(await requireCmsActor(tenantId))) return { error: "Akses ditolak: hanya OWNER atau role CMS." };
 
-    await createSeminarForTenant({ tenantId, title, description, date, location });
+    await createSeminarForTenant({ tenantId, title, description, date, location, url });
     const slug = await resolveTenantRouteSlugForTenant(tenantId);
     if (slug) {
       revalidatePath(`/${slug}/cms/seminar`);

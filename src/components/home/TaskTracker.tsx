@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
-import { Calendar, Clock, Filter } from "lucide-react";
+import { Calendar, Clock, Filter, CheckCircle2 } from "lucide-react";
 import { formatDateTime, getDaysRemaining } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -13,14 +13,21 @@ interface Task {
   description: string;
   startDate?: string;
   deadline: string;
+  url?: string | null;
   submissions?: any[];
 }
 
 interface TaskTrackerProps {
   tasks: Task[];
+  allTasks: Task[];
+  currentUserId: string;
 }
 
-export default function TaskTracker({ tasks }: TaskTrackerProps) {
+export default function TaskTracker({
+  tasks,
+  allTasks,
+  currentUserId,
+}: TaskTrackerProps) {
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [filteredTasks, setFilteredTasks] = useState<Task[]>(tasks);
 
@@ -38,6 +45,41 @@ export default function TaskTracker({ tasks }: TaskTrackerProps) {
       setFilteredTasks(tasks);
     }
   }, [dateRange, tasks]);
+
+  const isRangeSelected = Boolean(dateRange.start && dateRange.end);
+
+  const isSubmittedByUser = (task: Task) =>
+    task.submissions?.some(
+      (submission) =>
+        submission.userId === currentUserId &&
+        submission.status === "SUBMITTED"
+    ) ?? false;
+
+  const todoTasks = isRangeSelected
+    ? allTasks.filter((task) => {
+        const taskDate = new Date(task.deadline);
+        const inRange =
+          taskDate >= new Date(dateRange.start) &&
+          taskDate <= new Date(dateRange.end);
+        return inRange && !isSubmittedByUser(task);
+      })
+    : filteredTasks.filter((task) => !isSubmittedByUser(task));
+
+  const tasksInRange = isRangeSelected
+    ? allTasks.filter((task) => {
+        const taskDate = new Date(task.deadline);
+        return (
+          taskDate >= new Date(dateRange.start) &&
+          taskDate <= new Date(dateRange.end)
+        );
+      })
+    : [];
+
+  const scopeTasks = isRangeSelected ? tasksInRange : allTasks;
+  const allDone =
+    todoTasks.length === 0 &&
+    scopeTasks.length > 0 &&
+    scopeTasks.every(isSubmittedByUser);
 
   return (
     <Card padding="lg">
@@ -72,18 +114,13 @@ export default function TaskTracker({ tasks }: TaskTrackerProps) {
       </div>
 
       <div className="space-y-3">
-        {filteredTasks.length === 0? (
-          <div className="text-center py-12 text-dark-400 dark:text-dark-500">
-            <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p>Tidak ada tugas dalam rentang waktu ini</p>
-          </div>
-        ) : (
-          filteredTasks.map((task) => {
+        {todoTasks.length > 0 ? (
+          todoTasks.map((task) => {
             const daysLeft = getDaysRemaining(task.deadline);
             const urgency =
               daysLeft <= 1? "danger" : daysLeft <= 3? "warning" : "info";
 
-            return (
+            const card = (
               <div
                 key={task.id}
                 className="group rounded-xl border border-dark-100 dark:border-dark-800 bg-dark-50/50 dark:bg-dark-800/40 p-4 hover:border-primary-200 dark:hover:border-primary-800/50 hover:bg-primary-50/30 dark:hover:bg-primary-950/20 transition-all duration-200"
@@ -125,7 +162,39 @@ export default function TaskTracker({ tasks }: TaskTrackerProps) {
                 </div>
               </div>
             );
+
+            if (!task.url) return card;
+
+            return (
+              <a
+                key={task.id}
+                href={task.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Buka tugas ${task.title} di tab baru`}
+                className="block"
+              >
+                {card}
+              </a>
+            );
           })
+        ) : allDone ? (
+          <div className="text-center py-12 rounded-xl border border-green-200 dark:border-green-800/60 bg-green-50/60 dark:bg-green-950/30">
+            <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-green-500" />
+            <p className="font-semibold text-dark-900 dark:text-white">
+              Semua tugas sudah dikerjakan! 🎉
+            </p>
+            <p className="text-sm text-dark-500 dark:text-dark-400 mt-1">
+              {isRangeSelected
+                ? "Kamu telah menyelesaikan semua tugas pada rentang tanggal yang dipilih."
+                : "Tidak ada tugas yang belum kamu kerjakan. Kerja bagus!"}
+            </p>
+          </div>
+        ) : (
+          <div className="text-center py-12 text-dark-400 dark:text-dark-500">
+            <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
+            <p>Tidak ada tugas dalam rentang waktu ini</p>
+          </div>
         )}
       </div>
     </Card>
