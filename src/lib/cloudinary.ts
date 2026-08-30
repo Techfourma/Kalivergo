@@ -11,7 +11,7 @@ export const uploadToCloudinary = async (
   fileBuffer: Buffer,
   options: {
     folder?: string;
-    resourceType?: 'image' | 'video' | 'raw';
+     resourceType?: 'image' | 'video' | 'raw' | 'auto';
     publicId?: string;
     timeout?: number;
   } = {}

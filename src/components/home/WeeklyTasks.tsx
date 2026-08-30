@@ -99,7 +99,7 @@ export default function WeeklyTasks({ tasks, tenantPath }: WeeklyTasksProps) {
                   <div className="flex items-center gap-2 mt-1">
                     <Clock className="h-3 w-3 text-dark-400 dark:text-dark-500" />
                     <span className="text-xs text-dark-400 dark:text-dark-500">
-                      {formatDateTime(task.deadline)}
+                      Deadline: {formatDateTime(task.deadline)}
                     </span>
                   </div>
                 </div>
@@ -112,7 +112,7 @@ export default function WeeklyTasks({ tasks, tenantPath }: WeeklyTasksProps) {
                       : "info"
                   }
                 >
-                  {daysLeft <= 0 ? "Overdue" : `${daysLeft}d`}
+                  {daysLeft <= 0 ? "Overdue" : `${daysLeft} hari`}
                 </Badge>
               </div>
             );

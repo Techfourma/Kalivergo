@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getCurrentTenantForUser } from "@/lib/tenant-context";
 import { getCurrentSessionUser } from "@/server/auth/session";
-import { getTransactionsWithSummary } from "@/features/finance/services/transaction.service";
+import { getTransactionsWithSummary, createTransactionService } from "@/features/finance/services/transaction.service";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import { requireCmsActor } from "@/actions/cms/role-model";
 
 export const dynamic = "force-dynamic";
@@ -23,18 +25,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Tenant access denied" }, { status: 403 });
     }
     const tenantId = tenantContext?.tenantId;
+    const slug = tenantContext?.customSlug;
 
-    const { transactions, summary } = await getTransactionsWithSummary(tenantId);
+    let startDateObj: Date | undefined;
+    let endDateObj: Date | undefined;
+    if (startDate) startDateObj = new Date(startDate);
+    if (endDate) endDateObj = new Date(endDate);
+
+    const { transactions, summary } = await getTransactionsWithSummary(tenantId, startDateObj, endDateObj);
 
     let filteredTransactions = transactions;
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      filteredTransactions = transactions.filter(
-        (t) => t.date >= start && t.date <= end
-      );
-    }
-
     if (type) {
       filteredTransactions = filteredTransactions.filter((t) => t.type === type);
     }
@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
 
     const tenantContext = await getCurrentTenantForUser(session.id);
     const tenantId = tenantContext?.tenantId;
+    const slug = tenantContext?.customSlug;
     if (!tenantId) {
       return NextResponse.json(
         { error: "Konteks tenant tidak ditemukan. Buka kelas melalui URL /[universitas]/[prodi]/[kelas]." },
@@ -94,14 +95,18 @@ export async function POST(request: NextRequest) {
 
     let invoiceUrl = null;
     if (invoiceFile && invoiceFile.size > 0) {
-      const safeFileName = `${Date.now()}-${invoiceFile.name.replace(/\s+/g, "_")}`;
-      invoiceUrl = `/uploads/${safeFileName}`;
+      const bytes = await invoiceFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const uploadResult = await uploadToCloudinary(buffer, {
+        folder: "kalivergo/finance/invoices",
+        resourceType: "auto",
+      });
+      invoiceUrl = uploadResult.secure_url;
     }
 
     const { readSessionUser } = await import("@/actions/cms/role-model");
     const creatorName = (await readSessionUser())?.name ?? "System";
 
-    const { createTransactionService } = await import("@/features/finance/services/transaction.service");
     const { transaction } = await createTransactionService({
       tenantId,
       userId: userId || null,
@@ -113,6 +118,10 @@ export async function POST(request: NextRequest) {
       createdBy: creatorName,
       categoryId: categoryId || null,
     });
+
+    if (slug) {
+      revalidatePath(`/${slug}/cms/finance`);
+    }
 
     return NextResponse.json(transaction, { status: 201 });
   } catch (error) {

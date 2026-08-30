@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireCmsActor, resolveTenantId } from "@/actions/cms/role-model";
+import { requireCmsActor, resolveTenantId, resolveTenantSlug } from "@/actions/cms/role-model";
 import {
   createUangKasScheduleService,
   deleteUangKasScheduleService,
@@ -24,7 +24,8 @@ export async function saveUangKasSettingsAction(formData: FormData) {
     if (!(await requireCmsActor(tenantId))) return { error: "Akses ditolak: hanya OWNER atau role CMS." };
 
     await saveUangKasSettings({ tenantId, dates, amount });
-    revalidatePath("/cms/finance");
+    const financePath = `/${await resolveTenantSlug()}/cms/finance`;
+    revalidatePath(financePath);
     revalidatePath("/dashboard");
     return { success: "Pengaturan uang kelas berhasil disimpan" };
   } catch (error: any) {
@@ -61,7 +62,8 @@ export async function createUangKasSchedule(formData: FormData) {
       return { error: result.error };
     }
 
-    revalidatePath("/cms/finance");
+    const financePath = `/${await resolveTenantSlug()}/cms/finance`;
+    revalidatePath(financePath);
     revalidatePath("/dashboard");
     return { success: "Jadwal uang kas berhasil ditambahkan" };
   } catch (error: any) {
@@ -82,7 +84,8 @@ export async function deleteUangKasSchedule(id: string) {
       return { error: result.error };
     }
 
-    revalidatePath("/cms/finance");
+    const financePath = `/${await resolveTenantSlug()}/cms/finance`;
+    revalidatePath(financePath);
     revalidatePath("/dashboard");
     return { success: "Jadwal uang kas berhasil dihapus" };
   } catch (error: any) {

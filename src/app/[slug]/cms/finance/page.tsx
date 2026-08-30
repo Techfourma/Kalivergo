@@ -9,6 +9,7 @@ import { getUangKasSchedules } from "@/features/finance/services/uang-kas.servic
 import UangKasSettingsCard from "@/components/cms/UangKasSettingsCard";
 import { notFound, redirect } from "next/navigation";
 import type { CmsRole } from "@prisma/client";
+import { TrendingUp, TrendingDown, Wallet } from "lucide-react";
 
 import PageBackground from '@/components/ui/PageBackground';
 
@@ -23,8 +24,10 @@ function formatCurrency(value: number) {
 
 export default async function FinancePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ startDate?: string; endDate?: string }>;
 }) {
   const routeParams = await params;
   const tenantContext = await resolveTenantFromRoute(routeParams);
@@ -77,8 +80,14 @@ export default async function FinancePage({
     redirect("/unauthorized");
   }
 
+  const resolvedSearchParams = await searchParams;
+  const startDateParam = resolvedSearchParams?.startDate;
+  const endDateParam = resolvedSearchParams?.endDate;
+  const startDate = startDateParam ? new Date(startDateParam) : undefined;
+  const endDate = endDateParam ? new Date(endDateParam) : undefined;
+
   const categoryWhere = { tenantId };
-  const { transactions, summary } = await getTransactionsWithSummary(tenantId);
+  const { transactions, summary } = await getTransactionsWithSummary(tenantId, startDate, endDate);
   
   const users = await prisma.tenantMembership.findMany({
     where: { tenantId },
@@ -138,28 +147,36 @@ export default async function FinancePage({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="relative rounded-xl border-2 border-green-200 dark:border-green-700/40 bg-green-50/90 dark:bg-green-900/20 backdrop-blur-xl p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
-            <p className="text-sm text-green-600 dark:text-green-400 font-medium">Total Pemasukan</p>
-            <p className="text-2xl font-bold text-green-700 dark:text-green-300 mt-2">
-              {formatCurrency(totalIncome)}
-            </p>
-          </div>
-          <div className="relative rounded-xl border-2 border-red-200 dark:border-red-700/40 bg-red-50/90 dark:bg-red-900/20 backdrop-blur-xl p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
-            <p className="text-sm text-red-600 dark:text-red-400 font-medium">
-              Total Pengeluaran
-            </p>
-            <p className="text-2xl font-bold text-red-700 dark:text-red-300 mt-2">
-              {formatCurrency(totalExpense)}
-            </p>
-          </div>
-          <div className="relative rounded-xl border-2 border-blue-200 dark:border-blue-700/40 bg-blue-50/90 dark:bg-blue-900/20 backdrop-blur-xl p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
-            <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-              Saldo Saat Ini
-            </p>
-            <p className="text-2xl font-bold text-blue-700 dark:text-blue-300 mt-2">
-              {formatCurrency(balance)}
-            </p>
+        <div className="relative overflow-hidden rounded-2xl border-2 border-dark-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/70 backdrop-blur-xl p-4 sm:p-6 shadow-[0_16px_40px_-12px_rgba(15,23,42,0.15)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.55)]">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-2xl bg-gradient-to-r from-transparent via-white/80 dark:via-white/10 to-transparent" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg">
+                <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 font-medium truncate">Total Pemasukan</p>
+                <p className="text-base sm:text-xl font-bold text-emerald-700 dark:text-emerald-300 truncate">{formatCurrency(totalIncome)}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg">
+                <TrendingDown className="h-5 w-5 sm:h-6 sm:w-6" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 font-medium truncate">Total Pengeluaran</p>
+                <p className="text-base sm:text-xl font-bold text-red-700 dark:text-red-300 truncate">{formatCurrency(totalExpense)}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg">
+                <Wallet className="h-5 w-5 sm:h-6 sm:w-6" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 font-medium truncate">Saldo Saat Ini</p>
+                <p className="text-base sm:text-xl font-bold text-blue-700 dark:text-blue-300 truncate">{formatCurrency(balance)}</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -203,8 +220,46 @@ export default async function FinancePage({
 
         <div className="relative rounded-xl border-2 border-dark-100 dark:border-dark-700/60 bg-white/80 dark:bg-dark-900/70 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] overflow-hidden">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-400/60 to-transparent" />
-          <div className="p-6 border-b border-dark-100 dark:border-dark-700/60">
+          <div className="p-6 border-b border-dark-100 dark:border-dark-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 className="text-lg font-semibold text-dark-900 dark:text-dark-50">Riwayat Transaksi</h2>
+            <form className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-medium text-dark-600 dark:text-dark-300" htmlFor="startDate">Dari:</label>
+                <input
+                  type="date"
+                  id="startDate"
+                  name="startDate"
+                  defaultValue={startDateParam}
+                  className="rounded-lg border border-dark-200 dark:border-dark-600 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-medium text-dark-600 dark:text-dark-300" htmlFor="endDate">Sampai:</label>
+                <input
+                  type="date"
+                  id="endDate"
+                  name="endDate"
+                  defaultValue={endDateParam}
+                  className="rounded-lg border border-dark-200 dark:border-dark-600 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  className="px-3 py-2 text-sm font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                >
+                  Filter
+                </button>
+                {(startDateParam || endDateParam) && (
+                  <a
+                    href={`/${routeParams.slug}/cms/finance`}
+                    className="px-3 py-2 text-sm font-medium bg-dark-100 dark:bg-dark-700 text-dark-700 dark:text-dark-200 rounded-lg hover:bg-dark-200 dark:hover:bg-dark-600 transition-colors"
+                  >
+                    Reset
+                  </a>
+                )}
+              </div>
+            </form>
           </div>
           <div className="divide-y divide-dark-100 dark:divide-dark-700/60">
             {transactions.length === 0 ? (
@@ -231,9 +286,18 @@ export default async function FinancePage({
                         Kategori: {categoryMap.get(transaction.categoryId) ?? "Kategori tidak tersedia"}
                       </p>
                     )}
-                    <p className="text-sm text-dark-500 dark:text-dark-400">
-                      {transaction.invoiceUrl ? "Dengan bukti" : "Tanpa bukti"}
-                    </p>
+                    {transaction.invoiceUrl ? (
+                      <a
+                        href={transaction.invoiceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 underline"
+                      >
+                        Lihat Bukti
+                      </a>
+                    ) : (
+                      <p className="text-sm text-dark-500 dark:text-dark-400">Tanpa bukti</p>
+                    )}
                   </div>
                   <div className="text-right">
                     <p

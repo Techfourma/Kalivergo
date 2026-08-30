@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import { updateTaskSubmissionsAction } from "@/features/task/actions/task.action";
 import { Users, X, Search, CheckCircle2, Circle, Save, Loader2 } from "lucide-react";
+import Avatar from "@/components/ui/Avatar";
 
 interface User {
   id: string;
   name: string;
   email?: string | null;
+  image?: string | null;
 }
 
 interface TaskSubmissionManagerProps {
@@ -179,15 +181,12 @@ export default function TaskSubmissionManager({
                       ) : (
                         <Circle className="h-4 w-4 sm:h-5 sm:w-5 text-dark-300 shrink-0" />
                       )}
-                      <div
-                        className={`h-6 w-6 sm:h-8 sm:w-8 rounded-full flex items-center justify-center text-white text-[10px] sm:text-xs font-bold shrink-0 ${
-                          isChecked
-                            ? "bg-gradient-to-br from-blue-500 to-indigo-500"
-                            : "bg-gradient-to-br from-dark-300 to-dark-400"
-                        }`}
-                      >
-                        {user.name.charAt(0).toUpperCase()}
-                      </div>
+                      <Avatar
+                        src={user.image}
+                        name={user.name}
+                        id={user.id}
+                        size="sm"
+                      />
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm font-medium truncate ${isChecked ? "text-blue-900" : "text-dark-900"}`}>
                           {user.name}

@@ -48,6 +48,16 @@ export async function resolveTenantId(): Promise<string | null> {
   }
 }
 
+export async function resolveTenantSlug(): Promise<string | null> {
+  try {
+    const tenant = await getCurrentTenantForUser();
+    return tenant?.customSlug ?? null;
+  } catch (error) {
+    console.error('Error resolving tenant slug:', error);
+    return null;
+  }
+}
+
 export async function hasCmsAccess(userId: string, tenantId: string): Promise<boolean> {
   if (!userId || !tenantId) return false;
   const membership = await prisma.tenantMembership.findFirst({

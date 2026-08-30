@@ -66,7 +66,7 @@ export default function FinanceInput({
   const handleSubmit = async (formData: FormData) => {
     formData.set("type", type);
     if (invoiceFile) {
-      formData.set("invoiceName", invoiceFile.name);
+      formData.set("invoice", invoiceFile);
     }
 
     const result = await createTransaction(formData);

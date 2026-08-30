@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
-import { readSessionUser, requireCmsActor, requireOwner, resolveTenantId } from './role-model';
+import { readSessionUser, requireCmsActor, requireOwner, resolveTenantId, resolveTenantSlug } from './role-model';
 import { createAuditLog } from './audit';
 
 function isUangKasName(name: string): boolean {
@@ -104,7 +104,7 @@ export async function createTransaction(formData: FormData) {
       tenantId,
     });
 
-    revalidatePath('/cms/finance');
+    revalidatePath(`/${await resolveTenantSlug()}/cms/finance`);
     return { success: 'Transaksi berhasil ditambahkan' };
   } catch (error: any) {
     console.error('Error creating transaction:', error);
@@ -158,7 +158,7 @@ export async function deleteTransaction(id: string) {
       tenantId,
     });
 
-    revalidatePath('/cms/finance');
+    revalidatePath(`/${await resolveTenantSlug()}/cms/finance`);
     return { success: 'Transaksi berhasil dihapus' };
   } catch (error: any) {
     console.error('Error deleting transaction:', error);
@@ -193,7 +193,7 @@ export async function createUangKasSchedule(formData: FormData) {
       tenantId,
     });
 
-    revalidatePath('/cms/finance');
+    revalidatePath(`/${await resolveTenantSlug()}/cms/finance`);
     revalidatePath('/dashboard');
     return { success: 'Jadwal uang kas berhasil ditambahkan' };
   } catch (error: any) {
@@ -221,7 +221,7 @@ export async function deleteUangKasSchedule(id: string) {
       tenantId,
     });
 
-    revalidatePath('/cms/finance');
+    revalidatePath(`/${await resolveTenantSlug()}/cms/finance`);
     revalidatePath('/dashboard');
     return { success: 'Jadwal uang kas berhasil dihapus' };
   } catch (error: any) {
