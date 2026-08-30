@@ -1,11 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { CalendarDays, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { getDaysRemaining, formatDateTime } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import {
+  DEFAULT_TASK_CATEGORY,
+  TASK_CATEGORIES,
+  getTaskCategoryLabel,
+} from "@/shared/task-category";
 
 interface Task {
   id: string;
@@ -13,6 +19,7 @@ interface Task {
   description: string;
   startDate?: string;
   deadline: string;
+  category?: string;
 }
 
 interface WeeklyTasksProps {
@@ -21,9 +28,15 @@ interface WeeklyTasksProps {
 }
 
 export default function WeeklyTasks({ tasks, tenantPath }: WeeklyTasksProps) {
-  const sortedTasks = [...tasks].sort(
-    (a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
-  );
+  const [category, setCategory] = useState<string>(DEFAULT_TASK_CATEGORY);
+
+  const sortedTasks = [...tasks]
+    .filter(
+      (task) => (task.category ?? DEFAULT_TASK_CATEGORY) === category
+    )
+    .sort(
+      (a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
+    );
 
   const card = (
     <Card
@@ -38,11 +51,26 @@ export default function WeeklyTasks({ tasks, tenantPath }: WeeklyTasksProps) {
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
           <CalendarDays className="h-5 w-5" />
         </div>
-        <div>
+        <div className="flex-1 min-w-0">
           <h2 className="text-lg font-bold text-dark-900 dark:text-white">Tugas Minggu Ini</h2>
           <p className="text-xs text-dark-400 dark:text-dark-500">
-            {tasks.length} tugas aktif
+            {sortedTasks.length} tugas aktif
           </p>
+        </div>
+        <div className="relative shrink-0">
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            aria-label="Filter kategori tugas"
+            className="appearance-none pl-3 pr-8 py-1.5 rounded-lg border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900 text-sm text-dark-700 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer font-medium [color-scheme:light] dark:[color-scheme:dark]"
+          >
+            {Object.entries(TASK_CATEGORIES).map(([value, label]) => (
+              <option key={value} value={value} className="text-dark-900 dark:text-white bg-white dark:bg-dark-900">
+                {label}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -80,9 +108,17 @@ export default function WeeklyTasks({ tasks, tenantPath }: WeeklyTasksProps) {
                   {index + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-dark-900 dark:text-white text-sm truncate">
-                    {task.title}
-                  </h4>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <h4 className="font-medium text-dark-900 dark:text-white text-sm truncate flex-1 min-w-0">
+                      {task.title}
+                    </h4>
+                    <Badge
+                      variant={(task.category ?? DEFAULT_TASK_CATEGORY) === "TATAP_MUKA" ? "warning" : "info"}
+                      className="shrink-0"
+                    >
+                      {getTaskCategoryLabel(task.category)}
+                    </Badge>
+                  </div>
                   <p className="text-xs text-dark-500 dark:text-dark-400 mt-0.5 truncate">
                     {task.description}
                   </p>

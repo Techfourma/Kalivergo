@@ -16,6 +16,7 @@ export async function createTaskForTenant(input: {
   title: string;
   description: string;
   url?: string | null;
+  category?: string;
   startDate: Date;
   deadline: Date;
 }) {

@@ -8,6 +8,10 @@ import {
   deleteTaskForTenant,
   updateTaskSubmissionsForTenant,
 } from "@/features/task/services/task.service";
+import {
+  DEFAULT_TASK_CATEGORY,
+  isTaskCategory,
+} from "@/shared/task-category";
 import { createAuditLog } from "@/server/audit";
 
 async function getTenantIdFromCookie(): Promise<string | null> {
@@ -36,6 +40,8 @@ export async function createTaskAction(formData: FormData) {
   const url = (formData.get("url") as string)?.trim() || undefined;
   const startDate = new Date(formData.get("startDate") as string);
   const deadline = new Date(formData.get("deadline") as string);
+  const rawCategory = formData.get("category");
+  const category = isTaskCategory(rawCategory) ? rawCategory : DEFAULT_TASK_CATEGORY;
 
   if (isNaN(startDate.getTime()) || isNaN(deadline.getTime())) {
     return { error: "Start Date Time dan Deadline harus diisi dengan waktu yang valid." };
@@ -63,10 +69,11 @@ export async function createTaskAction(formData: FormData) {
     return { error: "Akses ditolak: hanya OWNER atau role CMS." };
   }
 
-  const task = await createTaskForTenant({ tenantId, title, description, url, startDate, deadline });
+  const task = await createTaskForTenant({ tenantId, title, description, url, category, startDate, deadline });
   await createAuditLog("TASKS", "CREATE", `Menambahkan tugas: ${title}`, "System", {
     taskId: task.id,
     title,
+    category,
     startDate: startDate.toISOString(),
     deadline: deadline.toISOString(),
     tenantId,

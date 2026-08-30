@@ -78,6 +78,7 @@ export default async function TasksPage({ params }: TasksPageProps) {
       return {
         id: t.id,
         title: t.title,
+        category: t.category,
         startDate: t.startDate.toISOString(),
         deadline: t.deadline.toISOString(),
         submissions,

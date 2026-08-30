@@ -5,6 +5,10 @@ import {
   createTaskForTenant,
   findTasksForTenant,
 } from "@/features/task/services/task.service";
+import {
+  DEFAULT_TASK_CATEGORY,
+  isTaskCategory,
+} from "@/shared/task-category";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +18,7 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
     const weekly = searchParams.get("weekly");
+    const category = searchParams.get("category");
 
     const session = await getCurrentSessionUser();
     if (!session?.id) {
@@ -30,6 +35,7 @@ export async function GET(request: NextRequest) {
       weekly: weekly === "true",
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
+      category: category ? category : undefined,
     });
 
     return NextResponse.json(tasks);
@@ -47,7 +53,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, description, startDate, deadline } = body;
+    const { title, description, startDate, deadline, category } = body;
 
     const tenantContext = await getCurrentTenantForUser(session.id);
     const tenantId = tenantContext?.tenantId;
@@ -62,6 +68,7 @@ export async function POST(request: NextRequest) {
       tenantId,
       title,
       description,
+      category: isTaskCategory(category) ? category : DEFAULT_TASK_CATEGORY,
       startDate: startDate ? new Date(startDate) : new Date(),
       deadline: new Date(deadline),
     });

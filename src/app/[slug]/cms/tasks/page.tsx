@@ -1,6 +1,8 @@
 import DeleteTaskButton from '@/components/ui/DeleteTaskButton';
 import TaskSubmissionManager from '@/components/ui/TaskSubmissionManager';
 import ActionFeedback from '@/components/cms/ActionFeedback';
+import Badge from '@/components/ui/Badge';
+import { getTaskCategoryLabel } from '@/shared/task-category';
 import { resolveTenantFromRoute } from '@/lib/tenant';
 import { notFound } from 'next/navigation';
 import { getTaskManagementData } from '@/features/task/services/task.service';
@@ -54,17 +56,32 @@ export default async function TasksPage({ params }: TenantCmsTasksPageProps) {
           <h2 className="text-lg font-semibold mb-4 text-dark-900 dark:text-white">Buat Tugas Baru</h2>
           <ActionFeedback actionType="task" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                  Nama Tugas
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  required
-                  className="w-full px-4 py-2.5 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white placeholder:text-dark-400 dark:placeholder:text-dark-500 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm md:text-base transition-shadow"
-                  placeholder="Contoh: Algoritma Pemograman II"
-                />
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Nama Tugas
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    required
+                    className="w-full px-4 py-2.5 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white placeholder:text-dark-400 dark:placeholder:text-dark-500 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm md:text-base transition-shadow"
+                    placeholder="Contoh: Algoritma Pemograman II"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Kategori
+                  </label>
+                  <select
+                    name="category"
+                    defaultValue="E_LEARNING"
+                    className="w-full px-4 py-2.5 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm md:text-base transition-shadow cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
+                  >
+                    <option value="E_LEARNING">E-Learning</option>
+                    <option value="TATAP_MUKA">Tatap Muka</option>
+                  </select>
+                </div>
               </div>
               <div className="space-y-4">
                 <div>
@@ -146,9 +163,17 @@ export default async function TasksPage({ params }: TenantCmsTasksPageProps) {
                     className="p-4 md:p-6 flex flex-col md:flex-row md:items-start md:justify-between gap-4 hover:bg-dark-50 dark:hover:bg-dark-800/40 transition-colors"
                   >
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-dark-900 dark:text-white break-words line-clamp-2">
-                        {task.title}
-                      </h3>
+                      <div className="flex items-start gap-2 flex-wrap">
+                        <h3 className="font-semibold text-dark-900 dark:text-white break-words line-clamp-2">
+                          {task.title}
+                        </h3>
+                        <Badge
+                          variant={task.category === 'TATAP_MUKA' ? 'warning' : 'info'}
+                          className="shrink-0 mt-0.5"
+                        >
+                          {getTaskCategoryLabel(task.category)}
+                        </Badge>
+                      </div>
                       <p className="text-sm text-dark-600 dark:text-dark-300 mt-1 break-words">
                         {task.description}
                       </p>

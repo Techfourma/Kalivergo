@@ -252,6 +252,7 @@ model Task {
   title       String
   description String?
   url         String?
+  category    String       @default("E_LEARNING")
   startDate   DateTime     @default(now())
   deadline    DateTime
   createdAt   DateTime     @default(now())
