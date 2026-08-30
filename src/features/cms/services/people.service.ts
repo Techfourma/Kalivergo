@@ -29,6 +29,7 @@ export async function addMemberToTenant(input: {
     email: input.email,
     cmsRole: input.cmsRole,
     tenantId: input.tenantId,
+    isVerified: false,
   });
   return { user } as const;
 }
