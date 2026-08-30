@@ -1,11 +1,3 @@
-/**
- * Kategori tugas yang didukung aplikasi.
- *
- * Nilai disimpan di database (kolom `tasks.category`) sebagai kode internal
- * (`E_LEARNING` / `TATAP_MUKA`) dan dirender menjadi label ramah pengguna
- * ("E-Learning" / "Tatap Muka"). Kategori default untuk tugas baru adalah
- * E-Learning.
- */
 export const TASK_CATEGORIES = {
   E_LEARNING: "E-Learning",
   TATAP_MUKA: "Tatap Muka",
