@@ -33,11 +33,20 @@ export async function createTaskAction(formData: FormData) {
 
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
+  const url = (formData.get("url") as string)?.trim() || undefined;
   const startDate = new Date(formData.get("startDate") as string);
   const deadline = new Date(formData.get("deadline") as string);
 
   if (isNaN(startDate.getTime()) || isNaN(deadline.getTime())) {
     return { error: "Start Date Time dan Deadline harus diisi dengan waktu yang valid." };
+  }
+
+  if (url) {
+    try {
+      new URL(url);
+    } catch {
+      return { error: "URL tidak valid. Gunakan format lengkap, contoh: https://elearning.univ.ac.id/tugas/1" };
+    }
   }
 
   if (deadline <= startDate) {
@@ -54,7 +63,7 @@ export async function createTaskAction(formData: FormData) {
     return { error: "Akses ditolak: hanya OWNER atau role CMS." };
   }
 
-  const task = await createTaskForTenant({ tenantId, title, description, startDate, deadline });
+  const task = await createTaskForTenant({ tenantId, title, description, url, startDate, deadline });
   await createAuditLog("TASKS", "CREATE", `Menambahkan tugas: ${title}`, "System", {
     taskId: task.id,
     title,

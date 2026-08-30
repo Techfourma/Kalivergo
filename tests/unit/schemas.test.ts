@@ -48,6 +48,29 @@ test("seminar schema coerces valid dates and rejects missing fields", () => {
   assert.equal(createSeminarSchema.safeParse({ title: "", description: "", date: "bad", location: "" }).success, false);
 });
 
+test("seminar schema accepts valid/empty url and rejects invalid url", () => {
+  const base = {
+    title: "Tech Talk",
+    description: "A useful talk",
+    date: "2026-08-19",
+    location: "Room A",
+  };
+
+  const validUrl = createSeminarSchema.safeParse({ ...base, url: "https://zoom.us/j/123456789" });
+  assert.equal(validUrl.success, true);
+  if (validUrl.success) assert.equal(validUrl.data.url, "https://zoom.us/j/123456789");
+
+  const emptyUrl = createSeminarSchema.safeParse({ ...base, url: "" });
+  assert.equal(emptyUrl.success, true);
+  if (emptyUrl.success) assert.equal(emptyUrl.data.url, undefined);
+
+  const missingUrl = createSeminarSchema.safeParse({ ...base });
+  assert.equal(missingUrl.success, true);
+
+  const invalidUrl = createSeminarSchema.safeParse({ ...base, url: "bukan-url" });
+  assert.equal(invalidUrl.success, false);
+});
+
 test("KYC review schema validates decisions and reason length", () => {
   assert.equal(kycReviewSchema.safeParse({
     applicationId: "clh1234567890123456789012",

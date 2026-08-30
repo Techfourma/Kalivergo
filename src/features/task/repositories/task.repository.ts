@@ -40,6 +40,7 @@ export function createTaskForTenant(data: {
   tenantId: string;
   title: string;
   description: string;
+  url?: string | null;
   startDate: Date;
   deadline: Date;
 }) {

@@ -11,6 +11,7 @@ interface Seminar {
   description: string;
   date: string;
   location: string;
+  url?: string | null;
 }
 
 interface UpcomingSeminarsProps {
@@ -39,12 +40,13 @@ export default function UpcomingSeminars({ seminars }: UpcomingSeminarsProps) {
             <p className="text-sm">Belum ada seminar terjadwal</p>
           </div>
         ) : (
-          seminars.map((seminar, i) => (
-            <div
-              key={seminar.id}
-              style={{ animationDelay: `${i * 70}ms` }}
-              className="seminar-item group relative overflow-hidden rounded-2xl border border-dark-100 dark:border-dark-700/70 bg-white/70 dark:bg-dark-800/40 backdrop-blur-md p-4 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-blue-300/70 dark:hover:border-blue-600/50 hover:shadow-[0_12px_30px_-10px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_16px_36px_-12px_rgba(0,0,0,0.55)]"
-            >
+          seminars.map((seminar, i) => {
+            const card = (
+              <div
+                key={seminar.id}
+                style={{ animationDelay: `${i * 70}ms` }}
+                className="seminar-item group relative overflow-hidden rounded-2xl border border-dark-100 dark:border-dark-700/70 bg-white/70 dark:bg-dark-800/40 backdrop-blur-md p-4 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-blue-300/70 dark:hover:border-blue-600/50 hover:shadow-[0_12px_30px_-10px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_16px_36px_-12px_rgba(0,0,0,0.55)]"
+              >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-dark-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
@@ -67,7 +69,23 @@ export default function UpcomingSeminars({ seminars }: UpcomingSeminarsProps) {
                 </span>
               </div>
             </div>
-          ))
+            );
+
+            if (!seminar.url) return card;
+
+            return (
+              <a
+                key={seminar.id}
+                href={seminar.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Buka seminar ${seminar.title} di tab baru`}
+                className="block"
+              >
+                {card}
+              </a>
+            );
+          })
         )}
       </div>
 

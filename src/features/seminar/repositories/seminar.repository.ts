@@ -6,6 +6,7 @@ export function createSeminar(data: {
   tenantId: string;
   title: string;
   description: string;
+  url?: string | null;
   date: Date;
   location: string;
 }) {

@@ -13,6 +13,7 @@ interface Task {
   description: string;
   startDate?: string;
   deadline: string;
+  url?: string | null;
   submissions?: any[];
 }
 
@@ -83,7 +84,7 @@ export default function TaskTracker({ tasks }: TaskTrackerProps) {
             const urgency =
               daysLeft <= 1? "danger" : daysLeft <= 3? "warning" : "info";
 
-            return (
+            const card = (
               <div
                 key={task.id}
                 className="group rounded-xl border border-dark-100 dark:border-dark-800 bg-dark-50/50 dark:bg-dark-800/40 p-4 hover:border-primary-200 dark:hover:border-primary-800/50 hover:bg-primary-50/30 dark:hover:bg-primary-950/20 transition-all duration-200"
@@ -124,6 +125,21 @@ export default function TaskTracker({ tasks }: TaskTrackerProps) {
                   )}
                 </div>
               </div>
+            );
+
+            if (!task.url) return card;
+
+            return (
+              <a
+                key={task.id}
+                href={task.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Buka tugas ${task.title} di tab baru`}
+                className="block"
+              >
+                {card}
+              </a>
             );
           })
         )}
