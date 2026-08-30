@@ -86,6 +86,25 @@ export default async function TasksPage({ params }: TasksPageProps) {
 
     const tenantPath = `/${routeParams.slug}`;
 
+    const now = new Date();
+    const maxDeadline = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const currentUserId = currentUser.id;
+
+    const tasksForTracker = tasks.filter((task) => {
+      const isSubmittedByCurrentUser = task.submissions.some(
+        (submission) =>
+          submission.userId === currentUserId &&
+          submission.status === "SUBMITTED"
+      );
+      if (isSubmittedByCurrentUser) return false;
+
+      const deadline = new Date(task.deadline);
+      const isMissed = deadline < now;
+      const isDueWithin7Days = !isMissed && deadline <= maxDeadline;
+
+      return isMissed || isDueWithin7Days;
+    });
+
     return (
       <>
         <PageBackground />
@@ -107,7 +126,11 @@ export default async function TasksPage({ params }: TasksPageProps) {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
-                <TaskTracker tasks={tasks as any} />
+                <TaskTracker
+                  tasks={tasksForTracker as any}
+                  allTasks={tasks as any}
+                  currentUserId={currentUser.id}
+                />
                 <UnsubmittedList tasks={tasksForUnsubmitted} allUsers={allUsers} />
               </div>
             </div>
