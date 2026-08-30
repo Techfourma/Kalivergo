@@ -528,7 +528,7 @@ export async function registerMember(formData: FormData) {
     }
 
     return {
-      success: "Pendaftaran berhasil! Pendaftaran Anda sedang menunggu persetujuan admin/owner kelas. Setelah disetujui, link verifikasi akan dikirim ke email Anda.",
+      success: "Pendaftaran berhasil! Pendaftaran Anda sedang menunggu persetujuan admin/owner kelas. Setelah disetujui, akun Anda langsung aktif dan Anda dapat langsung login.",
       tenantId: tenant.id,
       className: tenant.name,
     };

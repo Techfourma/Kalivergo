@@ -5,8 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { CLASS_ROLES, readSessionUser, resolveTenantId, hasCmsAccess } from './role-model';
 import { createAuditLog } from './audit';
 import { deleteKtmFromKYC, deleteSelfieFromKYC } from '@/features/kyc/services/kyc-storage.service';
-import { generateVerificationToken, hashToken } from '@/lib/auth';
-import { sendVerificationEmail } from '@/lib/email';
+import { sendMemberApprovalEmail } from '@/lib/email';
 import { CmsRole } from '@prisma/client';
 import { env } from '@/config/env';
 import { deleteFromCloudinary, extractPublicIdFromUrl } from '@/server/storage/cloudinary';
@@ -100,37 +99,50 @@ export async function acceptUser(formData: FormData) {
     });
 
     const cloudName = env.cloudinaryCloudName;
-    if (application.profilePhotoStorageKey && cloudName) {
-      const profilePhotoUrl = `https://res.cloudinary.com/${cloudName}/image/upload/${application.profilePhotoStorageKey}`;
-      const existingUser = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { image: true },
-      });
-      if (existingUser && !existingUser.image) {
-        await prisma.user.update({
-          where: { id: userId },
-          data: { image: profilePhotoUrl },
-        });
-      }
-    }
+    const profilePhotoUrl =
+      application.profilePhotoStorageKey && cloudName
+        ? `https://res.cloudinary.com/${cloudName}/image/upload/${application.profilePhotoStorageKey}`
+        : null;
+
+    const existingUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, image: true },
+    });
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        isVerified: true,
+        ...(existingUser && !existingUser.image && profilePhotoUrl
+          ? { image: profilePhotoUrl }
+          : {}),
+      },
+    });
 
     await prisma.memberApplication.update({
       where: { id: application.id },
       data: { status: 'APPROVED', reviewedAt: new Date(), reviewedBy: session.id },
     });
 
-    const memberEmail = application.email || null;
-    if (memberEmail) {
-      const plainToken = generateVerificationToken();
-      const tokenHash = hashToken(plainToken);
-      const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
-
-      await prisma.verificationToken.deleteMany({ where: { email: memberEmail } });
-      await prisma.verificationToken.create({
-        data: { tokenHash, email: memberEmail, expiresAt },
+    try {
+      const memberEmail = application.email || null;
+      const tenant = await prisma.tenant.findUnique({
+        where: { id: tenantId },
+        select: { name: true, customSlug: true },
       });
 
-      await sendVerificationEmail(memberEmail, application.fullName, plainToken);
+      if (memberEmail && tenant?.customSlug) {
+        const baseUrl = env.baseUrl ?? 'http://localhost:3000';
+        const tenantUrl = `${baseUrl}/${tenant.customSlug}`;
+        await sendMemberApprovalEmail(
+          memberEmail,
+          application.fullName || 'Anggota',
+          tenant.name,
+          tenantUrl
+        );
+      }
+    } catch (emailError) {
+      console.error('Error sending member approval email:', emailError);
     }
 
     await createAuditLog(
