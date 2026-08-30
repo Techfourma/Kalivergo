@@ -1,6 +1,8 @@
 import { getAuditLogs } from '@/actions/cms';
 import AuditLogTable from '@/components/cms/AuditLogTable';
+import AuditExportButton from '@/components/cms/AuditExportButton';
 import { resolveTenantFromRoute } from '@/lib/tenant';
+import { prisma } from '@/lib/db';
 
 import PageBackground from '@/components/ui/PageBackground';
 
@@ -36,6 +38,26 @@ export default async function AuditPage({
 
   const tenantContext = await resolveTenantFromRoute(routeParams);
   const tenantId = tenantContext?.tenantId;
+
+  let universityName = '-';
+  let programName = '-';
+  let className = '-';
+
+  if (tenantId) {
+    const tenant = await prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: {
+        name: true,
+        university: { select: { name: true } },
+        program: { select: { name: true } },
+      },
+    });
+    if (tenant) {
+      className = tenant.name;
+      universityName = tenant.university.name;
+      programName = tenant.program.name;
+    }
+  }
 
   if (endDate) {
     endDate.setHours(23, 59, 59, 999);
@@ -78,55 +100,66 @@ export default async function AuditPage({
         <div className="relative rounded-2xl border-2 border-dark-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/70 backdrop-blur-xl p-6 shadow-[0_16px_40px_-12px_rgba(15,23,42,0.15)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.55)]">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-2xl bg-gradient-to-r from-transparent via-white/80 dark:via-white/10 to-transparent" />
 
-          <h2 className="text-lg font-semibold mb-4 text-dark-900 dark:text-white">Filter Audit Log</h2>
-          <form method="get" className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                Module
-              </label>
-              <select
-                name="module"
-                defaultValue={module}
-                className="w-full px-4 py-2 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
-              >
-                {modules.map((m) => (
-                  <option key={m.value} value={m.value}>
-                    {m.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                Tanggal Mulai
-              </label>
-              <input
-                type="date"
-                name="startDate"
-                defaultValue={formatDateInput(startDate)}
-                className="w-full px-4 py-2 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow [color-scheme:light] dark:[color-scheme:dark]"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                Tanggal Akhir
-              </label>
-              <input
-                type="date"
-                name="endDate"
-                defaultValue={formatDateInput(endDate)}
-                className="w-full px-4 py-2 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow [color-scheme:light] dark:[color-scheme:dark]"
-              />
-            </div>
-            <div className="flex items-end">
-              <button
-                type="submit"
-                className="w-full px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 shadow-lg shadow-primary-600/25 hover:shadow-xl hover:shadow-primary-600/30 hover:-translate-y-0.5 active:translate-y-0 transition-all"
-              >
-                Filter
-              </button>
-            </div>
-          </form>
+           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+             <h2 className="text-lg font-semibold text-dark-900 dark:text-white">Filter Audit Log</h2>
+             <AuditExportButton
+               logs={logs}
+               universityName={universityName}
+               programName={programName}
+               className={className}
+               module={module}
+               startDate={formatDateInput(startDate)}
+               endDate={formatDateInput(endDate)}
+             />
+           </div>
+           <form method="get" className="grid grid-cols-1 md:grid-cols-4 gap-4">
+             <div>
+               <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                 Module
+               </label>
+               <select
+                 name="module"
+                 defaultValue={module}
+                 className="w-full px-4 py-2 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
+               >
+                 {modules.map((m) => (
+                   <option key={m.value} value={m.value}>
+                     {m.label}
+                   </option>
+                 ))}
+               </select>
+             </div>
+             <div>
+               <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                 Tanggal Mulai
+               </label>
+               <input
+                 type="date"
+                 name="startDate"
+                 defaultValue={formatDateInput(startDate)}
+                 className="w-full px-4 py-2 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow [color-scheme:light] dark:[color-scheme:dark]"
+               />
+             </div>
+             <div>
+               <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                 Tanggal Akhir
+               </label>
+               <input
+                 type="date"
+                 name="endDate"
+                 defaultValue={formatDateInput(endDate)}
+                 className="w-full px-4 py-2 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow [color-scheme:light] dark:[color-scheme:dark]"
+               />
+             </div>
+             <div className="flex items-end">
+               <button
+                 type="submit"
+                 className="w-full px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 shadow-lg shadow-primary-600/25 hover:shadow-xl hover:shadow-primary-600/30 hover:-translate-y-0.5 active:translate-y-0 transition-all"
+               >
+                 Filter
+               </button>
+             </div>
+           </form>
         </div>
 
         <div className="relative rounded-2xl border-2 border-dark-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/70 backdrop-blur-xl overflow-hidden shadow-[0_16px_40px_-12px_rgba(15,23,42,0.15)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.55)]">

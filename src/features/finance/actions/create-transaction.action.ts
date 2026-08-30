@@ -65,7 +65,7 @@ export async function createTransaction(formData: FormData) {
       amount: transaction.amount,
       type,
       userId,
-      userName: memberName,
+      memberName,
       tenantId,
     });
 
@@ -122,7 +122,7 @@ export async function deleteTransaction(id: string) {
       amount: transaction?.amount,
       type: transaction?.type,
       userId: transaction?.userId,
-      userName: transactionOwnerName,
+      memberName: transactionOwnerName,
       tenantId,
     });
 

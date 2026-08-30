@@ -146,11 +146,8 @@ export default function MemberSignupPage() {
                 {selectedClass}
               </span>.
               {" "}Pendaftaran Anda sedang menunggu persetujuan admin/owner kelas.{" "}
-              Setelah disetujui, link verifikasi akan dikirim ke email{" "}
-              <span className="font-semibold text-dark-900 dark:text-white">
-                (termasuk folder spam/promosi)
-              </span>{" "}
-              untuk mengaktifkan akun Anda.
+              Setelah disetujui, akun Anda langsung aktif dan Anda dapat langsung login
+              menggunakan email dan password yang sudah didaftarkan.
             </p>
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -169,7 +166,7 @@ export default function MemberSignupPage() {
               </button>
             </div>
             <p className="text-xs text-dark-400 dark:text-dark-500 mt-5">
-              Link verifikasi berlaku selama 1 jam.
+              Setelah disetujui, Anda dapat langsung login tanpa perlu verifikasi email tambahan.
             </p>
           </div>
         </div>
@@ -474,7 +471,7 @@ export default function MemberSignupPage() {
           <p className="text-xs text-blue-700 dark:text-blue-400">
             <strong>Catatan:</strong> Pilih universitas, program studi, dan kelas yang ingin Anda ikuti.
             Setelah mendaftar, pendaftaran Anda akan menunggu persetujuan dari admin/owner kelas.
-            Setelah disetujui, link verifikasi akan dikirim ke email Anda (cek inbox atau folder spam).
+            Setelah disetujui, akun Anda langsung aktif dan Anda dapat langsung login.
           </p>
         </div>
       </div>

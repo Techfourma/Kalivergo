@@ -5,8 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { CLASS_ROLES, readSessionUser, resolveTenantId, hasCmsAccess } from './role-model';
 import { createAuditLog } from './audit';
 import { deleteKtmFromKYC, deleteSelfieFromKYC } from '@/features/kyc/services/kyc-storage.service';
-import { generateVerificationToken, hashToken } from '@/lib/auth';
-import { sendVerificationEmail } from '@/lib/email';
+import { sendMemberApprovalEmail } from '@/lib/email';
 import { CmsRole } from '@prisma/client';
 import { env } from '@/config/env';
 import { deleteFromCloudinary, extractPublicIdFromUrl } from '@/server/storage/cloudinary';
@@ -62,7 +61,7 @@ export async function addUser(formData: FormData) {
       'CREATE',
       `Menambahkan anggota: ${name} ke kelas`,
       undefined,
-      { userId: user.id, name, nim, email, cmsRole, tenantId }
+      { userId: user.id, name, nim, email, cmsRole, tenantId, isVerified: false }
     );
 
     revalidatePath('/cms/people');
@@ -91,6 +90,10 @@ export async function acceptUser(formData: FormData) {
     });
     if (!application) return;
 
+    const existingMembership = await prisma.tenantMembership.findFirst({
+      where: { userId, tenantId },
+    });
+
     await prisma.tenantMembership.upsert({
       where: {
         userId_tenantId: { userId, tenantId },
@@ -100,37 +103,50 @@ export async function acceptUser(formData: FormData) {
     });
 
     const cloudName = env.cloudinaryCloudName;
-    if (application.profilePhotoStorageKey && cloudName) {
-      const profilePhotoUrl = `https://res.cloudinary.com/${cloudName}/image/upload/${application.profilePhotoStorageKey}`;
-      const existingUser = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { image: true },
-      });
-      if (existingUser && !existingUser.image) {
-        await prisma.user.update({
-          where: { id: userId },
-          data: { image: profilePhotoUrl },
-        });
-      }
-    }
+    const profilePhotoUrl =
+      application.profilePhotoStorageKey && cloudName
+        ? `https://res.cloudinary.com/${cloudName}/image/upload/${application.profilePhotoStorageKey}`
+        : null;
+
+    const existingUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, image: true, isVerified: true },
+    });
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        isVerified: true,
+        ...(existingUser && !existingUser.image && profilePhotoUrl
+          ? { image: profilePhotoUrl }
+          : {}),
+      },
+    });
 
     await prisma.memberApplication.update({
       where: { id: application.id },
       data: { status: 'APPROVED', reviewedAt: new Date(), reviewedBy: session.id },
     });
 
-    const memberEmail = application.email || null;
-    if (memberEmail) {
-      const plainToken = generateVerificationToken();
-      const tokenHash = hashToken(plainToken);
-      const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
-
-      await prisma.verificationToken.deleteMany({ where: { email: memberEmail } });
-      await prisma.verificationToken.create({
-        data: { tokenHash, email: memberEmail, expiresAt },
+    try {
+      const memberEmail = application.email || null;
+      const tenant = await prisma.tenant.findUnique({
+        where: { id: tenantId },
+        select: { name: true, customSlug: true },
       });
 
-      await sendVerificationEmail(memberEmail, application.fullName, plainToken);
+      if (memberEmail && tenant?.customSlug) {
+        const baseUrl = env.baseUrl ?? 'http://localhost:3000';
+        const tenantUrl = `${baseUrl}/${tenant.customSlug}`;
+        await sendMemberApprovalEmail(
+          memberEmail,
+          application.fullName || 'Anggota',
+          tenant.name,
+          tenantUrl
+        );
+      }
+    } catch (emailError) {
+      console.error('Error sending member approval email:', emailError);
     }
 
     await createAuditLog(
@@ -138,7 +154,22 @@ export async function acceptUser(formData: FormData) {
       'APPROVE',
       `Menerima anggota dengan ID: ${userId}`,
       session.id,
-      { userId, tenantId }
+      {
+        userId,
+        tenantId,
+        applicationId: application.id,
+        applicantFullName: application.fullName,
+        applicantEmail: application.email,
+        profilePhotoStorageKey: application.profilePhotoStorageKey || null,
+        ktmPhotoStorageKey: application.ktmPhotoStorageKey || null,
+        userIsVerifiedBefore: existingUser?.isVerified ?? false,
+        userImageBefore: existingUser?.image ?? null,
+        membershipAction: existingMembership ? 'updated' : 'created',
+        membershipRoleBefore: existingMembership?.role ?? null,
+        membershipCmsRoleBefore: existingMembership?.cmsRole ?? null,
+        membershipRoleAfter: 'MEMBER',
+        membershipCmsRoleAfter: null,
+      }
     );
 
     revalidatePath('/cms/people');
@@ -205,7 +236,18 @@ export async function rejectUser(formData: FormData) {
       'REJECT',
       `Menolak anggota dengan ID: ${userId}`,
       session.id,
-      { userId, tenantId }
+      {
+        userId,
+        tenantId,
+        userName: user?.name ?? null,
+        userEmail: user?.email ?? null,
+        applicationId: application?.id ?? null,
+        profilePhotoStorageKey: application?.profilePhotoStorageKey ?? null,
+        ktmPhotoStorageKey: application?.ktmPhotoStorageKey ?? null,
+        membershipId: membership?.id ?? null,
+        membershipRole: membership?.role ?? null,
+        membershipCmsRole: membership?.cmsRole ?? null,
+      }
     );
 
     revalidatePath('/cms/people');
@@ -252,7 +294,7 @@ export async function updateUserRole(formData: FormData) {
       'UPDATE_ROLE',
       `Mengubah jabatan ${membership.user.name} menjadi ${role}`,
       session.id,
-      { userId, tenantId, newRole: role }
+      { userId, tenantId, oldRole: membership.cmsRole, newRole: role }
     );
 
     revalidatePath('/cms/people');
@@ -278,21 +320,24 @@ export async function deleteUser(formData: FormData) {
         id: true,
         name: true,
         email: true,
+        nim: true,
         image: true,
         ktpStorageKey: true,
         tenantMemberships: {
           where: { tenantId },
-          select: { role: true },
+          select: { role: true, cmsRole: true },
         },
         memberApplications: {
           where: { tenantId },
           select: {
+            id: true,
             profilePhotoStorageKey: true,
             ktmPhotoStorageKey: true,
           },
         },
         ownerApplications: {
           select: {
+            id: true,
             selfieStorageKey: true,
             ktmStorageKey: true,
           },
@@ -385,7 +430,18 @@ export async function deleteUser(formData: FormData) {
       'DELETE',
       `Menghapus anggota: ${user.name} (${user.email}) dari kelas`,
       session.id,
-      { userId: user.id, tenantId }
+      {
+        userId: user.id,
+        tenantId,
+        userName: user.name,
+        userEmail: user.email,
+        userNim: user.nim,
+        deletedMemberships: user.tenantMemberships.map(m => ({ role: m.role, cmsRole: m.cmsRole })),
+        deletedMemberApplications: user.memberApplications.map(a => ({ id: a.id, profilePhotoStorageKey: a.profilePhotoStorageKey, ktmPhotoStorageKey: a.ktmPhotoStorageKey })),
+        deletedOwnerApplications: user.ownerApplications.map(a => ({ id: a.id, selfieStorageKey: a.selfieStorageKey, ktmStorageKey: a.ktmStorageKey })),
+        deletedTransactions: true,
+        deletedAuditLogs: true,
+      }
     );
 
     revalidatePath('/cms/people');

@@ -69,7 +69,7 @@ export default async function TasksPage({ params }: TenantCmsTasksPageProps) {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Start Date Time (WIB)
+                    Start Date Time
                   </label>
                   <input
                     type="datetime-local"
@@ -80,7 +80,7 @@ export default async function TasksPage({ params }: TenantCmsTasksPageProps) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Deadline (WIB)
+                    Deadline
                   </label>
                   <input
                     type="datetime-local"

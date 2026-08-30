@@ -149,6 +149,68 @@ export async function sendOwnerApprovalEmail(
   }
 }
 
+export async function sendMemberApprovalEmail(
+  to: string,
+  name: string,
+  className: string,
+  tenantUrl: string
+): Promise<void> {
+  const apiKey = env.brevoApiKey;
+
+  if (!apiKey) {
+    throw new Error("BREVO_API_KEY tidak ditemukan di environment variables (.env)");
+  }
+
+  const safeName = escapeHtml(name);
+  const safeClass = escapeHtml(className);
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto;">
+      <h2>Akun Anda Telah Diverifikasi</h2>
+      <p>Halo ${safeName},</p>
+      <p>Selamat! Pendaftaran anggota Anda untuk kelas <strong>${safeClass}</strong> telah disetujui oleh pengelola kelas dan akun Anda telah diverifikasi.</p>
+      <p>Anda kini dapat langsung masuk dan mulai menggunakan kelas tersebut.</p>
+      <p style="margin: 24px 0;">
+        <a
+          href="${tenantUrl}"
+          style="background: #111827; color: #ffffff; padding: 12px 20px; text-decoration: none; border-radius: 8px; display: inline-block;"
+        >
+          Kunjungi Kelas Saya
+        </a>
+      </p>
+      <p>Jika tombol tidak bisa diklik, salin link berikut:</p>
+      <p style="word-break: break-all; color: #6b7280;">${tenantUrl}</p>
+      <p>Jika Anda tidak merasa mendaftar di Kalivergo, abaikan email ini.</p>
+    </div>
+  `;
+
+  const fromAddress = env.emailFrom ?? "Kalivergo <noreply@smtp-brevo.com>";
+  const from = parseFromAddress(fromAddress);
+
+  const payload = {
+    sender: { name: from.name, email: from.email },
+    to: [{ email: to, name: name }],
+    subject: "Akun Anda Telah Diverifikasi - Kalivergo",
+    htmlContent: html,
+  };
+
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "accept": "application/json",
+      "content-type": "application/json",
+      "api-key": apiKey,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("BREVO_SEND_ERROR:", response.status, errorText);
+    throw new Error(`Gagal mengirim email persetujuan anggota (Status: ${response.status})`);
+  }
+}
+
 export async function sendForgotPasswordVerificationEmail(
   email: string,
   verificationLink: string
