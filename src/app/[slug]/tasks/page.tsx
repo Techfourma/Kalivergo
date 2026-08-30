@@ -122,7 +122,7 @@ export default async function TasksPage({ params }: TasksPageProps) {
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-dark-900 dark:text-white font-display">Daftar Tugas</h1>
               <p className="text-muted mt-2">
-                Pantau dan kelola semua tugas di kelas Anda
+                Tugas yang belum dikerjakan akan muncul di Task Tracker, sedangkan tugas yang sudah dikerjakan tidak akan ditampilkan.
               </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

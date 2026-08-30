@@ -18,6 +18,7 @@ export { createSchedule, deleteSchedule } from './cms/schedule';
 export {
   createTaskAction as createTask,
   deleteTaskAction as deleteTask,
+  updateTaskAction as updateTask,
   updateTaskSubmissionsAction as updateTaskSubmissions,
 } from '@/features/task/actions/task.action';
 export { createSeminar } from '@/features/seminar/actions/create-seminar.action';

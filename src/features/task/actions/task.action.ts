@@ -6,6 +6,7 @@ import { validateTenantMembership } from "@/features/tenant/services/tenant.serv
 import {
   createTaskForTenant,
   deleteTaskForTenant,
+  updateTaskForTenant,
   updateTaskSubmissionsForTenant,
 } from "@/features/task/services/task.service";
 import {
@@ -108,6 +109,57 @@ export async function deleteTaskAction(id: string) {
 
   revalidatePath("/cms/tasks");
   return { success: "Tugas berhasil dihapus" };
+}
+
+export async function updateTaskAction(id: string, formData: FormData) {
+  const session = await readSessionUser();
+  if (!session?.id) {
+    return { error: "Unauthorized" };
+  }
+
+  const title = formData.get("title") as string;
+  const description = formData.get("description") as string;
+  const url = (formData.get("url") as string)?.trim() || undefined;
+  const category = formData.get("category") as string;
+  const startDate = new Date(formData.get("startDate") as string);
+  const deadline = new Date(formData.get("deadline") as string);
+
+  if (!title || !description) {
+    return { error: "Judul dan deskripsi harus diisi" };
+  }
+
+  if (isNaN(startDate.getTime()) || isNaN(deadline.getTime())) {
+    return { error: "Start Date Time dan Deadline harus diisi dengan waktu yang valid." };
+  }
+
+  if (deadline <= startDate) {
+    return { error: "Deadline harus setelah Start Date Time." };
+  }
+
+  const tenantId = await getTenantIdFromCookie();
+  if (!tenantId) {
+    return { error: "Konteks kelas tidak ditemukan. Silakan buka kelas melalui URL /[universitas]/[prodi]/[kelas]." };
+  }
+
+  const membership = await validateTenantMembership(session.id, tenantId);
+  if (!membership.valid || !(membership.role === "OWNER" || membership.cmsRole)) {
+    return { error: "Akses ditolak: hanya OWNER atau role CMS." };
+  }
+
+  const result = await updateTaskForTenant(id, tenantId, { title, description, url, category, startDate, deadline });
+  if ("error" in result) return result;
+
+  await createAuditLog("TASKS", "UPDATE", `Mengubah tugas: ${title}`, "System", {
+    taskId: id,
+    title,
+    category,
+    startDate: startDate.toISOString(),
+    deadline: deadline.toISOString(),
+    tenantId,
+  });
+
+  revalidatePath("/cms/tasks");
+  return { success: "Tugas berhasil diperbarui" };
 }
 
 export async function updateTaskSubmissionsAction(taskId: string, userIds: string[]) {

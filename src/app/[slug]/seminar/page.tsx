@@ -91,7 +91,8 @@ export default async function SeminarPage({ params }: SeminarPageProps) {
               </h1>
 
               <p className="text-muted mt-2">
-                Informasi seminar dan kegiatan yang tersedia untuk mahasiswa
+                Informasi seminar yang tersedia pada kelas Anda. 
+                Pantau seminar yang akan datang dan lihat siapa saja yang belum mendaftar.
               </p>
             </div>
 

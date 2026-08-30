@@ -1,8 +1,8 @@
 import DeleteTaskButton from '@/components/ui/DeleteTaskButton';
+import EditTaskButton from '@/components/cms/EditTaskButton';
+import TaskListWithSearch from '@/components/cms/TaskListWithSearch';
 import TaskSubmissionManager from '@/components/ui/TaskSubmissionManager';
 import ActionFeedback from '@/components/cms/ActionFeedback';
-import Badge from '@/components/ui/Badge';
-import { getTaskCategoryLabel } from '@/shared/task-category';
 import { resolveTenantFromRoute } from '@/lib/tenant';
 import { notFound } from 'next/navigation';
 import { getTaskManagementData } from '@/features/task/services/task.service';
@@ -141,83 +141,7 @@ export default async function TasksPage({ params }: TenantCmsTasksPageProps) {
         </div>
 
         {/* Daftar Tugas */}
-        <div className="relative rounded-2xl border-2 border-dark-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/70 backdrop-blur-xl overflow-hidden shadow-[0_16px_40px_-12px_rgba(15,23,42,0.15)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.55)]">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-2xl bg-gradient-to-r from-transparent via-white/80 dark:via-white/10 to-transparent" />
-
-          <div className="p-4 md:p-6 border-b border-dark-100 dark:border-dark-800">
-            <h2 className="text-lg font-semibold text-dark-900 dark:text-white">
-              Daftar Tugas ({tasks.length})
-            </h2>
-          </div>
-          <div className="divide-y divide-dark-100 dark:divide-dark-800">
-            {tasks.length === 0 ? (
-              <div className="p-6 text-center text-dark-500 dark:text-dark-400">
-                Belum ada tugas. Tambahkan tugas pertama Anda!
-              </div>
-            ) : (
-              tasks.map((task) => {
-                const submittedUserIds = task.submissions.map((s) => s.userId);
-                return (
-                  <div
-                    key={task.id}
-                    className="p-4 md:p-6 flex flex-col md:flex-row md:items-start md:justify-between gap-4 hover:bg-dark-50 dark:hover:bg-dark-800/40 transition-colors"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start gap-2 flex-wrap">
-                        <h3 className="font-semibold text-dark-900 dark:text-white break-words line-clamp-2">
-                          {task.title}
-                        </h3>
-                        <Badge
-                          variant={task.category === 'TATAP_MUKA' ? 'warning' : 'info'}
-                          className="shrink-0 mt-0.5"
-                        >
-                          {getTaskCategoryLabel(task.category)}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-dark-600 dark:text-dark-300 mt-1 break-words">
-                        {task.description}
-                      </p>
-                      <div className="text-xs md:text-sm text-dark-500 dark:text-dark-400 mt-2 space-y-1">
-                        <p className="text-primary-600 dark:text-primary-400">
-                          Start:{' '}
-                          {new Date(task.startDate).toLocaleDateString('id-ID', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </p>
-                        <p className="text-red-600 dark:text-red-400">
-                          Deadline:{' '}
-                          {new Date(task.deadline).toLocaleDateString('id-ID', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex flex-row items-center justify-between md:justify-end gap-3 w-full md:w-auto pt-2 md:pt-0 border-t md:border-0 border-dark-100 dark:border-dark-800">
-                      <TaskSubmissionManager
-                        taskId={task.id}
-                        taskTitle={task.title}
-                        submittedUserIds={submittedUserIds}
-                        allUsers={allUsers}
-                        submissionCount={task.submissions.length}
-                      />
-                      <DeleteTaskButton id={task.id} title={task.title} />
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
+        <TaskListWithSearch tasks={tasks} allUsers={allUsers} />
       </div>
     </>
   );
