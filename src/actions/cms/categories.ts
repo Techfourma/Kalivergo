@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { requireOwner, resolveTenantId } from './role-model';
+import { requireOwner, resolveTenantId, resolveTenantSlug } from './role-model';
 import {
   createCategoryForTenant,
   deleteCategoryForTenant,
@@ -25,7 +25,7 @@ export async function createCategory(formData: FormData) {
 
     const result = await createCategoryForTenant({ tenantId, name, type });
     if ('error' in result) return result;
-    revalidatePath('/cms/finance');
+    revalidatePath(`/${await resolveTenantSlug()}/cms/finance`);
     return { success: 'Kategori berhasil ditambahkan' };
   } catch (error: any) {
     console.error('Error creating category:', error);
@@ -48,7 +48,7 @@ export async function updateCategory(formData: FormData) {
 
     const result = await updateCategoryForTenant({ id, tenantId, name, type });
     if ('error' in result) return result;
-    revalidatePath('/cms/finance');
+    revalidatePath(`/${await resolveTenantSlug()}/cms/finance`);
     return { success: 'Kategori berhasil diubah' };
   } catch (error: any) {
     console.error('Error updating category:', error);
@@ -64,7 +64,7 @@ export async function deleteCategory(id: string) {
 
     const result = await deleteCategoryForTenant(id, tenantId);
     if ('error' in result) return result;
-    revalidatePath('/cms/finance');
+    revalidatePath(`/${await resolveTenantSlug()}/cms/finance`);
     return { success: 'Kategori berhasil dihapus' };
   } catch (error: any) {
     console.error('Error deleting category:', error);

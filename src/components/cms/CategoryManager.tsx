@@ -78,6 +78,7 @@ export default function CategoryManager({
   const [editing, setEditing] = useState<Category | null>(null);
   const [type, setType] = useState<"INCOME" | "EXPENSE">("INCOME");
   const [name, setName] = useState("");
+  const [activeTab, setActiveTab] = useState<"INCOME" | "EXPENSE">("INCOME");
 
   const closeModal = () => {
     setIsOpen(false);
@@ -118,42 +119,65 @@ export default function CategoryManager({
     return result;
   };
 
-  const renderGroup = (
-    t: "INCOME" | "EXPENSE",
-    title: string,
-    subtitle: string,
-    items: Category[]
-  ) => {
-    const isIncome = t === "INCOME";
-    const Icon = isIncome ? ArrowDownCircle : ArrowUpCircle;
-    return (
-      <Card key={t}>
+  const currentItems = activeTab === "INCOME" ? incomeCategories : expenseCategories;
+  const isIncome = activeTab === "INCOME";
+
+  return (
+    <>
+      <Card>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div
-              className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-                isIncome
-                  ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                  : "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
-              }`}
-            >
-              <Icon className="h-5 w-5" />
+            <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+              isIncome
+                ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                : "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
+            }`}>
+              {isIncome ? <ArrowDownCircle className="h-5 w-5" /> : <ArrowUpCircle className="h-5 w-5" />}
             </div>
             <div>
-              <h2 className="text-base font-bold text-dark-900 dark:text-dark-50">{title}</h2>
-              <p className="text-xs text-dark-500 dark:text-dark-400">{subtitle}</p>
+              <h2 className="text-base font-bold text-dark-900 dark:text-dark-50">
+                {isIncome ? "Pemasukan" : "Pengeluaran"}
+              </h2>
+              <p className="text-xs text-dark-500 dark:text-dark-400">
+                {isIncome ? "Kategori untuk pemasukan uang kas" : "Kategori untuk pengeluaran uang kas"}
+              </p>
             </div>
           </div>
-          <Button size="sm" onClick={() => openCreate(t)}>
+          <Button size="sm" onClick={() => openCreate(activeTab)}>
             <Plus className="h-4 w-4" /> Tambah
           </Button>
         </div>
 
-        {items.length === 0 ? (
-          <p className="text-sm text-dark-500 dark:text-dark-400">Belum ada kategori {title}.</p>
+        <div className="flex items-center gap-1 rounded-xl bg-dark-100 dark:bg-dark-800 p-1 mb-4">
+          <button
+            type="button"
+            onClick={() => setActiveTab("INCOME")}
+            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
+              activeTab === "INCOME"
+                ? "bg-white dark:bg-dark-900 text-dark-900 dark:text-white shadow-sm"
+                : "text-dark-600 dark:text-dark-300 hover:text-dark-900 dark:hover:text-dark-100"
+            }`}
+          >
+            Pemasukan
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("EXPENSE")}
+            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
+              activeTab === "EXPENSE"
+                ? "bg-white dark:bg-dark-900 text-dark-900 dark:text-white shadow-sm"
+                : "text-dark-600 dark:text-dark-300 hover:text-dark-900 dark:hover:text-dark-100"
+            }`}
+          >
+            Pengeluaran
+          </button>
+        </div>
+
+        {currentItems.length === 0 ? (
+          <p className="text-sm text-dark-500 dark:text-dark-400">Belum ada kategori {isIncome ? "pemasukan" : "pengeluaran"}.</p>
         ) : (
           <div className="divide-y divide-dark-100 dark:divide-dark-700/60">
-            {items.map((cat) => (
+            {currentItems.map((cat) => (
               <div
                 key={cat.id}
                 className="flex items-center justify-between py-3"
@@ -187,25 +211,6 @@ export default function CategoryManager({
           </div>
         )}
       </Card>
-    );
-  };
-
-  return (
-    <>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {renderGroup(
-          "INCOME",
-          "Pemasukan",
-          "Kategori untuk pemasukan uang kas",
-          incomeCategories
-        )}
-        {renderGroup(
-          "EXPENSE",
-          "Pengeluaran",
-          "Kategori untuk pengeluaran uang kas",
-          expenseCategories
-        )}
-      </div>
 
       <Modal
         isOpen={isOpen}

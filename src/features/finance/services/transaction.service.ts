@@ -14,8 +14,8 @@ import {
 import { isUangKasName } from "../validators/finance.utils";
 import { findCategoryById } from "@/features/cms/repositories/category.repository";
 
-export async function getTransactionsWithSummary(tenantId: string) {
-  const transactions = await findTransactionsByTenantId(tenantId);
+export async function getTransactionsWithSummary(tenantId: string, startDate?: Date, endDate?: Date) {
+  const transactions = await findTransactionsByTenantId(tenantId, { startDate, endDate });
 
   const totalIncome = transactions
     .filter((t) => t.type === "INCOME")

@@ -70,7 +70,7 @@ export function findTenantTaskMembers(tenantId: string) {
   return prisma.tenantMembership.findMany({
     where: { tenantId },
     include: {
-      user: { select: { id: true, name: true, email: true } },
+      user: { select: { id: true, name: true, email: true, image: true } },
     },
     orderBy: { user: { name: "asc" } },
   });

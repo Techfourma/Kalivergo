@@ -11,6 +11,7 @@ export type TenantRouteParams = {
 
 export type TenantContext = {
   tenantId: string;
+  customSlug: string | null;
   universitySlug: string;
   programSlug: string;
   classSlug: string;
@@ -38,6 +39,7 @@ export async function resolveTenantFromRoute(
 
     return {
       tenantId: tenant.id,
+      customSlug: tenant.customSlug,
       universitySlug: tenant.university.slug,
       programSlug: tenant.program.slug,
       classSlug: tenant.slug,
@@ -80,6 +82,7 @@ export async function getValidatedCurrentTenant(
     select: {
       id: true,
       slug: true,
+      customSlug: true,
       university: { select: { slug: true } },
       program: { select: { slug: true } },
     },
@@ -89,6 +92,7 @@ export async function getValidatedCurrentTenant(
 
   return {
     tenantId: tenant.id,
+    customSlug: tenant.customSlug,
     universitySlug: tenant.university.slug,
     programSlug: tenant.program.slug,
     classSlug: tenant.slug,

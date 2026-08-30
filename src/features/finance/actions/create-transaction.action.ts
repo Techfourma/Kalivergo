@@ -1,13 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { readSessionUser, requireCmsActor, resolveTenantId } from "@/actions/cms/role-model";
+import { readSessionUser, requireCmsActor, resolveTenantId, resolveTenantSlug } from "@/actions/cms/role-model";
 import { createAuditLog } from "@/actions/cms/audit";
 import {
   createTransactionService,
   deleteTransactionService,
   getMemberName,
 } from "../services/transaction.service";
+import { uploadToCloudinary, deleteFromCloudinary, extractPublicIdFromUrl } from "@/lib/cloudinary";
 
 export async function createTransaction(formData: FormData) {
   try {
@@ -30,11 +31,16 @@ export async function createTransaction(formData: FormData) {
     if (!(await requireCmsActor(tenantId)))
       return { error: "Akses ditolak: hanya OWNER atau role CMS." };
 
-    const invoiceName = formData.get("invoiceName") as string | null;
+    const invoiceFile = formData.get("invoice") as File | null;
     let invoiceUrl: string | null = null;
-    if (invoiceName) {
-      const safeFileName = `${Date.now()}-${invoiceName.replace(/\s+/g, "_")}`;
-      invoiceUrl = `/uploads/${safeFileName}`;
+    if (invoiceFile && invoiceFile.size > 0) {
+      const bytes = await invoiceFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const uploadResult = await uploadToCloudinary(buffer, {
+        folder: "kalivergo/finance/invoices",
+        resourceType: "auto",
+      });
+      invoiceUrl = uploadResult.secure_url;
     }
 
     const creatorName = (await readSessionUser())?.name ?? "System";
@@ -63,7 +69,7 @@ export async function createTransaction(formData: FormData) {
       tenantId,
     });
 
-    revalidatePath("/cms/finance");
+    revalidatePath(`/${await resolveTenantSlug()}/cms/finance`);
     return { success: "Transaksi berhasil ditambahkan" };
   } catch (error: any) {
     console.error("Error creating transaction:", error);
@@ -95,6 +101,13 @@ export async function deleteTransaction(id: string) {
     const { prisma } = await import("@/lib/db");
     const transaction = await prisma.transaction.findFirst({ where: { id, tenantId } });
 
+    if (transaction?.invoiceUrl) {
+      const publicId = extractPublicIdFromUrl(transaction.invoiceUrl);
+      if (publicId) {
+        await deleteFromCloudinary(publicId, "image");
+      }
+    }
+
     let transactionOwnerName: string | undefined;
     if (transaction?.userId) {
       const member = await prisma.user.findUnique({
@@ -113,7 +126,7 @@ export async function deleteTransaction(id: string) {
       tenantId,
     });
 
-    revalidatePath("/cms/finance");
+    revalidatePath(`/${await resolveTenantSlug()}/cms/finance`);
     return { success: "Transaksi berhasil dihapus" };
   } catch (error: any) {
     console.error("Error deleting transaction:", error);

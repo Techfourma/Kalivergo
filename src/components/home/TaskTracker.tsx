@@ -109,12 +109,12 @@ export default function TaskTracker({ tasks }: TaskTrackerProps) {
                   {task.startDate && (
                     <span className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      Mulai {formatDateTime(task.startDate)}
+                      Mulai: {formatDateTime(task.startDate)}
                     </span>
                   )}
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    {formatDateTime(task.deadline)}
+                    Deadline: {formatDateTime(task.deadline)}
                   </span>
                   {task.submissions && (
                     <span>
