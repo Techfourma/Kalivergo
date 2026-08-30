@@ -15,7 +15,6 @@ import {
   TrendingUp,
   TrendingDown,
   Wallet,
-  CalendarRange,
   RotateCcw,
   FileDown,
 } from "lucide-react";
@@ -246,36 +245,32 @@ export default function CashFlowChart({
   const hasFilter = Boolean(startDate || endDate);
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/30 dark:to-emerald-900/10 border-emerald-200 dark:border-emerald-800/40">
+      <Card padding="md" className="bg-gradient-to-br from-dark-50/50 to-dark-100/50 dark:from-dark-900/50 dark:to-dark-800/50 border-dark-200 dark:border-dark-700/60">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/25">
               <TrendingUp className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Pemasukan</p>
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Total Pemasukan</p>
               <p className="text-lg font-bold text-emerald-900 dark:text-emerald-300">
                 {formatCurrency(summary.totalIncome)}
               </p>
             </div>
           </div>
-        </Card>
 
-        <Card className="bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/30 dark:to-red-900/10 border-red-200 dark:border-red-800/40">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500 text-white shadow-lg shadow-red-500/25">
               <TrendingDown className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-red-600 dark:text-red-400 font-medium">Pengeluaran</p>
+              <p className="text-xs text-red-600 dark:text-red-400 font-medium">Total Pengeluaran</p>
               <p className="text-lg font-bold text-red-900 dark:text-red-300">
                 {formatCurrency(summary.totalExpense)}
               </p>
             </div>
           </div>
-        </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/15 border-blue-200 dark:border-blue-800/50">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 text-white shadow-lg shadow-blue-500/25">
               <Wallet className="h-5 w-5" />
@@ -287,8 +282,8 @@ export default function CashFlowChart({
               </p>
             </div>
           </div>
-        </Card>
-      </div>
+        </div>
+      </Card>
 
       {shouldLockFeatures && (
         <Card padding="md" className="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/40">
@@ -311,23 +306,10 @@ export default function CashFlowChart({
         </Card>
       )}
 
-      <Card padding="md" className={shouldLockFeatures ? "opacity-50 pointer-events-none" : ""}>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
-              <CalendarRange className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-dark-900 dark:text-white">
-                Rentang Waktu Arus Kas
-              </h3>
-              <p className="text-xs text-dark-500 dark:text-dark-400">
-                Pilih periode mulai &amp; selesai untuk memfilter arus kas.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+      <Card padding="lg" className={shouldLockFeatures ? "opacity-50 pointer-events-none" : ""}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <h3 className="text-lg font-bold text-dark-900 dark:text-white">Arus Kas</h3>
+          <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4 sm:ml-auto">
             <label className="flex flex-col gap-1">
               <span className="text-xs font-medium text-dark-600 dark:text-dark-300">
                 Dari Tanggal
@@ -358,7 +340,7 @@ export default function CashFlowChart({
               type="button"
               onClick={resetRange}
               disabled={shouldLockFeatures}
-              className="inline-flex items-center gap-2 rounded-xl border border-dark-200 dark:border-dark-700 px-4 py-2 text-sm font-medium text-dark-700 dark:text-dark-300 transition-colors hover:bg-dark-50 dark:hover:bg-dark-800 hover:text-dark-900 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-dark-200 dark:border-dark-700 px-4 py-2 text-sm font-medium text-dark-700 dark:text-dark-300 transition-colors hover:bg-dark-50 dark:hover:bg-dark-800 hover:text-dark-900 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <RotateCcw className="h-4 w-4" />
               Reset
@@ -367,7 +349,7 @@ export default function CashFlowChart({
         </div>
 
         {hasFilter && (
-          <p className="mt-3 text-xs text-dark-500 dark:text-dark-400">
+          <p className="mb-3 text-xs text-dark-500 dark:text-dark-400">
             Menampilkan arus kas dari{" "}
             <span className="font-semibold text-dark-800 dark:text-dark-200">
               {startDate
@@ -391,21 +373,7 @@ export default function CashFlowChart({
             ({chartData.length} hari).
           </p>
         )}
-      </Card>
 
-      <Card padding="lg" className={shouldLockFeatures ? "opacity-50 pointer-events-none" : ""}>
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-bold text-dark-900 dark:text-white">Arus Kas</h3>
-          <button
-            type="button"
-            onClick={handleExportPDF}
-            disabled={shouldLockFeatures}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <FileDown className="h-4 w-4" />
-            Export PDF
-          </button>
-        </div>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>
@@ -483,111 +451,113 @@ export default function CashFlowChart({
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card padding="lg">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
-              <TrendingUp className="h-4 w-4" />
+      <Card padding="lg">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                <TrendingUp className="h-4 w-4" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-dark-900 dark:text-white">
+                  Pemasukan per Kategori
+                </h3>
+                <p className="text-xs text-dark-500 dark:text-dark-400">
+                  Total {formatCurrency(summary.totalIncome)}
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-base font-bold text-dark-900 dark:text-white">
-                Pemasukan per Kategori
-              </h3>
-              <p className="text-xs text-dark-500 dark:text-dark-400">
-                Total {formatCurrency(summary.totalIncome)}
+
+            {incomeCategoryBreakdown.length > 0 ? (
+              <ul className="space-y-3">
+                {incomeCategoryBreakdown.map((item) => {
+                  const pct =
+                    summary.totalIncome > 0
+                      ? Math.round((item.amount / summary.totalIncome) * 100)
+                      : 0;
+                  return (
+                    <li key={`income-${item.category}`} className="space-y-1">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium text-dark-800 dark:text-dark-200">
+                          {item.category}
+                        </span>
+                        <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                          {formatCurrency(item.amount)}
+                          <span className="ml-2 text-xs font-medium text-dark-500 dark:text-dark-400">
+                            {pct}%
+                          </span>
+                        </span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-dark-100 dark:bg-dark-700">
+                        <div
+                          className="h-full rounded-full bg-emerald-500 transition-all"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="text-sm text-dark-500 dark:text-dark-400">
+                Belum ada data pemasukan pada rentang waktu ini.
               </p>
-            </div>
+            )}
           </div>
 
-          {incomeCategoryBreakdown.length > 0 ? (
-            <ul className="space-y-3">
-              {incomeCategoryBreakdown.map((item) => {
-                const pct =
-                  summary.totalIncome > 0
-                    ? Math.round((item.amount / summary.totalIncome) * 100)
-                    : 0;
-                return (
-                  <li key={`income-${item.category}`} className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium text-dark-800 dark:text-dark-200">
-                        {item.category}
-                      </span>
-                      <span className="font-semibold text-emerald-700 dark:text-emerald-400">
-                        {formatCurrency(item.amount)}
-                        <span className="ml-2 text-xs font-medium text-dark-500 dark:text-dark-400">
-                          {pct}%
-                        </span>
-                      </span>
-                    </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-dark-100 dark:bg-dark-700">
-                      <div
-                        className="h-full rounded-full bg-emerald-500 transition-all"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="text-sm text-dark-500 dark:text-dark-400">
-              Belum ada data pemasukan pada rentang waktu ini.
-            </p>
-          )}
-        </Card>
-
-        <Card padding="lg">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
-              <TrendingDown className="h-4 w-4" />
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+                <TrendingDown className="h-4 w-4" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-dark-900 dark:text-white">
+                  Pengeluaran per Kategori
+                </h3>
+                <p className="text-xs text-dark-500 dark:text-dark-400">
+                  Total {formatCurrency(summary.totalExpense)}
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-base font-bold text-dark-900 dark:text-white">
-                Pengeluaran per Kategori
-              </h3>
-              <p className="text-xs text-dark-500 dark:text-dark-400">
-                Total {formatCurrency(summary.totalExpense)}
+
+            {expenseCategoryBreakdown.length > 0 ? (
+              <ul className="space-y-3">
+                {expenseCategoryBreakdown.map((item) => {
+                  const pct =
+                    summary.totalExpense > 0
+                      ? Math.round((item.amount / summary.totalExpense) * 100)
+                      : 0;
+                  return (
+                    <li key={`expense-${item.category}`} className="space-y-1">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium text-dark-800 dark:text-dark-200">
+                          {item.category}
+                        </span>
+                        <span className="font-semibold text-red-700 dark:text-red-400">
+                          {formatCurrency(item.amount)}
+                          <span className="ml-2 text-xs font-medium text-dark-500 dark:text-dark-400">
+                            {pct}%
+                          </span>
+                        </span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-dark-100 dark:bg-dark-700">
+                        <div
+                          className="h-full rounded-full bg-red-500 transition-all"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="text-sm text-dark-500 dark:text-dark-400">
+                Belum ada data pengeluaran pada rentang waktu ini.
               </p>
-            </div>
+            )}
           </div>
-
-          {expenseCategoryBreakdown.length > 0 ? (
-            <ul className="space-y-3">
-              {expenseCategoryBreakdown.map((item) => {
-                const pct =
-                  summary.totalExpense > 0
-                    ? Math.round((item.amount / summary.totalExpense) * 100)
-                    : 0;
-                return (
-                  <li key={`expense-${item.category}`} className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium text-dark-800 dark:text-dark-200">
-                        {item.category}
-                      </span>
-                      <span className="font-semibold text-red-700 dark:text-red-400">
-                        {formatCurrency(item.amount)}
-                        <span className="ml-2 text-xs font-medium text-dark-500 dark:text-dark-400">
-                          {pct}%
-                        </span>
-                      </span>
-                    </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-dark-100 dark:bg-dark-700">
-                      <div
-                        className="h-full rounded-full bg-red-500 transition-all"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="text-sm text-dark-500 dark:text-dark-400">
-              Belum ada data pengeluaran pada rentang waktu ini.
-            </p>
-          )}
-        </Card>
-      </div>
+        </div>
+      </Card>
     </div>
   );
 }
