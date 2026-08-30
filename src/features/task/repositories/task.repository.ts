@@ -4,13 +4,18 @@ import { prisma } from "@/server/db/prisma";
 
 export function findTasksForTenant(
   tenantId: string,
-  filters: { startDate?: Date; endDate?: Date; weekly?: boolean }
+  filters: { startDate?: Date; endDate?: Date; weekly?: boolean; category?: string }
 ) {
   const where: {
     tenantId: string;
     startDate?: { lt?: Date };
     deadline?: { gte?: Date; lte?: Date; lt?: Date };
+    category?: string;
   } = { tenantId };
+
+  if (filters.category) {
+    where.category = filters.category;
+  }
 
   if (filters.weekly) {
     const now = new Date();
@@ -41,6 +46,7 @@ export function createTaskForTenant(data: {
   title: string;
   description: string;
   url?: string | null;
+  category?: string;
   startDate: Date;
   deadline: Date;
 }) {

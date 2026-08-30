@@ -6,6 +6,10 @@ import Badge from "@/components/ui/Badge";
 import { Calendar, Clock, Filter, CheckCircle2 } from "lucide-react";
 import { formatDateTime, getDaysRemaining } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import {
+  DEFAULT_TASK_CATEGORY,
+  getTaskCategoryLabel,
+} from "@/shared/task-category";
 
 interface Task {
   id: string;
@@ -14,6 +18,7 @@ interface Task {
   startDate?: string;
   deadline: string;
   url?: string | null;
+  category?: string;
   submissions?: any[];
 }
 
@@ -29,6 +34,7 @@ export default function TaskTracker({
   currentUserId,
 }: TaskTrackerProps) {
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [filteredTasks, setFilteredTasks] = useState<Task[]>(tasks);
 
   useEffect(() => {
@@ -55,27 +61,37 @@ export default function TaskTracker({
         submission.status === "SUBMITTED"
     ) ?? false;
 
-  const todoTasks = isRangeSelected
-    ? allTasks.filter((task) => {
-        const taskDate = new Date(task.deadline);
-        const inRange =
-          taskDate >= new Date(dateRange.start) &&
-          taskDate <= new Date(dateRange.end);
-        return inRange && !isSubmittedByUser(task);
-      })
-    : filteredTasks.filter((task) => !isSubmittedByUser(task));
+  const matchesCategory = (task: Task) =>
+    categoryFilter === "all" ||
+    (task.category ?? DEFAULT_TASK_CATEGORY) === categoryFilter;
+
+  const todoTasks = (
+    isRangeSelected
+      ? allTasks.filter((task) => {
+          const taskDate = new Date(task.deadline);
+          const inRange =
+            taskDate >= new Date(dateRange.start) &&
+            taskDate <= new Date(dateRange.end);
+          return inRange && !isSubmittedByUser(task);
+        })
+      : filteredTasks.filter((task) => !isSubmittedByUser(task))
+  ).filter(matchesCategory);
 
   const tasksInRange = isRangeSelected
-    ? allTasks.filter((task) => {
-        const taskDate = new Date(task.deadline);
-        return (
-          taskDate >= new Date(dateRange.start) &&
-          taskDate <= new Date(dateRange.end)
-        );
-      })
+    ? allTasks
+        .filter((task) => {
+          const taskDate = new Date(task.deadline);
+          return (
+            taskDate >= new Date(dateRange.start) &&
+            taskDate <= new Date(dateRange.end)
+          );
+        })
+        .filter(matchesCategory)
     : [];
 
-  const scopeTasks = isRangeSelected ? tasksInRange : allTasks;
+  const scopeTasks = isRangeSelected
+    ? tasksInRange
+    : allTasks.filter(matchesCategory);
   const allDone =
     todoTasks.length === 0 &&
     scopeTasks.length > 0 &&
@@ -91,6 +107,19 @@ export default function TaskTracker({
           </p>
         </div>
         <div className="flex items-end gap-2">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold text-dark-600 dark:text-dark-300 tracking-widest ml-1 mb-1">KATEGORI</span>
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              aria-label="Filter kategori tugas"
+              className="appearance-none rounded-lg border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900 px-3 py-1.5 text-sm text-dark-700 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer font-medium [color-scheme:light] dark:[color-scheme:dark]"
+            >
+              <option value="all" className="text-dark-900 dark:text-white bg-white dark:bg-dark-900">Semua</option>
+              <option value="E_LEARNING" className="text-dark-900 dark:text-white bg-white dark:bg-dark-900">E-Learning</option>
+              <option value="TATAP_MUKA" className="text-dark-900 dark:text-white bg-white dark:bg-dark-900">Tatap Muka</option>
+            </select>
+          </div>
           <div className="flex flex-col">
             <span className="text-[10px] font-bold text-dark-600 dark:text-dark-300 tracking-widest ml-1 mb-1">TGL. MULAI</span>
             <input
@@ -126,10 +155,18 @@ export default function TaskTracker({
                 className="group rounded-xl border border-dark-100 dark:border-dark-800 bg-dark-50/50 dark:bg-dark-800/40 p-4 hover:border-primary-200 dark:hover:border-primary-800/50 hover:bg-primary-50/30 dark:hover:bg-primary-950/20 transition-all duration-200"
               >
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-dark-900 dark:text-white group-hover:text-primary-700 dark:group-hover:text-primary-400 transition-colors">
-                      {task.title}
-                    </h3>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <h3 className="font-semibold text-dark-900 dark:text-white group-hover:text-primary-700 dark:group-hover:text-primary-400 transition-colors truncate flex-1 min-w-0">
+                        {task.title}
+                      </h3>
+                      <Badge
+                        variant={(task.category ?? DEFAULT_TASK_CATEGORY) === "TATAP_MUKA" ? "warning" : "info"}
+                        className="shrink-0"
+                      >
+                        {getTaskCategoryLabel(task.category)}
+                      </Badge>
+                    </div>
                     <p className="text-sm text-dark-500 dark:text-dark-400 mt-1 line-clamp-2">
                       {task.description}
                     </p>

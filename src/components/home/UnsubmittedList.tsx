@@ -5,6 +5,7 @@ import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Avatar from "@/components/ui/Avatar";
 import { AlertTriangle, ChevronDown, ClipboardList, CheckCircle2, UserX } from "lucide-react";
+import { DEFAULT_TASK_CATEGORY, getTaskCategoryLabel } from "@/shared/task-category";
 
 interface User {
   id: string;
@@ -21,6 +22,7 @@ interface Submission {
 interface Task {
   id: string;
   title: string;
+  category?: string;
   startDate?: string;
   deadline: string;
   submissions: Submission[];
@@ -111,6 +113,18 @@ export default function UnsubmittedList({ tasks, allUsers }: UnsubmittedListProp
             </div>
             {selectedTask && (
               <div className="text-xs text-dark-400 dark:text-dark-500 mt-1 pl-1 space-y-0.5">
+                <p>
+                  Kategori:{" "}
+                  <span
+                    className={
+                      (selectedTask.category ?? DEFAULT_TASK_CATEGORY) === "TATAP_MUKA"
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-primary-600 dark:text-primary-400"
+                    }
+                  >
+                    {getTaskCategoryLabel(selectedTask.category)}
+                  </span>
+                </p>
                 {selectedTask.startDate && (
                   <p>
                     Mulai:{" "}
