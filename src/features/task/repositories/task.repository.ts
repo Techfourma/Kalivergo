@@ -36,6 +36,7 @@ export function findTasksForTenant(
       submissions: {
         include: { user: { select: { id: true, name: true, email: true } } },
       },
+      pertemuan: true,
     },
     orderBy: { deadline: "asc" },
   });
@@ -57,6 +58,13 @@ export function findTaskWithTenant(id: string) {
   return prisma.task.findUnique({
     where: { id },
     select: { id: true, tenantId: true },
+  });
+}
+
+export function findTaskWithPertemuan(id: string) {
+  return prisma.task.findUnique({
+    where: { id },
+    include: { pertemuan: { orderBy: { createdAt: "asc" } } },
   });
 }
 
@@ -113,4 +121,35 @@ export async function replaceTaskSubmissions(
     });
   }
   return prisma.submission.count({ where: { taskId } });
+}
+
+export function createPertemuan(taskId: string, name: string) {
+  return prisma.pertemuan.create({ data: { taskId, name } });
+}
+
+export function findPertemuanByTaskId(taskId: string) {
+  return prisma.pertemuan.findMany({
+    where: { taskId },
+    orderBy: { createdAt: "asc" },
+  });
+}
+
+export function deletePertemuanById(id: string) {
+  return prisma.pertemuan.delete({ where: { id } });
+}
+
+export function updateSubmissionPertemuan(taskId: string, userId: string, pertemuanId: string | null) {
+  return prisma.submission.updateMany({
+    where: { taskId, userId },
+    data: { pertemuanId },
+  });
+}
+
+export function findSubmissionsByPertemuan(taskId: string, pertemuanId: string) {
+  return prisma.submission.findMany({
+    where: { taskId, pertemuanId },
+    include: {
+      user: { select: { id: true, name: true, email: true, image: true } },
+    },
+  });
 }

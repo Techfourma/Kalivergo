@@ -6,7 +6,8 @@ import ActionFeedback from '@/components/cms/ActionFeedback';
 import { resolveTenantFromRoute } from '@/lib/tenant';
 import { notFound } from 'next/navigation';
 import { getTaskManagementData } from '@/features/task/services/task.service';
-
+import { cookies } from 'next/headers';
+import { loadCurrentUser } from '@/lib/user-session';
 import PageBackground from '@/components/ui/PageBackground';
 
 export const dynamic = 'force-dynamic';
@@ -28,6 +29,21 @@ export default async function TasksPage({ params }: TenantCmsTasksPageProps) {
   }
 
   const tenantId = tenant.tenantId;
+  const cookieStore = await cookies();
+  const userCookie = cookieStore.get("kalivergo_user")?.value;
+  const currentUser = await loadCurrentUser(userCookie, tenantId);
+
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-dark-50 dark:bg-dark-950">
+        <div className="text-dark-900 dark:text-white text-center">
+          <h2 className="text-2xl font-bold mb-4">Akses Ditolak</h2>
+          <p>Silakan login untuk mengakses halaman ini.</p>
+        </div>
+      </div>
+    );
+  }
+
   const { tasks, allUsers } = await getTaskManagementData(tenantId);
 
   return (
@@ -81,6 +97,20 @@ export default async function TasksPage({ params }: TenantCmsTasksPageProps) {
                     <option value="E_LEARNING">E-Learning</option>
                     <option value="TATAP_MUKA">Tatap Muka</option>
                   </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                    Pertemuan
+                  </label>
+                  <input
+                    type="text"
+                    name="pertemuan"
+                    className="w-full px-4 py-2.5 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white placeholder:text-dark-400 dark:placeholder:text-dark-500 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm md:text-base transition-shadow"
+                    placeholder="Contoh: Pertemuan 1, Pertemuan 2, Pertemuan 3"
+                  />
+                  <p className="text-xs text-dark-400 dark:text-dark-500 mt-1">
+                    Pisahkan dengan koma jika lebih dari satu
+                  </p>
                 </div>
               </div>
               <div className="space-y-4">

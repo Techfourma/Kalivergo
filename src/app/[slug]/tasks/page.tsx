@@ -70,9 +70,9 @@ export default async function TasksPage({ params }: TasksPageProps) {
       const submissions = allUsers.map((user) => {
         const existing = submissionMap.get(user.id);
         if (existing) {
-          return { userId: user.id, status: existing.status };
+          return { userId: user.id, status: existing.status, pertemuanId: existing.pertemuanId ?? null };
         }
-        return { userId: user.id, status: "PENDING" };
+        return { userId: user.id, status: "PENDING", pertemuanId: null };
       });
 
       return {
@@ -82,6 +82,7 @@ export default async function TasksPage({ params }: TasksPageProps) {
         startDate: t.startDate.toISOString(),
         deadline: t.deadline.toISOString(),
         submissions,
+        pertemuan: t.pertemuan?.map((p: any) => ({ id: p.id, name: p.name })) ?? [],
       };
     });
 

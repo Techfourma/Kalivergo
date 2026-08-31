@@ -260,9 +260,24 @@ model Task {
 
   tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   submissions Submission[]
+  pertemuan   Pertemuan[]
 
   @@index([tenantId])
   @@map("tasks")
+}
+
+model Pertemuan {
+  id        String   @id @default(cuid())
+  taskId    String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task      Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+
+  @@index([taskId])
+  @@map("pertemuan")
 }
 
 model Submission {
@@ -271,11 +286,13 @@ model Submission {
   userId    String
   status    String   @default("PENDING")
   submittedAt DateTime @default(now())
+  pertemuanId String?
 
-  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task      Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  pertemuan Pertemuan? @relation(fields: [pertemuanId], references: [id], onDelete: SetNull)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([taskId, userId])
+  @@unique([taskId, userId, pertemuanId])
   @@map("submissions")
 }
 

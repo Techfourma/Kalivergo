@@ -55,7 +55,7 @@ export default async function SlugLayout({
   const tenantPath = `/${routeParams.slug}`;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-950">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-950" suppressHydrationWarning>
       <NavbarGate
         user={user}
         tenantPath={tenantPath}
