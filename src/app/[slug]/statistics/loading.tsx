@@ -3,7 +3,7 @@ import Loading from "@/components/layout/Loading";
 export default function LoadingPage() {
   return (
     <Loading
-      message="Memuat Seminar"
+      message="Memuat Statistics"
       subMessage="Silahkan tunggu sebentar..."
     />
   );
