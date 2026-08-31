@@ -6,6 +6,7 @@ import Badge from "@/components/ui/Badge";
 import Avatar from "@/components/ui/Avatar";
 import { AlertTriangle, ChevronDown, ClipboardList, CheckCircle2, UserX } from "lucide-react";
 import { DEFAULT_TASK_CATEGORY, getTaskCategoryLabel } from "@/shared/task-category";
+import { normalizeTaskTitle, getDistinctTaskTitles, getTasksByTitle, getPertemuanUnion, getSubmittedUserIdsForScope } from "@/features/task/validators/task.utils";
 
 interface User {
   id: string;
@@ -38,45 +39,55 @@ interface Task {
 interface UnsubmittedListProps {
   tasks: Task[];
   allUsers: User[];
+  currentUserName?: string;
 }
 
-export default function UnsubmittedList({ tasks, allUsers }: UnsubmittedListProps) {
-  const [selectedTaskId, setSelectedTaskId] = useState<string>("");
-  const [selectedMember, setSelectedMember] = useState<string>("all");
+export default function UnsubmittedList({ tasks, allUsers, currentUserName }: UnsubmittedListProps) {
+  const [selectedTaskName, setSelectedTaskName] = useState<string>("");
+  const [selectedMember, setSelectedMember] = useState<string>(currentUserName ?? "all");
   const [selectedPertemuanId, setSelectedPertemuanId] = useState<string>("");
-  const [pertemuanList, setPertemuanList] = useState<Pertemuan[]>([]);
 
-  const selectedTask = useMemo(
-    () => tasks.find((t) => t.id === selectedTaskId) ?? null,
-    [tasks, selectedTaskId]
+  const taskNames = useMemo(() => getDistinctTaskTitles(tasks), [tasks]);
+
+  const scopedTasks = useMemo(
+    () => getTasksByTitle(tasks, selectedTaskName),
+    [tasks, selectedTaskName]
   );
 
-  useEffect(() => {
-    if (selectedTask) {
-      setSelectedPertemuanId("");
-      setPertemuanList(selectedTask.pertemuan ?? []);
-    } else {
-      setSelectedPertemuanId("");
-      setPertemuanList([]);
-    }
-  }, [selectedTask]);
+  const pertemuanList = useMemo(() => getPertemuanUnion(scopedTasks), [scopedTasks]);
 
-  const submittedUserIds = useMemo(() => {
-    if (!selectedTask) return new Set<string>();
-    const ids = new Set<string>();
-    for (const submission of selectedTask.submissions) {
-      if (submission.status !== "PENDING") {
-        if (selectedPertemuanId) {
-          if (submission.pertemuanId === selectedPertemuanId) {
-            ids.add(submission.userId);
-          }
-        } else {
-          ids.add(submission.userId);
-        }
-      }
+  const selectedTask = useMemo(() => {
+    if (selectedPertemuanId) {
+      const byPertemuan = scopedTasks.find((t) =>
+        (t.pertemuan ?? []).some((p) => p.id === selectedPertemuanId)
+      );
+      if (byPertemuan) return byPertemuan;
     }
-    return ids;
-  }, [selectedTask, selectedPertemuanId]);
+    return scopedTasks[0] ?? null;
+  }, [scopedTasks, selectedPertemuanId]);
+
+  useEffect(() => {
+    setSelectedPertemuanId("");
+  }, [selectedTaskName]);
+
+  useEffect(() => {
+    if (selectedMember === "all" && selectedPertemuanId === "") {
+      setSelectedPertemuanId(pertemuanList[0]?.id ?? "");
+    }
+  }, [selectedMember, selectedPertemuanId, pertemuanList]);
+
+  const submittedUserIds = useMemo(
+    () => getSubmittedUserIdsForScope(scopedTasks, selectedPertemuanId),
+    [scopedTasks, selectedPertemuanId]
+  );
+
+  const submittedByPertemuan = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const p of pertemuanList) {
+      map.set(p.id, getSubmittedUserIdsForScope(scopedTasks, p.id));
+    }
+    return map;
+  }, [scopedTasks, pertemuanList]);
 
   const allMemberNames = useMemo(() => {
     return Array.from(new Set(allUsers.map((u) => u.name))).sort((a, b) =>
@@ -85,7 +96,7 @@ export default function UnsubmittedList({ tasks, allUsers }: UnsubmittedListProp
   }, [allUsers]);
 
   const usersForSelectedTask = useMemo(() => {
-    if (!selectedTask) return [];
+    if (scopedTasks.length === 0) return [];
     let result = allUsers.map((user) => ({
       id: user.id,
       name: user.name,
@@ -97,7 +108,7 @@ export default function UnsubmittedList({ tasks, allUsers }: UnsubmittedListProp
       result = result.filter((u) => u.name === selectedMember);
     }
     return result;
-  }, [allUsers, selectedTask, submittedUserIds, selectedMember]);
+  }, [allUsers, scopedTasks, submittedUserIds, selectedMember]);
 
   const submittedCount = usersForSelectedTask.filter((u) => u.submitted).length;
   const notSubmittedCount = usersForSelectedTask.filter((u) => !u.submitted).length;
@@ -129,14 +140,18 @@ export default function UnsubmittedList({ tasks, allUsers }: UnsubmittedListProp
             </div>
             <div className="relative">
               <select
-                value={selectedTaskId}
-                onChange={(e) => setSelectedTaskId(e.target.value)}
+                value={selectedTaskName}
+                onChange={(e) => setSelectedTaskName(e.target.value)}
                 className="w-full appearance-none pl-3 pr-9 py-2.5 border border-dark-200 dark:border-dark-700 rounded-xl text-sm text-dark-900 dark:text-white bg-white dark:bg-dark-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none cursor-pointer font-medium"
               >
                 <option value="">-- Pilih Tugas --</option>
-                {tasks.map((task) => (
-                  <option key={task.id} value={task.id} className="text-dark-900 dark:text-white bg-white dark:bg-dark-900">
-                    {task.title}
+                {taskNames.map((name) => (
+                  <option
+                    key={normalizeTaskTitle(name).toLowerCase()}
+                    value={name}
+                    className="text-dark-900 dark:text-white bg-white dark:bg-dark-900"
+                  >
+                    {name}
                   </option>
                 ))}
               </select>
@@ -196,7 +211,9 @@ export default function UnsubmittedList({ tasks, allUsers }: UnsubmittedListProp
                   onChange={(e) => setSelectedPertemuanId(e.target.value)}
                   className="w-full appearance-none pl-3 pr-9 py-2.5 border border-dark-200 dark:border-dark-700 rounded-xl text-sm text-dark-900 dark:text-white bg-white dark:bg-dark-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none cursor-pointer font-medium"
                 >
-                  <option value="">-- Semua Pertemuan --</option>
+                  <option value="" disabled={selectedMember === "all"}>
+                    -- Semua Pertemuan --
+                  </option>
                   {pertemuanList.map((p) => (
                     <option key={p.id} value={p.id} className="text-dark-900 dark:text-white bg-white dark:bg-dark-900">
                       {p.name}
@@ -251,29 +268,70 @@ export default function UnsubmittedList({ tasks, allUsers }: UnsubmittedListProp
             <p className="text-sm">Tidak ada anggota yang cocok dengan filter ini</p>
           </div>
         ) : (
-          usersForSelectedTask.map((user) => (
-            <div
-              key={user.id}
-              className={`flex items-center gap-3 rounded-xl p-3 transition-colors ${
-                user.submitted
-                  ? "border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/60 dark:bg-emerald-950/20"
-                  : "bg-dark-50 dark:bg-dark-800/50 hover:bg-red-50 dark:hover:bg-red-950/20"
-              }`}
-            >
-              <Avatar src={user.image} name={user.name} id={user.id} size="sm" />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-dark-900 dark:text-white text-sm truncate">
-                  {user.name}
-                </p>
-                {user.email && (
-                  <p className="text-xs text-dark-500 dark:text-dark-400 truncate">{user.email}</p>
-                )}
+          usersForSelectedTask.map((user) =>
+            selectedPertemuanId ? (
+              <div
+                key={user.id}
+                className={`flex items-center gap-3 rounded-xl p-3 transition-colors ${
+                  user.submitted
+                    ? "border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/60 dark:bg-emerald-950/20"
+                    : "bg-dark-50 dark:bg-dark-800/50 hover:bg-red-50 dark:hover:bg-red-950/20"
+                }`}
+              >
+                <Avatar src={user.image} name={user.name} id={user.id} size="sm" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-dark-900 dark:text-white text-sm truncate">
+                    {user.name}
+                  </p>
+                  {user.email && (
+                    <p className="text-xs text-dark-500 dark:text-dark-400 truncate">{user.email}</p>
+                  )}
+                </div>
+                <Badge variant={user.submitted ? "success" : "danger"}>
+                  {user.submitted ? "Sudah Mengumpulkan" : "Belum Mengumpulkan"}
+                </Badge>
               </div>
-              <Badge variant={user.submitted ? "success" : "danger"}>
-                {user.submitted ? "Sudah Mengumpulkan" : "Belum Mengumpulkan"}
-              </Badge>
-            </div>
-          ))
+            ) : (
+              <div
+                key={user.id}
+                className="rounded-xl p-3 transition-colors bg-dark-50 dark:bg-dark-800/50"
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar src={user.image} name={user.name} id={user.id} size="sm" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-dark-900 dark:text-white text-sm truncate">
+                      {user.name}
+                    </p>
+                    {user.email && (
+                      <p className="text-xs text-dark-500 dark:text-dark-400 truncate">{user.email}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-3 pl-11 space-y-1.5">
+                  {pertemuanList.map((p) => {
+                    const submitted = submittedByPertemuan.get(p.id)?.has(user.id) ?? false;
+                    return (
+                      <div
+                        key={p.id}
+                        className={`flex items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 ${
+                          submitted
+                            ? "bg-emerald-50/60 dark:bg-emerald-950/20"
+                            : "bg-white/50 dark:bg-dark-900/40"
+                        }`}
+                      >
+                        <span className="text-sm text-dark-700 dark:text-dark-200 truncate">
+                          {p.name}
+                        </span>
+                        <Badge variant={submitted ? "success" : "danger"}>
+                          {submitted ? "Sudah Mengerjakan" : "Belum Mengerjakan"}
+                        </Badge>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )
+          )
         )}
       </div>
     </Card>

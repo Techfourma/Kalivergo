@@ -133,7 +133,11 @@ export default async function TasksPage({ params }: TasksPageProps) {
                   allTasks={tasks as any}
                   currentUserId={currentUser.id}
                 />
-                <UnsubmittedList tasks={tasksForUnsubmitted} allUsers={allUsers} />
+                <UnsubmittedList
+                  tasks={tasksForUnsubmitted}
+                  allUsers={allUsers}
+                  currentUserName={currentUser.name}
+                />
               </div>
             </div>
           </div>
