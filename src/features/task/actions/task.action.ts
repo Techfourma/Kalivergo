@@ -4,16 +4,10 @@ import { revalidatePath } from "next/cache";
 import { readSessionUser } from "@/actions/cms/role-model";
 import { validateTenantMembership } from "@/features/tenant/services/tenant.service";
 import {
-  createTaskForTenant,
+  upsertTaskWithPertemuanForTenant,
   deleteTaskForTenant,
   updateTaskForTenant,
   updateTaskSubmissionsForTenant,
-  addPertemuanToTask,
-  removePertemuanFromTask,
-  getTaskWithPertemuan,
-  getSubmissionsForPertemuan,
-  markSubmissionPertemuan,
-  createPertemuan,
 } from "@/features/task/services/task.service";
 import {
   DEFAULT_TASK_CATEGORY,
@@ -50,6 +44,10 @@ export async function createTaskAction(formData: FormData) {
   const rawCategory = formData.get("category");
   const category = isTaskCategory(rawCategory) ? rawCategory : DEFAULT_TASK_CATEGORY;
 
+  if (!title?.trim()) {
+    return { error: "Judul tugas harus diisi" };
+  }
+
   if (isNaN(startDate.getTime()) || isNaN(deadline.getTime())) {
     return { error: "Start Date Time dan Deadline harus diisi dengan waktu yang valid." };
   }
@@ -76,24 +74,39 @@ export async function createTaskAction(formData: FormData) {
     return { error: "Akses ditolak: hanya OWNER atau role CMS." };
   }
 
-  const task = await createTaskForTenant({ tenantId, title, description, url, category, startDate, deadline });
-  
   const rawPertemuan = formData.get("pertemuan");
-  const pertemuanNames = rawPertemuan
-    ? (rawPertemuan as string).split(",").map((name) => name.trim()).filter(Boolean)
-    : [];
-  for (const name of pertemuanNames) {
-    await createPertemuan(task.id, name);
-  }
-  
-  await createAuditLog("TASKS", "CREATE", `Menambahkan tugas: ${title}`, "System", {
-    taskId: task.id,
-    title,
-    category,
-    startDate: startDate.toISOString(),
-    deadline: deadline.toISOString(),
+  const pertemuanName = typeof rawPertemuan === "string" ? rawPertemuan.trim() : "";
+
+  const result = await upsertTaskWithPertemuanForTenant({
     tenantId,
+    title,
+    description,
+    url,
+    category,
+    startDate,
+    deadline,
+    pertemuanName: pertemuanName || undefined,
   });
+
+  const { task, created } = result;
+
+  await createAuditLog(
+    "TASKS",
+    created ? "CREATE" : "UPDATE",
+    created
+      ? `Menambahkan tugas: ${task.title}${pertemuanName ? ` · ${pertemuanName}` : ""}`
+      : `Tugas ${task.title}${pertemuanName ? ` · ${pertemuanName}` : ""} sudah ada; metadata disinkronkan ulang`,
+    "System",
+    {
+      taskId: task.id,
+      title: task.title,
+      pertemuan: pertemuanName || null,
+      category,
+      startDate: startDate.toISOString(),
+      deadline: deadline.toISOString(),
+      tenantId,
+    }
+  );
   revalidatePath("/cms/tasks");
   return { success: "Tugas berhasil ditambahkan" };
 }
@@ -161,12 +174,24 @@ export async function updateTaskAction(id: string, formData: FormData) {
     return { error: "Akses ditolak: hanya OWNER atau role CMS." };
   }
 
-  const result = await updateTaskForTenant(id, tenantId, { title, description, url, category, startDate, deadline });
+  const rawPertemuan = formData.get("pertemuan");
+  const pertemuanName = typeof rawPertemuan === "string" ? rawPertemuan.trim() : "";
+
+  const result = await updateTaskForTenant(id, tenantId, {
+    title,
+    description,
+    url,
+    category,
+    startDate,
+    deadline,
+    pertemuanName: pertemuanName || undefined,
+  });
   if ("error" in result) return result;
 
-  await createAuditLog("TASKS", "UPDATE", `Mengubah tugas: ${title}`, "System", {
+  await createAuditLog("TASKS", "UPDATE", `Mengubah tugas: ${title}${pertemuanName ? ` · ${pertemuanName}` : ""}`, "System", {
     taskId: id,
     title,
+    pertemuan: pertemuanName || null,
     category,
     startDate: startDate.toISOString(),
     deadline: deadline.toISOString(),
@@ -199,76 +224,4 @@ export async function updateTaskSubmissionsAction(taskId: string, userIds: strin
   revalidatePath("/cms/tasks");
   revalidatePath("/home");
   return { success: "Submission berhasil diperbarui" };
-}
-
-export async function addPertemuanAction(taskId: string, name: string) {
-  const session = await readSessionUser();
-  if (!session?.id) {
-    return { error: "Unauthorized" };
-  }
-
-  const tenantId = await getTenantIdFromCookie();
-  if (!tenantId) {
-    return { error: "Konteks kelas tidak ditemukan." };
-  }
-
-  const membership = await validateTenantMembership(session.id, tenantId);
-  if (!membership.valid || !(membership.role === "OWNER" || membership.cmsRole)) {
-    return { error: "Akses ditolak: hanya OWNER atau role CMS." };
-  }
-
-  if (!name.trim()) {
-    return { error: "Nama pertemuan harus diisi" };
-  }
-
-  const result = await addPertemuanToTask(taskId, tenantId, name.trim());
-  if ("error" in result) return result;
-
-  revalidatePath("/cms/tasks");
-  return { success: "Pertemuan berhasil ditambahkan", pertemuan: result.pertemuan };
-}
-
-export async function deletePertemuanAction(pertemuanId: string, taskId: string) {
-  const session = await readSessionUser();
-  if (!session?.id) {
-    return { error: "Unauthorized" };
-  }
-
-  const tenantId = await getTenantIdFromCookie();
-  if (!tenantId) {
-    return { error: "Konteks kelas tidak ditemukan." };
-  }
-
-  const membership = await validateTenantMembership(session.id, tenantId);
-  if (!membership.valid || !(membership.role === "OWNER" || membership.cmsRole)) {
-    return { error: "Akses ditolak: hanya OWNER atau role CMS." };
-  }
-
-  const result = await removePertemuanFromTask(pertemuanId, taskId, tenantId);
-  if ("error" in result) return result;
-
-  revalidatePath("/cms/tasks");
-  return { success: "Pertemuan berhasil dihapus" };
-}
-
-export async function getTaskPertemuanAction(taskId: string) {
-  const session = await readSessionUser();
-  if (!session?.id) {
-    return { error: "Unauthorized" };
-  }
-
-  const tenantId = await getTenantIdFromCookie();
-  if (!tenantId) {
-    return { error: "Konteks kelas tidak ditemukan." };
-  }
-
-  const membership = await validateTenantMembership(session.id, tenantId);
-  if (!membership.valid || !(membership.role === "OWNER" || membership.cmsRole)) {
-    return { error: "Akses ditolak: hanya OWNER atau role CMS." };
-  }
-
-  const result = await getTaskWithPertemuan(taskId, tenantId);
-  if ("error" in result) return result;
-
-  return { task: result.task, pertemuan: result.pertemuan };
 }

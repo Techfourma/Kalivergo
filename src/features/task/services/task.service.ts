@@ -4,7 +4,7 @@ import {
   createTaskForTenant as createTaskForTenantRepository,
   findTaskSubmissions,
   findTaskWithTenant,
-  findTaskWithPertemuan,
+  findTasksByTitleForTenant,
   findTenantMemberIds,
   findTenantTaskMembers,
   findTasksForTenant,
@@ -12,11 +12,13 @@ import {
   replaceTaskSubmissions,
   updateTaskById,
   createPertemuan,
-  findPertemuanByTaskId,
-  deletePertemuanById,
-  findSubmissionsByPertemuan,
-  updateSubmissionPertemuan,
+  setTaskPertemuan,
 } from "@/features/task/repositories/task.repository";
+import {
+  getPertemuanSetKey,
+  normalizePertemuanName,
+  normalizeTaskTitle,
+} from "@/features/task/validators/task.utils";
 
 export async function createTaskForTenant(input: {
   tenantId: string;
@@ -28,6 +30,69 @@ export async function createTaskForTenant(input: {
   deadline: Date;
 }) {
   return createTaskForTenantRepository(input);
+}
+
+export async function upsertTaskWithPertemuanForTenant(input: {
+  tenantId: string;
+  title: string;
+  description: string;
+  url?: string | null;
+  category?: string;
+  startDate: Date;
+  deadline: Date;
+  pertemuanName?: string;
+}) {
+  const title = normalizeTaskTitle(input.title);
+  const pertemuanName = normalizePertemuanName(input.pertemuanName ?? "");
+  const submittedPertemuanKey = getPertemuanSetKey(
+    pertemuanName ? [pertemuanName] : []
+  );
+
+  const existingTasks = await findTasksByTitleForTenant(input.tenantId, title);
+
+  const matchingTask =
+    existingTasks.find(
+      (task) =>
+        getPertemuanSetKey(task.pertemuan.map((p) => p.name)) ===
+        submittedPertemuanKey
+    ) ?? null;
+
+  if (!matchingTask) {
+    const task = await createTaskForTenantRepository({
+      tenantId: input.tenantId,
+      title,
+      description: input.description,
+      url: input.url ?? null,
+      category: input.category,
+      startDate: input.startDate,
+      deadline: input.deadline,
+    });
+
+    if (pertemuanName) {
+      await createPertemuan(task.id, pertemuanName);
+    }
+
+    return {
+      task,
+      created: true as const,
+      pertemuanAdded: pertemuanName ? 1 : 0,
+    };
+  }
+
+  const updated = await updateTaskById(matchingTask.id, {
+    title,
+    description: input.description,
+    url: input.url ?? null,
+    category: input.category,
+    startDate: input.startDate,
+    deadline: input.deadline,
+  });
+
+  return {
+    task: updated,
+    created: false as const,
+    pertemuanAdded: 0,
+  };
 }
 
 export { findTasksForTenant };
@@ -61,6 +126,7 @@ export async function updateTaskForTenant(id: string, tenantId: string, data: {
   category: string;
   startDate: Date;
   deadline: Date;
+  pertemuanName?: string;
 }) {
   const task = await findTaskWithTenant(id);
   if (!task) return { error: "Tugas tidak ditemukan" } as const;
@@ -70,7 +136,17 @@ export async function updateTaskForTenant(id: string, tenantId: string, data: {
   if (data.deadline <= data.startDate) {
     return { error: "Deadline harus setelah Start Date Time." } as const;
   }
-  const updated = await updateTaskById(id, data);
+
+  const { pertemuanName, ...taskData } = data;
+  const updated = await updateTaskById(id, taskData);
+
+  if (pertemuanName !== undefined) {
+    const trimmed = normalizePertemuanName(pertemuanName);
+    if (trimmed) {
+      await setTaskPertemuan(id, trimmed);
+    }
+  }
+
   return { task: updated } as const;
 }
 
@@ -113,56 +189,4 @@ export async function updateTaskSubmissionsForTenant(
   tenantId: string
 ) {
   return replaceTaskSubmissionsForTenant(taskId, tenantId, userIds);
-}
-
-export async function getTaskWithPertemuan(taskId: string, tenantId: string) {
-  const task = await findTaskWithTenant(taskId);
-  if (!task) return { error: "Tugas tidak ditemukan" } as const;
-  if (task.tenantId !== tenantId) {
-    return { error: "Akses ditolak: Tugas bukan milik kelas Anda" } as const;
-  }
-  const pertemuan = await findPertemuanByTaskId(taskId);
-  return { task, pertemuan } as const;
-}
-
-export async function addPertemuanToTask(taskId: string, tenantId: string, name: string) {
-  const task = await findTaskWithTenant(taskId);
-  if (!task) return { error: "Tugas tidak ditemukan" } as const;
-  if (task.tenantId !== tenantId) {
-    return { error: "Akses ditolak: Tugas bukan milik kelas Anda" } as const;
-  }
-  const pertemuan = await createPertemuan(taskId, name);
-  return { pertemuan } as const;
-}
-
-export { createPertemuan };
-
-export async function removePertemuanFromTask(pertemuanId: string, taskId: string, tenantId: string) {
-  const task = await findTaskWithTenant(taskId);
-  if (!task) return { error: "Tugas tidak ditemukan" } as const;
-  if (task.tenantId !== tenantId) {
-    return { error: "Akses ditolak: Tugas bukan milik kelas Anda" } as const;
-  }
-  await deletePertemuanById(pertemuanId);
-  return { success: true } as const;
-}
-
-export async function getSubmissionsForPertemuan(taskId: string, pertemuanId: string, tenantId: string) {
-  const task = await findTaskWithTenant(taskId);
-  if (!task) return { error: "Tugas tidak ditemukan" } as const;
-  if (task.tenantId !== tenantId) {
-    return { error: "Akses ditolak: Tugas bukan milik kelas Anda" } as const;
-  }
-  const submissions = await findSubmissionsByPertemuan(taskId, pertemuanId);
-  return { submissions } as const;
-}
-
-export async function markSubmissionPertemuan(taskId: string, userId: string, pertemuanId: string | null, tenantId: string) {
-  const task = await findTaskWithTenant(taskId);
-  if (!task) return { error: "Tugas tidak ditemukan" } as const;
-  if (task.tenantId !== tenantId) {
-    return { error: "Akses ditolak: Tugas bukan milik kelas Anda" } as const;
-  }
-  await updateSubmissionPertemuan(taskId, userId, pertemuanId);
-  return { success: true } as const;
 }

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { prisma } from "@/server/db/prisma";
+import { normalizePertemuanName } from "@/features/task/validators/task.utils";
 
 export function findTasksForTenant(
   tenantId: string,
@@ -61,10 +62,19 @@ export function findTaskWithTenant(id: string) {
   });
 }
 
-export function findTaskWithPertemuan(id: string) {
-  return prisma.task.findUnique({
-    where: { id },
-    include: { pertemuan: { orderBy: { createdAt: "asc" } } },
+export function findTasksByTitleForTenant(tenantId: string, title: string) {
+  return prisma.task.findMany({
+    where: {
+      tenantId,
+      title: { equals: title, mode: "insensitive" },
+    },
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      tenantId: true,
+      createdAt: true,
+      pertemuan: { select: { id: true, name: true } },
+    },
   });
 }
 
@@ -127,29 +137,26 @@ export function createPertemuan(taskId: string, name: string) {
   return prisma.pertemuan.create({ data: { taskId, name } });
 }
 
-export function findPertemuanByTaskId(taskId: string) {
-  return prisma.pertemuan.findMany({
+export async function setTaskPertemuan(taskId: string, name: string) {
+  const existing = await prisma.pertemuan.findFirst({
     where: { taskId },
     orderBy: { createdAt: "asc" },
   });
-}
 
-export function deletePertemuanById(id: string) {
-  return prisma.pertemuan.delete({ where: { id } });
-}
+  if (existing) {
+    await prisma.pertemuan.deleteMany({
+      where: { taskId, NOT: { id: existing.id } },
+    });
 
-export function updateSubmissionPertemuan(taskId: string, userId: string, pertemuanId: string | null) {
-  return prisma.submission.updateMany({
-    where: { taskId, userId },
-    data: { pertemuanId },
-  });
-}
+    if (
+      normalizePertemuanName(existing.name).toLowerCase() ===
+      normalizePertemuanName(name).toLowerCase()
+    ) {
+      return existing;
+    }
 
-export function findSubmissionsByPertemuan(taskId: string, pertemuanId: string) {
-  return prisma.submission.findMany({
-    where: { taskId, pertemuanId },
-    include: {
-      user: { select: { id: true, name: true, email: true, image: true } },
-    },
-  });
+    return prisma.pertemuan.update({ where: { id: existing.id }, data: { name } });
+  }
+
+  return prisma.pertemuan.create({ data: { taskId, name } });
 }

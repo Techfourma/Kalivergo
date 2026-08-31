@@ -106,10 +106,10 @@ export default async function TasksPage({ params }: TenantCmsTasksPageProps) {
                     type="text"
                     name="pertemuan"
                     className="w-full px-4 py-2.5 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white placeholder:text-dark-400 dark:placeholder:text-dark-500 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm md:text-base transition-shadow"
-                    placeholder="Contoh: Pertemuan 1, Pertemuan 2, Pertemuan 3"
+                    placeholder="Contoh: Pertemuan 1"
                   />
                   <p className="text-xs text-dark-400 dark:text-dark-500 mt-1">
-                    Pisahkan dengan koma jika lebih dari satu
+                    Isi dengan satu pertemuan untuk tugas ini
                   </p>
                 </div>
               </div>

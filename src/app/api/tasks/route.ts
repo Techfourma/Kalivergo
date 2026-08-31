@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentTenantForUser } from "@/lib/tenant-context";
 import { getCurrentSessionUser } from "@/server/auth/session";
 import {
-  createTaskForTenant,
+  upsertTaskWithPertemuanForTenant,
   findTasksForTenant,
 } from "@/features/task/services/task.service";
 import {
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, description, startDate, deadline, category } = body;
+    const { title, description, startDate, deadline, category, pertemuan } = body;
 
     const tenantContext = await getCurrentTenantForUser(session.id);
     const tenantId = tenantContext?.tenantId;
@@ -64,16 +64,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const task = await createTaskForTenant({
+    if (!title || typeof title !== "string" || !title.trim()) {
+      return NextResponse.json(
+        { error: "Judul tugas (title) wajib diisi." },
+        { status: 400 }
+      );
+    }
+
+    const result = await upsertTaskWithPertemuanForTenant({
       tenantId,
       title,
-      description,
+      description: typeof description === "string" ? description : "",
       category: isTaskCategory(category) ? category : DEFAULT_TASK_CATEGORY,
       startDate: startDate ? new Date(startDate) : new Date(),
       deadline: new Date(deadline),
+      pertemuanName:
+        typeof pertemuan === "string" && pertemuan.trim()
+          ? pertemuan.trim()
+          : undefined,
     });
 
-    return NextResponse.json(task, { status: 201 });
+    return NextResponse.json(result.task, { status: result.created ? 201 : 200 });
   } catch (error) {
     console.error("Error creating task:", error);
     return NextResponse.json({ error: "Failed to create task" }, { status: 500 });
