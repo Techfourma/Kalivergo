@@ -4,12 +4,18 @@ import {
   createTaskForTenant as createTaskForTenantRepository,
   findTaskSubmissions,
   findTaskWithTenant,
+  findTaskWithPertemuan,
   findTenantMemberIds,
   findTenantTaskMembers,
   findTasksForTenant,
   deleteTaskById,
   replaceTaskSubmissions,
   updateTaskById,
+  createPertemuan,
+  findPertemuanByTaskId,
+  deletePertemuanById,
+  findSubmissionsByPertemuan,
+  updateSubmissionPertemuan,
 } from "@/features/task/repositories/task.repository";
 
 export async function createTaskForTenant(input: {
@@ -107,4 +113,56 @@ export async function updateTaskSubmissionsForTenant(
   tenantId: string
 ) {
   return replaceTaskSubmissionsForTenant(taskId, tenantId, userIds);
+}
+
+export async function getTaskWithPertemuan(taskId: string, tenantId: string) {
+  const task = await findTaskWithTenant(taskId);
+  if (!task) return { error: "Tugas tidak ditemukan" } as const;
+  if (task.tenantId !== tenantId) {
+    return { error: "Akses ditolak: Tugas bukan milik kelas Anda" } as const;
+  }
+  const pertemuan = await findPertemuanByTaskId(taskId);
+  return { task, pertemuan } as const;
+}
+
+export async function addPertemuanToTask(taskId: string, tenantId: string, name: string) {
+  const task = await findTaskWithTenant(taskId);
+  if (!task) return { error: "Tugas tidak ditemukan" } as const;
+  if (task.tenantId !== tenantId) {
+    return { error: "Akses ditolak: Tugas bukan milik kelas Anda" } as const;
+  }
+  const pertemuan = await createPertemuan(taskId, name);
+  return { pertemuan } as const;
+}
+
+export { createPertemuan };
+
+export async function removePertemuanFromTask(pertemuanId: string, taskId: string, tenantId: string) {
+  const task = await findTaskWithTenant(taskId);
+  if (!task) return { error: "Tugas tidak ditemukan" } as const;
+  if (task.tenantId !== tenantId) {
+    return { error: "Akses ditolak: Tugas bukan milik kelas Anda" } as const;
+  }
+  await deletePertemuanById(pertemuanId);
+  return { success: true } as const;
+}
+
+export async function getSubmissionsForPertemuan(taskId: string, pertemuanId: string, tenantId: string) {
+  const task = await findTaskWithTenant(taskId);
+  if (!task) return { error: "Tugas tidak ditemukan" } as const;
+  if (task.tenantId !== tenantId) {
+    return { error: "Akses ditolak: Tugas bukan milik kelas Anda" } as const;
+  }
+  const submissions = await findSubmissionsByPertemuan(taskId, pertemuanId);
+  return { submissions } as const;
+}
+
+export async function markSubmissionPertemuan(taskId: string, userId: string, pertemuanId: string | null, tenantId: string) {
+  const task = await findTaskWithTenant(taskId);
+  if (!task) return { error: "Tugas tidak ditemukan" } as const;
+  if (task.tenantId !== tenantId) {
+    return { error: "Akses ditolak: Tugas bukan milik kelas Anda" } as const;
+  }
+  await updateSubmissionPertemuan(taskId, userId, pertemuanId);
+  return { success: true } as const;
 }

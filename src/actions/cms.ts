@@ -20,6 +20,9 @@ export {
   deleteTaskAction as deleteTask,
   updateTaskAction as updateTask,
   updateTaskSubmissionsAction as updateTaskSubmissions,
+  addPertemuanAction as addPertemuan,
+  deletePertemuanAction as deletePertemuan,
+  getTaskPertemuanAction as getTaskPertemuan,
 } from '@/features/task/actions/task.action';
 export { createSeminar } from '@/features/seminar/actions/create-seminar.action';
 export { deleteSeminar } from '@/features/seminar/actions/delete-seminar.action';

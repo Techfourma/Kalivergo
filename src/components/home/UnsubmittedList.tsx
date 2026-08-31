@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Avatar from "@/components/ui/Avatar";
@@ -14,9 +14,15 @@ interface User {
   image?: string | null;
 }
 
+interface Pertemuan {
+  id: string;
+  name: string;
+}
+
 interface Submission {
   userId: string;
   status?: string;
+  pertemuanId?: string | null;
 }
 
 interface Task {
@@ -26,6 +32,7 @@ interface Task {
   startDate?: string;
   deadline: string;
   submissions: Submission[];
+  pertemuan?: Pertemuan[];
 }
 
 interface UnsubmittedListProps {
@@ -36,16 +43,40 @@ interface UnsubmittedListProps {
 export default function UnsubmittedList({ tasks, allUsers }: UnsubmittedListProps) {
   const [selectedTaskId, setSelectedTaskId] = useState<string>("");
   const [selectedMember, setSelectedMember] = useState<string>("all");
+  const [selectedPertemuanId, setSelectedPertemuanId] = useState<string>("");
+  const [pertemuanList, setPertemuanList] = useState<Pertemuan[]>([]);
 
   const selectedTask = useMemo(
     () => tasks.find((t) => t.id === selectedTaskId) ?? null,
     [tasks, selectedTaskId]
   );
 
-  const submittedUserIds = useMemo(
-    () => new Set(selectedTask?.submissions.filter((s) => s.status !== "PENDING").map((s) => s.userId) ?? []),
-    [selectedTask]
-  );
+  useEffect(() => {
+    if (selectedTask) {
+      setSelectedPertemuanId("");
+      setPertemuanList(selectedTask.pertemuan ?? []);
+    } else {
+      setSelectedPertemuanId("");
+      setPertemuanList([]);
+    }
+  }, [selectedTask]);
+
+  const submittedUserIds = useMemo(() => {
+    if (!selectedTask) return new Set<string>();
+    const ids = new Set<string>();
+    for (const submission of selectedTask.submissions) {
+      if (submission.status !== "PENDING") {
+        if (selectedPertemuanId) {
+          if (submission.pertemuanId === selectedPertemuanId) {
+            ids.add(submission.userId);
+          }
+        } else {
+          ids.add(submission.userId);
+        }
+      }
+    }
+    return ids;
+  }, [selectedTask, selectedPertemuanId]);
 
   const allMemberNames = useMemo(() => {
     return Array.from(new Set(allUsers.map((u) => u.name))).sort((a, b) =>
@@ -150,6 +181,32 @@ export default function UnsubmittedList({ tasks, allUsers }: UnsubmittedListProp
               </div>
             )}
           </div>
+
+          {selectedTask && pertemuanList.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <ClipboardList className="h-3.5 w-3.5 text-dark-500 dark:text-dark-400" />
+                <span className="text-xs font-medium text-dark-500 dark:text-dark-400 uppercase tracking-wide">
+                  Pilih Pertemuan
+                </span>
+              </div>
+              <div className="relative">
+                <select
+                  value={selectedPertemuanId}
+                  onChange={(e) => setSelectedPertemuanId(e.target.value)}
+                  className="w-full appearance-none pl-3 pr-9 py-2.5 border border-dark-200 dark:border-dark-700 rounded-xl text-sm text-dark-900 dark:text-white bg-white dark:bg-dark-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none cursor-pointer font-medium"
+                >
+                  <option value="">-- Semua Pertemuan --</option>
+                  {pertemuanList.map((p) => (
+                    <option key={p.id} value={p.id} className="text-dark-900 dark:text-white bg-white dark:bg-dark-900">
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-dark-400 dark:text-dark-500 pointer-events-none" />
+              </div>
+            </div>
+          )}
 
           {selectedTask && (
             <div>
