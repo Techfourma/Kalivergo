@@ -81,7 +81,7 @@ export default async function SeminarPage({ params }: SeminarPageProps) {
           <TenantNavbar user={currentUser} tenantPath={tenantPath} />
         </div>
 
-        <main className="flex-1 py-8 pt-24 pb-28 relative z-10">
+        <main className="flex-1 py-8 pt-24 pb-28 relative z-10 lg:pl-[18rem] xl:pl-[20rem]">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
 
             {/* Header */}
