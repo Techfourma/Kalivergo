@@ -20,6 +20,7 @@ interface Submission {
   userId: string;
   status: string;
   submittedAt?: Date | string | null;
+  pertemuanId?: string | null;
   user?: {
     id: string;
     name: string;
@@ -32,6 +33,7 @@ interface Task {
   startDate?: Date | string;
   deadline: Date | string;
   submissions: Submission[];
+  pertemuan?: Array<{ id: string; name: string }> | null;
 }
 
 interface User {
@@ -73,21 +75,73 @@ export default function TaskProgressStats({ tasks, users }: TaskProgressStatsPro
     );
   }, [users]);
 
+  const filteredTasks = useMemo(() => {
+    if (!startDate && !endDate) return tasks;
+    return tasks.filter((task) => {
+      const taskStart = task.startDate ? new Date(task.startDate).toISOString().split("T")[0] : null;
+      const taskDeadline = new Date(task.deadline).toISOString().split("T")[0];
+
+      if (startDate && taskDeadline < startDate) return false;
+      if (startDate && taskStart && taskStart > endDate) return false;
+      if (endDate && taskStart && taskDeadline < startDate) return false;
+
+      return true;
+    });
+  }, [tasks, startDate, endDate]);
+
+  const taskProgressEntries = useMemo(() => {
+    const seen = new Set<string>();
+    const rows: Array<{
+      id: string;
+      title: string;
+      pertemuanId?: string | null;
+      pertemuanName: string;
+      submissions: Submission[];
+    }> = [];
+
+    filteredTasks.forEach((task) => {
+      const taskMeetings = task.pertemuan && task.pertemuan.length > 0 ? task.pertemuan : [{ id: `${task.id}-general`, name: "Umum" }];
+
+      taskMeetings.forEach((meeting) => {
+        const key = `${task.title.trim().toLowerCase()}::${meeting.id}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+
+        rows.push({
+          id: `${task.id}-${meeting.id}`,
+          title: task.title,
+          pertemuanId: meeting.id,
+          pertemuanName: meeting.name,
+          submissions: task.submissions,
+        });
+      });
+    });
+
+    return rows;
+  }, [filteredTasks]);
+
   const memberProgress = useMemo<MemberProgress[]>(() => {
-    if (tasks.length === 0) return [];
+    if (taskProgressEntries.length === 0) return [];
 
     const progressMap = new Map<string, MemberProgress>();
 
     users.forEach((user) => {
       let submitted = 0;
-      tasks.forEach((task) => {
-        const submission = task.submissions.find((s) => s.userId === user.id);
+      taskProgressEntries.forEach((taskEntry) => {
+        const submission = taskEntry.submissions.find((s) => {
+          if (s.userId !== user.id) return false;
+          if (taskEntry.pertemuanId) {
+            return s.pertemuanId === taskEntry.pertemuanId || (!s.pertemuanId && taskEntry.pertemuanId);
+          }
+          return !s.pertemuanId;
+        });
+
         if (submission && submission.status !== "PENDING") {
           submitted++;
         }
       });
 
-      const total = tasks.length;
+      const total = taskProgressEntries.length;
       const pending = total - submitted;
       const rate = total > 0 ? Math.round((submitted / total) * 100) : 0;
 
@@ -103,21 +157,7 @@ export default function TaskProgressStats({ tasks, users }: TaskProgressStatsPro
     });
 
     return Array.from(progressMap.values());
-  }, [tasks, users]);
-
-  const filteredTasks = useMemo(() => {
-    if (!startDate && !endDate) return tasks;
-    return tasks.filter((task) => {
-      const taskStart = task.startDate ? new Date(task.startDate).toISOString().split("T")[0] : null;
-      const taskDeadline = new Date(task.deadline).toISOString().split("T")[0];
-      
-      if (startDate && taskDeadline < startDate) return false;
-      if (startDate && taskStart && taskStart > endDate) return false;
-      if (endDate && taskStart && taskDeadline < startDate) return false;
-      
-      return true;
-    });
-  }, [tasks, startDate, endDate]);
+  }, [taskProgressEntries, users]);
 
   const chartData = useMemo<ChartDataPoint[]>(() => {
     if (filteredTasks.length === 0) return [];
@@ -198,14 +238,14 @@ export default function TaskProgressStats({ tasks, users }: TaskProgressStatsPro
 
     const member = memberProgress.find((m) => m.userId === selectedMember);
     if (!member) {
-      return { submitted: 0, pending: filteredTasks.length, rate: 0 };
+      return { submitted: 0, pending: taskProgressEntries.length, rate: 0 };
     }
     return {
       submitted: member.submitted,
       pending: member.pending,
       rate: member.rate,
     };
-  }, [selectedMember, memberProgress, filteredTasks.length]);
+  }, [selectedMember, memberProgress, taskProgressEntries.length]);
 
   const selectedUserName = useMemo(() => {
     if (selectedMember === "all") return "Semua Anggota";
@@ -224,6 +264,62 @@ export default function TaskProgressStats({ tasks, users }: TaskProgressStatsPro
     if (selectedMember === "all") return null;
     return memberProgress.find((m) => m.userId === selectedMember) || null;
   }, [selectedMember, memberProgress]);
+
+  const selectedMemberTaskRows = useMemo(() => {
+    if (selectedMember === "all") return [];
+
+    const grouped = new Map<string, {
+      title: string;
+      totalMeetings: number;
+      completedMeetings: number;
+      meetingNames: Set<string>;
+    }>();
+
+    filteredTasks.forEach((task) => {
+      const normalizedTitle = task.title.trim();
+      const taskMeetings = task.pertemuan && task.pertemuan.length > 0
+        ? task.pertemuan
+        : [{ id: `${task.id}-general`, name: "Umum" }];
+
+      const summary = grouped.get(normalizedTitle) ?? {
+        title: task.title,
+        totalMeetings: 0,
+        completedMeetings: 0,
+        meetingNames: new Set<string>(),
+      };
+
+      const uniqueMeetingIds = new Set<string>();
+      taskMeetings.forEach((meeting) => {
+        const meetingKey = meeting.id || `${task.id}-general`;
+        uniqueMeetingIds.add(meetingKey);
+        summary.meetingNames.add(meeting.name);
+      });
+
+      const completedForThisTask = Array.from(uniqueMeetingIds).filter((meetingId) => {
+        const hasSubmittedMeeting = task.submissions.some((submission) => {
+          if (submission.userId !== selectedMember) return false;
+          if (submission.status === "PENDING") return false;
+          if (!meetingId || meetingId.endsWith("-general")) {
+            return !submission.pertemuanId;
+          }
+          return submission.pertemuanId === meetingId;
+        });
+        return hasSubmittedMeeting;
+      }).length;
+
+      summary.totalMeetings += uniqueMeetingIds.size;
+      summary.completedMeetings += completedForThisTask;
+      grouped.set(normalizedTitle, summary);
+    });
+
+    return Array.from(grouped.values()).map((entry) => ({
+      title: entry.title,
+      totalMeetings: entry.totalMeetings,
+      completedMeetings: entry.completedMeetings,
+      rate: entry.totalMeetings > 0 ? Math.round((entry.completedMeetings / entry.totalMeetings) * 100) : 0,
+      meetingList: Array.from(entry.meetingNames),
+    }));
+  }, [filteredTasks, selectedMember]);
 
   const resetDateRange = () => {
     setStartDate("");
@@ -467,7 +563,7 @@ export default function TaskProgressStats({ tasks, users }: TaskProgressStatsPro
               <ClipboardList className="h-4 w-4 text-primary-500" />
               <div>
                 <p className="text-[10px] font-medium text-dark-500 dark:text-dark-400 uppercase tracking-wide">Total Tugas</p>
-                <p className="text-sm font-bold text-dark-900 dark:text-white">{filteredTasks.length}</p>
+                <p className="text-sm font-bold text-dark-900 dark:text-white">{taskProgressEntries.length}</p>
               </div>
             </div>
             <Badge variant={summary.rate === 100 ? "success" : summary.rate >= 50 ? "warning" : "danger"}>
@@ -526,20 +622,29 @@ export default function TaskProgressStats({ tasks, users }: TaskProgressStatsPro
                 </tr>
               </thead>
               <tbody>
-                {filteredTasks.map((task) => {
-                  const submission = task.submissions.find((s) => s.userId === selectedMember);
-                  const isSubmitted = !!submission && submission.status !== "PENDING";
-                  return (
-                    <tr key={task.id} className="border-b border-gray-100 dark:border-gray-800">
-                      <td className="py-2 px-4 text-gray-900 dark:text-gray-100">{task.title}</td>
-                      <td className="text-center py-2 px-4">
-                        <Badge variant={isSubmitted ? "success" : "danger"}>
-                          {isSubmitted ? "Dikerjakan" : "Belum"}
-                        </Badge>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {selectedMemberTaskRows.map((taskRow) => (
+                  <tr key={taskRow.title} className="border-b border-gray-100 dark:border-gray-800">
+                    <td className="py-2 px-4 text-gray-900 dark:text-gray-100">
+                      <div className="flex flex-col">
+                        <span>{taskRow.title}</span>
+                        <span className="text-[11px] text-gray-500 dark:text-gray-400">
+                          Pertemuan: {taskRow.completedMeetings}/{taskRow.totalMeetings}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="text-center py-2 px-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-24 h-2 bg-gray-200 rounded-full dark:bg-gray-700 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${taskRow.rate === 100 ? 'bg-green-500' : taskRow.rate >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                            style={{ width: `${taskRow.rate}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300 w-10">{taskRow.rate}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

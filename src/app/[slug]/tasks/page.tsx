@@ -118,7 +118,7 @@ export default async function TasksPage({ params }: TasksPageProps) {
           />
         </div>
 
-        <main className="flex-1 py-8 pt-24 pb-28 relative z-10">
+        <main className="flex-1 py-8 pt-24 pb-28 relative z-10 lg:pl-[18rem] xl:pl-[20rem]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-dark-900 dark:text-white font-display">Daftar Tugas</h1>

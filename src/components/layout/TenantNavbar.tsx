@@ -22,6 +22,8 @@ import {
   Newspaper,
   ClipboardList,
   BarChart3,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import ThemeToggle from "@/components/ui/ThemeToggle";
@@ -54,9 +56,23 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
   const [mounted, setMounted] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [academicOpen, setAcademicOpen] = useState(true);
+  const [desktopCollapsed, setDesktopCollapsed] = useState(false);
+  const [isDesktopViewport, setIsDesktopViewport] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    const updateViewport = () => {
+      const isLarge = window.innerWidth >= 1024;
+      setIsDesktopViewport(isLarge);
+      if (!isLarge) {
+        setDesktopCollapsed(false);
+      }
+    };
+
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+
+    return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
   useEffect(() => {
@@ -201,11 +217,19 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
 
   const academicActive = academicItems.some((item) => isActiveHref(item.href));
 
+  const desktopSidebarWidth = desktopCollapsed ? "w-[88px]" : "w-72";
+
   return (
     <>
-      <aside className="hidden md:flex fixed left-0 top-0 h-screen w-72 flex-col border-r border-dark-200 bg-white/95 backdrop-blur-xl dark:border-dark-800 dark:bg-dark-950/95">
-        <div className="flex items-center justify-between border-b border-dark-200 px-4 py-4 dark:border-dark-800">
-          <Link href={`${tenantPath}/home`} className="flex items-center gap-3 overflow-hidden">
+      <aside
+        className={cn(
+          "hidden lg:flex fixed left-0 top-0 h-screen flex-col border-r border-dark-200 bg-white/95 backdrop-blur-xl transition-all duration-300 ease-in-out dark:border-dark-800 dark:bg-dark-950/95",
+          desktopSidebarWidth,
+          isDesktopViewport ? "visible" : "hidden"
+        )}
+      >
+        <div className="flex items-center justify-between border-b border-dark-200 px-3 py-4 dark:border-dark-800">
+          <Link href={`${tenantPath}/home`} className={cn("flex items-center gap-3 overflow-hidden", desktopCollapsed && "justify-center w-full")}>
             <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 shadow-lg shadow-primary-500/25">
               <Image
                 src="/logo.jpg"
@@ -216,47 +240,62 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                 priority
               />
             </div>
-            <span className="text-sm font-bold uppercase tracking-wide text-dark-900 dark:text-dark-100">
-              {tenantPath.replace("/", "").toUpperCase() || "UNIVERSITAS"}
-            </span>
+            {!desktopCollapsed && (
+              <span className="text-sm font-bold uppercase tracking-wide text-dark-900 dark:text-dark-100">
+                {tenantPath.replace("/", "").toUpperCase() || "UNIVERSITAS"}
+              </span>
+            )}
           </Link>
 
-          <div className="flex items-center justify-center">
-            <ThemeToggle className="h-8 w-8" />
-          </div>
+          <button
+            type="button"
+            onClick={() => setDesktopCollapsed((prev) => !prev)}
+            className="hidden h-8 w-8 items-center justify-center rounded-lg text-dark-500 transition-colors hover:bg-dark-100 dark:text-dark-300 dark:hover:bg-dark-800 xl:flex"
+            aria-label={desktopCollapsed ? "Buka sidebar" : "Sembunyikan sidebar"}
+          >
+            {desktopCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+          </button>
+
+          {!desktopCollapsed && (
+            <div className="hidden items-center justify-center xl:flex">
+              <ThemeToggle className="h-8 w-8" />
+            </div>
+          )}
         </div>
 
         {user && (
-          <div className="border-b border-dark-200 p-4 dark:border-dark-800">
-            <div className="flex items-center gap-3">
+          <div className={cn("border-b border-dark-200 dark:border-dark-800", desktopCollapsed ? "p-2" : "p-4")}>
+            <div className={cn("flex items-center gap-3", desktopCollapsed && "justify-center")}>
               {user.image ? (
-                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-dark-200 dark:border-dark-700">
+                <div className={cn("relative shrink-0 overflow-hidden rounded-full border border-dark-200 dark:border-dark-700", desktopCollapsed ? "h-10 w-10" : "h-12 w-12")}>
                   <Image
                     src={user.image}
                     alt={user.name}
                     fill
                     className="object-cover"
-                    sizes="48px"
+                    sizes={desktopCollapsed ? "40px" : "48px"}
                   />
                 </div>
               ) : (
-                <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-primary-400 to-accent-400 text-lg font-bold text-white">
+                <div className={cn("flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-primary-400 to-accent-400 text-white font-bold", desktopCollapsed ? "h-10 w-10 text-sm" : "h-12 w-12 text-lg")}>
                   {user.name?.charAt(0).toUpperCase()}
                 </div>
               )}
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-dark-900 dark:text-dark-100">
-                  {user.name}
-                </p>
-                <p className="text-[11px] uppercase tracking-[0.12em] text-dark-500 dark:text-dark-400">
-                  {formatRole(user.role)}
-                </p>
-              </div>
+              {!desktopCollapsed && (
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-dark-900 dark:text-dark-100">
+                    {user.name}
+                  </p>
+                  <p className="text-[11px] uppercase tracking-[0.12em] text-dark-500 dark:text-dark-400">
+                    {formatRole(user.role)}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        <nav className="flex-1 space-y-2 overflow-y-auto p-3">
+        <nav className={cn("flex-1 space-y-2 overflow-y-auto p-3", desktopCollapsed && "px-2")}>
           {homeItems.map((item) => {
             const Icon = item.icon;
             const isActive = isActiveHref(item.href);
@@ -267,13 +306,15 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                 href={item.href}
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                  desktopCollapsed ? "justify-center px-2" : "",
                   isActive
                     ? "bg-primary-50 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300"
                     : "text-dark-600 hover:bg-dark-50 hover:text-dark-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-dark-100"
                 )}
+                title={desktopCollapsed ? item.label : undefined}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />
-                <span>{item.label}</span>
+                {!desktopCollapsed && <span>{item.label}</span>}
               </Link>
             );
           })}
@@ -284,16 +325,20 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
               onClick={() => setAcademicOpen((prev) => !prev)}
               className={cn(
                 "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-dark-700 transition-colors hover:bg-dark-50 dark:text-dark-200 dark:hover:bg-dark-800",
-                academicActive && "bg-primary-50 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300"
+                academicActive && "bg-primary-50 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300",
+                desktopCollapsed && "justify-center px-2"
               )}
+              title={desktopCollapsed ? "Academic" : undefined}
             >
-              <span className="flex items-center gap-3">
+              <span className={cn("flex items-center gap-3", desktopCollapsed && "gap-0")}>
                 <GraduationCap className="h-4 w-4" />
-                Academic
+                {!desktopCollapsed && <span>Academic</span>}
               </span>
-              <span className="text-xs text-dark-500 dark:text-dark-400">
-                {academicOpen ? "−" : "+"}
-              </span>
+              {!desktopCollapsed && (
+                <span className="text-xs text-dark-500 dark:text-dark-400">
+                  {academicOpen ? "−" : "+"}
+                </span>
+              )}
             </button>
 
             {academicOpen && (
@@ -308,13 +353,15 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                       href={item.href}
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                        desktopCollapsed ? "justify-center px-2" : "",
                         isActive
                           ? "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
                           : "text-dark-600 hover:bg-dark-50 hover:text-dark-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-dark-100"
                       )}
+                      title={desktopCollapsed ? item.label : undefined}
                     >
                       <Icon className="h-4 w-4 flex-shrink-0" />
-                      <span>{item.label}</span>
+                      {!desktopCollapsed && <span>{item.label}</span>}
                     </Link>
                   );
                 })}
@@ -332,13 +379,15 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                 href={item.href}
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                  desktopCollapsed ? "justify-center px-2" : "",
                   isActive
                     ? "bg-primary-50 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300"
                     : "text-dark-600 hover:bg-dark-50 hover:text-dark-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-dark-100"
                 )}
+                title={desktopCollapsed ? item.label : undefined}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />
-                <span>{item.label}</span>
+                {!desktopCollapsed && <span>{item.label}</span>}
               </Link>
             );
           })}
@@ -350,10 +399,13 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
               type="button"
               onClick={handleSignOut}
               disabled={isLoggingOut}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
+              className={cn(
+                "flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300",
+                desktopCollapsed && "px-2"
+              )}
             >
               <LogOut className="h-4 w-4" />
-              {isLoggingOut ? "Signing out..." : "Sign Out"}
+              {!desktopCollapsed && (isLoggingOut ? "Signing out..." : "Sign Out")}
             </button>
           </div>
         ) : (
@@ -366,7 +418,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
         )}
       </aside>
 
-      <nav className="sticky top-0 z-40 border-b border-dark-200 bg-white/80 backdrop-blur-xl dark:border-dark-800 dark:bg-dark-950/80 md:hidden">
+      <nav className="sticky top-0 z-40 border-b border-dark-200 bg-white/80 backdrop-blur-xl dark:border-dark-800 dark:bg-dark-950/80 lg:hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <Link href={`${tenantPath}/home`} className="flex items-center gap-3">
@@ -458,7 +510,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
 
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden rounded-lg p-2 text-dark-600 hover:bg-dark-100 transition-colors dark:text-dark-300 dark:hover:bg-dark-800"
+              className="lg:hidden rounded-lg p-2 text-dark-600 hover:bg-dark-100 transition-colors dark:text-dark-300 dark:hover:bg-dark-800"
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
             >
@@ -471,11 +523,11 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
       {mounted && mobileOpen && createPortal(
         <>
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] md:hidden"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] lg:hidden"
             onClick={() => setMobileOpen(false)}
           />
           <div
-            className="fixed top-0 left-0 h-full w-72 bg-white shadow-2xl z-[110] md:hidden flex flex-col dark:bg-dark-950 dark:border-r dark:border-dark-800"
+            className="fixed top-0 left-0 h-full w-72 bg-white shadow-2xl z-[110] lg:hidden flex flex-col dark:bg-dark-950 dark:border-r dark:border-dark-800"
           >
             <div className="flex items-center justify-between p-4 border-b border-dark-100 dark:border-dark-800">
               <div className="flex items-center gap-3">
