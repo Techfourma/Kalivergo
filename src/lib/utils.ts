@@ -16,6 +16,7 @@ export function formatCurrency(amount: number): string {
 
 export function formatDate(date: Date | string): string {
   return new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -25,6 +26,7 @@ export function formatDate(date: Date | string): string {
 
 export function formatDateTime(date: Date | string): string {
   return new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
     weekday: "short",
     year: "numeric",
     month: "short",

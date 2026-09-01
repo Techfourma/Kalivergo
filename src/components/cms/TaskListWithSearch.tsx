@@ -7,6 +7,7 @@ import EditTaskButton from "@/components/cms/EditTaskButton";
 import DeleteTaskButton from "@/components/ui/DeleteTaskButton";
 import Badge from "@/components/ui/Badge";
 import { getTaskCategoryLabel } from "@/shared/task-category";
+import { formatDateTimeWIB } from "@/lib/date-time";
 
 interface User {
   id: string;
@@ -110,7 +111,7 @@ export default function TaskListWithSearch({ tasks, allUsers }: TaskListWithSear
                   <div className="text-xs md:text-sm text-dark-500 dark:text-dark-400 mt-2 space-y-1">
                     <p className="text-primary-600 dark:text-primary-400">
                       Start:{" "}
-                      {new Date(task.startDate).toLocaleDateString("id-ID", {
+                      {formatDateTimeWIB(task.startDate, {
                         weekday: "long",
                         year: "numeric",
                         month: "long",
@@ -121,7 +122,7 @@ export default function TaskListWithSearch({ tasks, allUsers }: TaskListWithSear
                     </p>
                     <p className="text-red-600 dark:text-red-400">
                       Deadline:{" "}
-                      {new Date(task.deadline).toLocaleDateString("id-ID", {
+                      {formatDateTimeWIB(task.deadline, {
                         weekday: "long",
                         year: "numeric",
                         month: "long",

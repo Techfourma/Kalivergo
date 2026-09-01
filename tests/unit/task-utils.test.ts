@@ -10,6 +10,7 @@ import {
   getPertemuanUnion,
   getSubmittedUserIdsForScope,
 } from "@/features/task/validators/task.utils";
+import { parseDateTimeLocalToWIB } from "@/lib/date-time";
 
 test("normalizeTaskTitle trims and collapses internal whitespace", () => {
   assert.equal(normalizeTaskTitle("  Matematika   Diskrit  "), "Matematika Diskrit");
@@ -103,6 +104,21 @@ test("getPertemuanUnion aggregates meetings from all task rows", () => {
     { id: "p2", name: "Pertemuan 2" },
   ]);
   assert.deepEqual(getPertemuanUnion([]), []);
+});
+
+test("parseDateTimeLocalToWIB preserves the wall-clock time in Asia/Jakarta", () => {
+  const value = parseDateTimeLocalToWIB("2026-09-01T00:00");
+  assert.ok(value);
+  assert.equal(value?.toISOString(), "2026-08-31T17:00:00.000Z");
+  assert.equal(
+    new Intl.DateTimeFormat("id-ID", {
+      timeZone: "Asia/Jakarta",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(value!),
+    "00.00"
+  );
 });
 
 test("getSubmittedUserIdsForScope syncs resumes per pertemuan (incl. legacy rows)", () => {
