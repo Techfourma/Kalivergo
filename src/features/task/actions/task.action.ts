@@ -14,6 +14,8 @@ import {
   isTaskCategory,
 } from "@/shared/task-category";
 import { createAuditLog } from "@/server/audit";
+import { parseDateTimeLocalToWIB } from "@/lib/date-time";
+import { resolveTenantSlug } from "@/actions/cms/role-model";
 
 async function getTenantIdFromCookie(): Promise<string | null> {
   const { cookies } = await import("next/headers");
@@ -39,8 +41,8 @@ export async function createTaskAction(formData: FormData) {
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
   const url = (formData.get("url") as string)?.trim() || undefined;
-  const startDate = new Date(formData.get("startDate") as string);
-  const deadline = new Date(formData.get("deadline") as string);
+  const startDate = parseDateTimeLocalToWIB(formData.get("startDate") as string);
+  const deadline = parseDateTimeLocalToWIB(formData.get("deadline") as string);
   const rawCategory = formData.get("category");
   const category = isTaskCategory(rawCategory) ? rawCategory : DEFAULT_TASK_CATEGORY;
 
@@ -48,7 +50,7 @@ export async function createTaskAction(formData: FormData) {
     return { error: "Judul tugas harus diisi" };
   }
 
-  if (isNaN(startDate.getTime()) || isNaN(deadline.getTime())) {
+  if (!startDate || !deadline || Number.isNaN(startDate.getTime()) || Number.isNaN(deadline.getTime())) {
     return { error: "Start Date Time dan Deadline harus diisi dengan waktu yang valid." };
   }
 
@@ -69,6 +71,7 @@ export async function createTaskAction(formData: FormData) {
     return { error: "Konteks kelas tidak ditemukan. Silakan buka kelas melalui URL /[universitas]/[prodi]/[kelas]." };
   }
 
+  const tenantSlug = await resolveTenantSlug();
   const membership = await validateTenantMembership(session.id, tenantId);
   if (!membership.valid || !(membership.role === "OWNER" || membership.cmsRole)) {
     return { error: "Akses ditolak: hanya OWNER atau role CMS." };
@@ -108,6 +111,11 @@ export async function createTaskAction(formData: FormData) {
     }
   );
   revalidatePath("/cms/tasks");
+  if (tenantSlug) {
+    revalidatePath(`/${tenantSlug}/cms/tasks`);
+    revalidatePath(`/${tenantSlug}/tasks`);
+    revalidatePath(`/${tenantSlug}/home`);
+  }
   return { success: "Tugas berhasil ditambahkan" };
 }
 
@@ -122,6 +130,7 @@ export async function deleteTaskAction(id: string) {
     return { error: "Konteks kelas tidak ditemukan. Silakan buka kelas melalui URL /[universitas]/[prodi]/[kelas]." };
   }
 
+  const tenantSlug = await resolveTenantSlug();
   const membership = await validateTenantMembership(session.id, tenantId);
   if (!membership.valid || !(membership.role === "OWNER" || membership.cmsRole)) {
     return { error: "Akses ditolak: hanya OWNER atau role CMS." };
@@ -136,6 +145,11 @@ export async function deleteTaskAction(id: string) {
   });
 
   revalidatePath("/cms/tasks");
+  if (tenantSlug) {
+    revalidatePath(`/${tenantSlug}/cms/tasks`);
+    revalidatePath(`/${tenantSlug}/tasks`);
+    revalidatePath(`/${tenantSlug}/home`);
+  }
   return { success: "Tugas berhasil dihapus" };
 }
 
@@ -149,14 +163,14 @@ export async function updateTaskAction(id: string, formData: FormData) {
   const description = formData.get("description") as string;
   const url = (formData.get("url") as string)?.trim() || undefined;
   const category = formData.get("category") as string;
-  const startDate = new Date(formData.get("startDate") as string);
-  const deadline = new Date(formData.get("deadline") as string);
+  const startDate = parseDateTimeLocalToWIB(formData.get("startDate") as string);
+  const deadline = parseDateTimeLocalToWIB(formData.get("deadline") as string);
 
   if (!title || !description) {
     return { error: "Judul dan deskripsi harus diisi" };
   }
 
-  if (isNaN(startDate.getTime()) || isNaN(deadline.getTime())) {
+  if (!startDate || !deadline || Number.isNaN(startDate.getTime()) || Number.isNaN(deadline.getTime())) {
     return { error: "Start Date Time dan Deadline harus diisi dengan waktu yang valid." };
   }
 
@@ -169,6 +183,7 @@ export async function updateTaskAction(id: string, formData: FormData) {
     return { error: "Konteks kelas tidak ditemukan. Silakan buka kelas melalui URL /[universitas]/[prodi]/[kelas]." };
   }
 
+  const tenantSlug = await resolveTenantSlug();
   const membership = await validateTenantMembership(session.id, tenantId);
   if (!membership.valid || !(membership.role === "OWNER" || membership.cmsRole)) {
     return { error: "Akses ditolak: hanya OWNER atau role CMS." };
@@ -199,6 +214,11 @@ export async function updateTaskAction(id: string, formData: FormData) {
   });
 
   revalidatePath("/cms/tasks");
+  if (tenantSlug) {
+    revalidatePath(`/${tenantSlug}/cms/tasks`);
+    revalidatePath(`/${tenantSlug}/tasks`);
+    revalidatePath(`/${tenantSlug}/home`);
+  }
   return { success: "Tugas berhasil diperbarui" };
 }
 
@@ -213,6 +233,7 @@ export async function updateTaskSubmissionsAction(taskId: string, userIds: strin
     return { error: "Konteks kelas tidak ditemukan." };
   }
 
+  const tenantSlug = await resolveTenantSlug();
   const membership = await validateTenantMembership(session.id, tenantId);
   if (!membership.valid || !(membership.role === "OWNER" || membership.cmsRole)) {
     return { error: "Akses ditolak: hanya OWNER atau role CMS." };
@@ -222,6 +243,10 @@ export async function updateTaskSubmissionsAction(taskId: string, userIds: strin
   if ("error" in result) return result;
 
   revalidatePath("/cms/tasks");
-  revalidatePath("/home");
+  if (tenantSlug) {
+    revalidatePath(`/${tenantSlug}/cms/tasks`);
+    revalidatePath(`/${tenantSlug}/tasks`);
+    revalidatePath(`/${tenantSlug}/home`);
+  }
   return { success: "Submission berhasil diperbarui" };
 }

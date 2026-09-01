@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Modal from "@/components/ui/Modal";
-import { Pencil } from "lucide-react";
+import { CheckCircle2, Pencil } from "lucide-react";
 import { updateTask } from "@/actions/cms";
-import ActionFeedback from "@/components/cms/ActionFeedback";
+import { formatDateTimeLocalInput } from "@/lib/date-time";
 
 interface Task {
   id: string;
@@ -22,30 +23,47 @@ interface EditTaskButtonProps {
 }
 
 export default function EditTaskButton({ task }: EditTaskButtonProps) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
-  const formatDateTimeLocal = (value: string | Date) => {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "";
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-  };
+  const formatDateTimeLocal = (value: string | Date) => formatDateTimeLocalInput(value);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setFeedback(null);
+
     const formData = new FormData(e.currentTarget);
-    await updateTask(task.id, formData);
+    const result = await updateTask(task.id, formData);
+
+    if (result && "success" in result) {
+      setIsOpen(false);
+      setShowSuccessPopup(true);
+      setFeedback({ type: "success", message: result.success });
+      router.refresh();
+    } else if (result && "error" in result) {
+      setFeedback({ type: "error", message: result.error });
+    }
+
     setIsLoading(false);
-    setIsOpen(false);
+  };
+
+  const closeSuccessPopup = () => {
+    setShowSuccessPopup(false);
   };
 
   return (
     <>
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          setFeedback(null);
+          setShowSuccessPopup(false);
+          setIsOpen(true);
+        }}
         className="px-4 py-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors text-sm font-medium inline-flex items-center gap-1"
       >
         <Pencil className="h-4 w-4" />
@@ -53,7 +71,19 @@ export default function EditTaskButton({ task }: EditTaskButtonProps) {
       </button>
 
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Edit Tugas" size="md">
-        <ActionFeedback actionType="task" errorTitle="Gagal memperbarui tugas" className="space-y-4">
+        <div className="space-y-4">
+          {feedback && (
+            <div
+              className={`rounded-xl border px-3 py-2 text-sm ${
+                feedback.type === "success"
+                  ? "border-green-200 bg-green-50 text-green-700"
+                  : "border-red-200 bg-red-50 text-red-700"
+              }`}
+            >
+              {feedback.message}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-dark-700 mb-1.5">Judul Tugas</label>
@@ -142,8 +172,25 @@ export default function EditTaskButton({ task }: EditTaskButtonProps) {
               </button>
             </div>
           </form>
-        </ActionFeedback>
+        </div>
       </Modal>
+
+      {showSuccessPopup && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl">
+            <CheckCircle2 className="mx-auto mb-4 h-16 w-16 text-green-600" />
+            <h2 className="text-xl font-bold text-dark-900">Tugas berhasil diperbarui</h2>
+            <p className="mt-2 text-sm text-dark-600">Perubahan tugas telah berhasil disimpan.</p>
+            <button
+              type="button"
+              onClick={closeSuccessPopup}
+              className="mt-6 rounded-lg bg-primary-600 px-6 py-2.5 font-medium text-white transition-colors hover:bg-primary-700"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

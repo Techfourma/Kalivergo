@@ -15,6 +15,7 @@ import {
   LogOut,
   Calendar,
   GraduationCap,
+  Presentation,
   User,
   LayoutDashboard,
   FolderOpen,
@@ -52,6 +53,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [academicOpen, setAcademicOpen] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -103,6 +105,12 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
       requiresAuth: true
     },
     {
+      href: `${tenantPath}/schedule`,
+      label: "Schedule",
+      icon: Calendar,
+      requiresAuth: true
+    },
+    {
       href: `${tenantPath}/information`,
       label: "Information",
       icon: Newspaper,
@@ -123,7 +131,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
     {
       href: `${tenantPath}/seminar`,
       label: "Seminar",
-      icon: GraduationCap,
+      icon: Presentation,
       requiresAuth: true
     },
     {
@@ -166,6 +174,14 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
     ? navItems.filter((item) => !item.requiresAuth)
     : navItems;
 
+  const homeItems = filteredNavItems.filter((item) => item.label === "Home");
+  const topLevelMenuItems = filteredNavItems.filter(
+    (item) => !["Home", "Tasks", "Schedule", "Seminar"].includes(item.label)
+  );
+  const academicItems = filteredNavItems.filter((item) =>
+    ["Tasks", "Schedule", "Seminar"].includes(item.label)
+  );
+
   const isActiveHref = (href: string) => {
     const current = pathname ?? (typeof window !== "undefined" ? window.location.pathname : "");
     const normalize = (p: string) => {
@@ -183,9 +199,174 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
     return false;
   };
 
+  const academicActive = academicItems.some((item) => isActiveHref(item.href));
+
   return (
     <>
-      <nav className="sticky top-0 z-40 border-b border-dark-200 bg-white/80 backdrop-blur-xl dark:border-dark-800 dark:bg-dark-950/80">
+      <aside className="hidden md:flex fixed left-0 top-0 h-screen w-72 flex-col border-r border-dark-200 bg-white/95 backdrop-blur-xl dark:border-dark-800 dark:bg-dark-950/95">
+        <div className="flex items-center justify-between border-b border-dark-200 px-4 py-4 dark:border-dark-800">
+          <Link href={`${tenantPath}/home`} className="flex items-center gap-3 overflow-hidden">
+            <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 shadow-lg shadow-primary-500/25">
+              <Image
+                src="/logo.jpg"
+                alt="Kalivergo Logo"
+                width={36}
+                height={36}
+                className="object-cover"
+                priority
+              />
+            </div>
+            <span className="text-sm font-bold uppercase tracking-wide text-dark-900 dark:text-dark-100">
+              {tenantPath.replace("/", "").toUpperCase() || "UNIVERSITAS"}
+            </span>
+          </Link>
+
+          <div className="flex items-center justify-center">
+            <ThemeToggle className="h-8 w-8" />
+          </div>
+        </div>
+
+        {user && (
+          <div className="border-b border-dark-200 p-4 dark:border-dark-800">
+            <div className="flex items-center gap-3">
+              {user.image ? (
+                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-dark-200 dark:border-dark-700">
+                  <Image
+                    src={user.image}
+                    alt={user.name}
+                    fill
+                    className="object-cover"
+                    sizes="48px"
+                  />
+                </div>
+              ) : (
+                <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-primary-400 to-accent-400 text-lg font-bold text-white">
+                  {user.name?.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-dark-900 dark:text-dark-100">
+                  {user.name}
+                </p>
+                <p className="text-[11px] uppercase tracking-[0.12em] text-dark-500 dark:text-dark-400">
+                  {formatRole(user.role)}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <nav className="flex-1 space-y-2 overflow-y-auto p-3">
+          {homeItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = isActiveHref(item.href);
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-primary-50 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300"
+                    : "text-dark-600 hover:bg-dark-50 hover:text-dark-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-dark-100"
+                )}
+              >
+                <Icon className="h-4 w-4 flex-shrink-0" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+
+          <div className="pt-1">
+            <button
+              type="button"
+              onClick={() => setAcademicOpen((prev) => !prev)}
+              className={cn(
+                "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-dark-700 transition-colors hover:bg-dark-50 dark:text-dark-200 dark:hover:bg-dark-800",
+                academicActive && "bg-primary-50 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300"
+              )}
+            >
+              <span className="flex items-center gap-3">
+                <GraduationCap className="h-4 w-4" />
+                Academic
+              </span>
+              <span className="text-xs text-dark-500 dark:text-dark-400">
+                {academicOpen ? "−" : "+"}
+              </span>
+            </button>
+
+            {academicOpen && (
+              <div className="mt-1 space-y-1 pl-3">
+                {academicItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = isActiveHref(item.href);
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                        isActive
+                          ? "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
+                          : "text-dark-600 hover:bg-dark-50 hover:text-dark-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-dark-100"
+                      )}
+                    >
+                      <Icon className="h-4 w-4 flex-shrink-0" />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {topLevelMenuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = isActiveHref(item.href);
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-primary-50 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300"
+                    : "text-dark-600 hover:bg-dark-50 hover:text-dark-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-dark-100"
+                )}
+              >
+                <Icon className="h-4 w-4 flex-shrink-0" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {user ? (
+          <div className="border-t border-dark-200 p-3 dark:border-dark-800">
+            <button
+              type="button"
+              onClick={handleSignOut}
+              disabled={isLoggingOut}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
+            >
+              <LogOut className="h-4 w-4" />
+              {isLoggingOut ? "Signing out..." : "Sign Out"}
+            </button>
+          </div>
+        ) : (
+          <div className="border-t border-dark-200 p-3 dark:border-dark-800">
+            <Button onClick={onSignIn} className="w-full">
+              <LogIn className="h-4 w-4 mr-2" />
+              Sign In
+            </Button>
+          </div>
+        )}
+      </aside>
+
+      <nav className="sticky top-0 z-40 border-b border-dark-200 bg-white/80 backdrop-blur-xl dark:border-dark-800 dark:bg-dark-950/80 md:hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <Link href={`${tenantPath}/home`} className="flex items-center gap-3">
@@ -231,9 +412,21 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
               {user ? (
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2 rounded-xl bg-dark-50 px-3 py-1.5 border border-dark-100 dark:bg-dark-900 dark:border-dark-800">
-                    <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-white text-xs font-bold">
-                      {user.name?.charAt(0).toUpperCase()}
-                    </div>
+                    {user.image ? (
+                      <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full border border-dark-200 dark:border-dark-700">
+                        <Image
+                          src={user.image}
+                          alt={user.name}
+                          fill
+                          className="object-cover"
+                          sizes="28px"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-white text-xs font-bold">
+                        {user.name?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div className="flex flex-col">
                       <span className="text-xs font-medium text-dark-900 leading-tight dark:text-dark-100">
                         {user.name}
@@ -311,7 +504,72 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
 
             <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none' } as React.CSSProperties}>
               <div className="p-4 space-y-1">
-                {filteredNavItems.map((item) => {
+                {homeItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = isActiveHref(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all",
+                        isActive
+                          ? "bg-primary-50 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300"
+                          : "text-dark-600 hover:bg-dark-50 hover:text-dark-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-dark-100"
+                      )}
+                    >
+                      <Icon className="h-5 w-5 flex-shrink-0" />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setAcademicOpen((prev) => !prev)}
+                    className={cn(
+                      "flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-dark-700 transition-colors hover:bg-dark-50 dark:text-dark-200 dark:hover:bg-dark-800",
+                      academicActive && "bg-primary-50 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300"
+                    )}
+                  >
+                    <span className="flex items-center gap-3">
+                      <GraduationCap className="h-5 w-5" />
+                      Academic
+                    </span>
+                    <span className="text-xs text-dark-500 dark:text-dark-400">
+                      {academicOpen ? "−" : "+"}
+                    </span>
+                  </button>
+
+                  {academicOpen && (
+                    <div className="mt-1 space-y-1 pl-3">
+                      {academicItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = isActiveHref(item.href);
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setMobileOpen(false)}
+                            className={cn(
+                              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
+                              isActive
+                                ? "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
+                                : "text-dark-600 hover:bg-dark-50 hover:text-dark-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-dark-100"
+                            )}
+                          >
+                            <Icon className="h-4 w-4 flex-shrink-0" />
+                            <span>{item.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {topLevelMenuItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = isActiveHref(item.href);
                   return (

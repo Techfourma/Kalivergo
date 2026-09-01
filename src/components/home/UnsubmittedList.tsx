@@ -7,6 +7,7 @@ import Avatar from "@/components/ui/Avatar";
 import { AlertTriangle, ChevronDown, ClipboardList, CheckCircle2, UserX } from "lucide-react";
 import { DEFAULT_TASK_CATEGORY, getTaskCategoryLabel } from "@/shared/task-category";
 import { normalizeTaskTitle, getDistinctTaskTitles, getTasksByTitle, getPertemuanUnion, getSubmittedUserIdsForScope } from "@/features/task/validators/task.utils";
+import { formatDateTimeWIB } from "@/lib/date-time";
 
 interface User {
   id: string;
@@ -174,7 +175,7 @@ export default function UnsubmittedList({ tasks, allUsers, currentUserName }: Un
                 {selectedTask.startDate && (
                   <p>
                     Mulai:{" "}
-                    {new Date(selectedTask.startDate).toLocaleDateString("id-ID", {
+                    {formatDateTimeWIB(selectedTask.startDate, {
                       weekday: "short",
                       day: "numeric",
                       month: "short",
@@ -186,11 +187,13 @@ export default function UnsubmittedList({ tasks, allUsers, currentUserName }: Un
                 )}
                 <p>
                   Deadline:{" "}
-                  {new Date(selectedTask.deadline).toLocaleDateString("id-ID", {
+                  {formatDateTimeWIB(selectedTask.deadline, {
                     weekday: "short",
                     day: "numeric",
                     month: "short",
                     year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
                   })}
                 </p>
               </div>

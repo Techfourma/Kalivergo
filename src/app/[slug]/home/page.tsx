@@ -102,8 +102,9 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
     ]);
 
     const now = new Date();
-    const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - now.getDay());
+    const jakartaNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+    const startOfWeek = new Date(jakartaNow);
+    startOfWeek.setDate(jakartaNow.getDate() - jakartaNow.getDay());
     startOfWeek.setHours(0, 0, 0, 0);
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 7);
