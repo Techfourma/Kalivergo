@@ -9,6 +9,7 @@ import {
   DEFAULT_TASK_CATEGORY,
   isTaskCategory,
 } from "@/shared/task-category";
+import { parseDateTimeLocalToWIB } from "@/lib/date-time";
 
 export const dynamic = "force-dynamic";
 
@@ -71,13 +72,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const parsedStartDate = parseDateTimeLocalToWIB(startDate ?? "") ?? new Date();
+    const parsedDeadline = parseDateTimeLocalToWIB(deadline ?? "");
+
+    if (!parsedDeadline) {
+      return NextResponse.json(
+        { error: "Deadline harus diisi dengan waktu yang valid." },
+        { status: 400 }
+      );
+    }
+
     const result = await upsertTaskWithPertemuanForTenant({
       tenantId,
       title,
       description: typeof description === "string" ? description : "",
       category: isTaskCategory(category) ? category : DEFAULT_TASK_CATEGORY,
-      startDate: startDate ? new Date(startDate) : new Date(),
-      deadline: new Date(deadline),
+      startDate: parsedStartDate,
+      deadline: parsedDeadline,
       pertemuanName:
         typeof pertemuan === "string" && pertemuan.trim()
           ? pertemuan.trim()

@@ -123,7 +123,7 @@ export default function PageBackground({
       <div className="absolute -left-40 -top-40 h-[28rem] w-[28rem] rounded-full bg-primary-500/10 blur-[120px] dark:bg-primary-500/20" />
       <div className="absolute -bottom-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-accent-500/10 blur-[120px] dark:bg-accent-500/20" />
       
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(100,116,139,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(100,116,139,0.08)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_75%)] dark:bg-[linear-gradient(to_right,rgba(148,163,184,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.06)_1px,transparent_1px)]" />
+      <div className="absolute inset-0 opacity-80 [background-image:radial-gradient(circle_at_center,rgba(99,102,241,0.18)_0,rgba(99,102,241,0.12)_1.3px,transparent_1.8px),linear-gradient(to_right,rgba(148,163,184,0.12),rgba(148,163,184,0.04),transparent_55%),linear-gradient(to_bottom,rgba(148,163,184,0.12),rgba(148,163,184,0.04),transparent_55%)] [background-size:22px_22px,100%_100%,100%_100%] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_82%)] dark:[background-image:radial-gradient(circle_at_center,rgba(96,165,250,0.2)_0,rgba(96,165,250,0.1)_1.3px,transparent_1.8px),linear-gradient(to_right,rgba(148,163,184,0.12),rgba(148,163,184,0.04),transparent_55%),linear-gradient(to_bottom,rgba(148,163,184,0.12),rgba(148,163,184,0.04),transparent_55%)]" />
     </div>
   );
 }
