@@ -55,7 +55,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [academicOpen, setAcademicOpen] = useState(true);
+  const [academicOpen, setAcademicOpen] = useState(false);
   const [desktopCollapsed, setDesktopCollapsed] = useState(false);
   const [isDesktopViewport, setIsDesktopViewport] = useState(false);
 
