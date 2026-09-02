@@ -241,6 +241,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
             universityName={tenantInfo?.university.name || "Universitas"}
             programName={tenantInfo?.program.name || "Program"}
             className={tenantInfo?.name || "Kelas"}
+            classSlug={routeParams.slug}
             members={users.map(u => ({ userId: u.id, userName: u.name }))}
             shouldLockFeatures={shouldLockFeatures}
           />

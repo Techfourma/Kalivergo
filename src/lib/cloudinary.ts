@@ -11,8 +11,9 @@ export const uploadToCloudinary = async (
   fileBuffer: Buffer,
   options: {
     folder?: string;
-     resourceType?: 'image' | 'video' | 'raw' | 'auto';
+    resourceType?: 'image' | 'video' | 'raw' | 'auto';
     publicId?: string;
+    accessMode?: 'public' | 'authenticated' | 'private';
     timeout?: number;
   } = {}
 ) => {
@@ -20,6 +21,7 @@ export const uploadToCloudinary = async (
     folder = 'kalivergo/profiles',
     resourceType = 'image',
     publicId,
+    accessMode,
     timeout = 120000,
   } = options;
 
@@ -32,6 +34,10 @@ export const uploadToCloudinary = async (
 
     if (publicId) {
       uploadOptions.public_id = publicId;
+    }
+
+    if (accessMode) {
+      uploadOptions.access_mode = accessMode;
     }
 
     const uploadStream = cloudinary.uploader.upload_stream(
