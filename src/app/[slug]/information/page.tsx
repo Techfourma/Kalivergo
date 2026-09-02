@@ -1,4 +1,4 @@
-import { prisma, withRetry } from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 import { getCurrentSessionUser } from '@/server/auth/session';
 import { requireTenantMembership } from '@/lib/tenant';
 import { InformationType } from '@prisma/client';
@@ -20,12 +20,10 @@ export default async function InformationPage({
     );
   }
 
-  const tenant = await withRetry(() =>
-    prisma.tenant.findFirst({
-      where: { customSlug: routeParams.slug },
-      select: { id: true },
-    })
-  );
+  const tenant = await prisma.tenant.findFirst({
+    where: { customSlug: routeParams.slug },
+    select: { id: true },
+  });
 
   if (!tenant) {
     return (
