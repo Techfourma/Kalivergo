@@ -2,7 +2,7 @@ import "server-only";
 import { env } from "@/config/env";
 
 export const AIAssistantConfig = {
-  geminiApiKey: env.geminiApiKey,
+  geminiApiKey: env.geminiApiKey?.trim(),
 
   geminiModel: env.geminiModel || "gemini-2.5-flash",
 
@@ -21,4 +21,8 @@ export const AIAssistantConfig = {
 
 export function isAIConfigured(): boolean {
   return Boolean(AIAssistantConfig.geminiApiKey);
+}
+
+export function isProduction(): boolean {
+  return env.nodeEnv === "production";
 }

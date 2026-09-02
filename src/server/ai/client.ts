@@ -1,5 +1,5 @@
 import type { AIAssistantError } from "@/features/ai-assistant/types";
-import { AIAssistantConfig } from "./config";
+import { AIAssistantConfig, isProduction } from "./config";
 import { generateAnswer } from "./gemini";
 import { loadKnowledgeBase, retrieveRelevantContext } from "./knowledgeBase";
 
@@ -59,13 +59,20 @@ export async function sendToAIAssistant(
         ? request.conversationId
         : generateUuid();
 
-    if (!AIAssistantConfig.geminiApiKey) {
+    if (!AIAssistantConfig.geminiApiKey && !isProduction()) {
       return {
         success: true,
         response: {
           success: true,
           data: { response: getMockReply(request.message), conversationId },
         },
+      };
+    }
+
+    if (!AIAssistantConfig.geminiApiKey) {
+      return {
+        success: false,
+        error: new Error("Gemini API key is not configured in production."),
       };
     }
 
