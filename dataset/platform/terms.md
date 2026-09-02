@@ -1,71 +1,57 @@
 # Terms of Service - Kalivergo
 
+> Ringkasan untuk knowledge base AI. Laman resmi: `/terms`.
+
 ## 1. Penerimaan Syarat
-Dengan menggunakan Kalivergo, Anda menyetujui untuk terikat dengan ketentuan layanan ini.
+Dengan menggunakan Kalivergo, pengguna menyetujui ketentuan layanan ini.
 
 ## 2. Deskripsi Layanan
-Kalivergo adalah platform asisten akademik AI yang menyediakan:
-- Bantuan pembelajaran dan penelitian
-- Rekomendasi konten edukasi
-- Analisis performa akademik
-- Tools produktivitas untuk mahasiswa dan akademisi
+Kalivergo adalah platform manajemen kelas berbasis web yang menyediakan:
+
+- Pengelolaan anggota dan peran dalam kelas (tenant).
+- Manajemen tugas, jadwal, seminar, dan informasi kelas.
+- Pengelolaan keuangan kelas (transaksi dan uang kas).
+- Portofolio anggota dan panel platform untuk verifikasi KYC owner.
+- Asisten AI yang menjawab berdasarkan knowledge base internal.
 
 ## 3. Akun Pengguna
-### 3.1 Pendaftaran
-- Harus berusia minimal 16 tahun
-- Informasi yang diberikan harus akurat dan lengkap
-- Satu akun per individu
 
-### 3.2 Keamanan Akun
-- Pengguna bertanggung jawab menjaga kerahasiaan kredensial
-- Segera laporkan jika terjadi unauthorized access
-- Kalivergo tidak bertanggung jawab atas kelalaian pengguna
+- Informasi pendaftaran harus akurat dan lengkap.
+- Pengguna bertanggung jawab menjaga kerahasiaan kredensial.
+- Laporkan akses tidak sah segera.
 
 ## 4. Penggunaan yang Diperbolehkan
-- Untuk keperluan edukasi dan penelitian
-- Berbagi konten untuk kolaborasi akademik
-- Memberikan feedback untuk peningkatan layanan
+- Menggunakan layanan sesuai tujuan manajemen kelas/organisasi.
+- Mengunggah konten yang menjadi hak pengguna dan sah digunakan.
 
 ## 5. Penggunaan yang Dilarang
-- Aktivitas ilegal atau melanggar hukum
-- Penyalahgunaan untuk plagiarisme
-- Reverse engineering atau dekompilasi
-- Spamming atau distribusi malware
-- Impersonasi atau penipuan
+- Aktivitas ilegal atau melanggar hukum.
+- Menyalahgunakan akses/role, mengakses data kelas lain tanpa izin.
+- Reverse engineering, spamming, distribusi malware, impersonasi, atau penipuan.
+- Mengunggah data KYC/pribadi ke fitur yang tidak ditujukan untuk itu.
 
 ## 6. Konten
-### 6.1 Konten Pengguna
-- Pengguna tetap memiliki hak atas konten mereka
-- Memberikan lisensi non-eksklusif kepada Kalivergo untuk hosting dan distribusi
-
-### 6.2 Konten Kalivergo
-- Semua konten platform adalah properti Kalivergo
-- Dilarang mendistribusikan ulang tanpa izin
+- Pengguna tetap memiliki hak atas konten yang diunggah.
+- Pengguna memberikan lisensi non-eksklusif untuk hosting dan distribusi agar layanan berfungsi.
+- Konten platform adalah milik Kalivergo.
 
 ## 7. Disclaimer
-- Layanan disediakan "as is" tanpa jaminan
-- Kalivergo tidak menjamin akurasi 100% dari output AI
-- Pengguna bertanggung jawab memverifikasi informasi
+- Layanan disediakan "as is".
+- Jawaban asisten AI tidak dijamin akurat 100%; verifikasi sebelum digunakan sebagai keputusan.
 
 ## 8. Batasan Tanggung Jawab
-- Tidak bertanggung jawab atas kerugian tidak langsung
-- Liability dibatasi pada jumlah yang dibayarkan pengguna (jika ada)
+- Kalivergo tidak bertanggung jawab atas kerugian tidak langsung di luar kendali layanan.
 
 ## 9. Terminasi
-Kalivergo dapat menonaktifkan akun jika:
-- Pelanggaran terhadap terms of service
-- Aktivitas mencurigakan atau fraudulent
-- Permintaan dari pengguna sendiri
+- Akun dapat dinonaktifkan atas pelanggaran syarat, aktivitas mencurigakan, atau permintaan pengguna.
 
 ## 10. Perubahan Layanan
-- Kalivergo berhak mengubah atau menghentikan fitur
-- Notifikasi akan diberikan untuk perubahan signifikan
+- Kalivergo dapat mengubah/menghentikan fitur dengan pemberitahuan untuk perubahan signifikan.
 
 ## 11. Hukum yang Berlaku
-- Diatur oleh hukum Indonesia
-- Sengketa diselesaikan melalui arbitrase
+- Diatur oleh hukum Indonesia.
 
 ## 12. Kontak
-Untuk pertanyaan mengenai terms, hubungi: legal@kalivergo.com
+- Untuk pertanyaan syarat layanan, hubungi kontak resmi yang tertera pada laman `/terms`.
 
-**Terakhir diperbarui:** Januari 2025
+**Terakhir diperbarui:** September 2026
