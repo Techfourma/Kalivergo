@@ -19,6 +19,31 @@ Temuan paling penting:
 
 Indeks final tetap perlu divalidasi dengan `EXPLAIN (ANALYZE, BUFFERS)` pada dataset produksi atau staging yang representatif.
 
+## Update Audit (2026-09-02)
+
+Pembaruan ini mencatat perubahan skema pada branch `development` sejak audit awal (2026-08-28) beserta dampaknya terhadap rekomendasi yang ada.
+
+### Perubahan model baru
+
+- `Pertemuan` (tabel `pertemuan`): sub-bagian per tugas (`taskId`, `name`). Memiliki `@@index([taskId])` dan `onDelete: Cascade` terhadap `Task`. Model ini mendukung "satu tugas dengan satu pertemuan" dan pelacakan submission per pertemuan.
+- `Information`, `Comment`, `Reaction`, `ReadMark` (feed informasi kelas): sudah ter-relasi ke `User` dan `Tenant`. `Reaction` dan `ReadMark` memiliki unique constraint `[informationId, userId]`; `Comment` mendukung balasan via `parentId` self-relation dengan `onDelete: Cascade`.
+
+### Perubahan field pada model yang sudah ada
+
+- `Task` kini memiliki `url String?`, `category String @default("E_LEARNING")`, dan `startDate DateTime @default(now())` (selain `deadline`). Field `description` bersifat nullable.
+- `Submission` kini memiliki `pertemuanId String?` dan unique constraint menjadi `@@unique([taskId, userId, pertemuanId])`.
+- `Seminar` kini memiliki `url String?`.
+- `Schedule` memiliki `time String?` dan `type String @default("MEETING")`.
+- `Transaction` memiliki `invoiceUrl String?`, `userId String?`, dan `categoryId String?` (relasi ke `Category`); `createdBy String?` menyimpan nama pembuat.
+
+### Dampak terhadap temuan awal
+
+1. **Unique constraint submission dengan `pertemuanId` nullable** — `@@unique([taskId, userId, pertemuanId])` memungkinkan lebih dari satu baris per `(taskId, userId)` saat `pertemuanId` bernilai `NULL` (karena NULL tidak dianggap sama oleh PostgreSQL). Pastikan logika aplikasi menormalkan `pertemuanId` (misal selalu `NULL` atau selalu mengisi id pertemuan) agar tidak terjadi duplikat yang tidak disengaja.
+2. **`Float` untuk nominal masih berlaku** di `CashPayment.amount`, `Transaction.amount`, dan `UangKasSchedule.amount`. Rekomendasi `Decimal(19,2)` pada audit awal tetap relevan.
+3. **Indeks umum masih berlaku** — `Task`, `Transaction`, `CashPayment`, `UangKasSchedule`, `Schedule`, `Seminar`, `Submission`, dan `AuditLog` masih dominan berindeks `tenantId`/`taskId` saja. Tambahan indeks komposit tetap disarankan mengikuti pola query aktual (misal `Task @@index([tenantId, deadline])`, `Transaction @@index([tenantId, date])`).
+4. **`AuditLog` belum memiliki kolom `tenantId`** — temuan audit awal (tambahkan `tenantId` dan indeks `tenantId/createdAt`) masih berlaku.
+5. **Kategori tugas** kini menjadi string bebas dengan default `E_LEARNING`; jika klasifikasi mulai dipakai untuk pelaporan, pertimbangkan mengubahnya menjadi enum bersama `shared/task-category`.
+
 ## Findings
 
 ### P1 - Kolom nominal menggunakan `Float`

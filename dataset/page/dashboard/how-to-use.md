@@ -1,161 +1,51 @@
-# How to Use - Dashboard Kalivergo
+# How to Use - Dashboard (Keuangan Kelas)
 
-## 1. Overview Dashboard
-Dashboard adalah pusat kontrol untuk memantau progress akademik dan aktivitas pembelajaran Anda. Dashboard menyediakan:
-- Visualisasi progress belajar
-- Statistik dan analytics
-- Task management
-- Performance tracking
+> Berlaku untuk versi Kalivergo saat ini. Dashboard adalah **ringkasan keuangan kelas** (uang kas), bukan dashboard tugas/seminar.
+
+## 1. Apa itu Dashboard
+
+Halaman `/{slug}/dashboard` menampilkan monitoring uang kas dan transaksi keuangan kelas. Halaman ini bisa diakses oleh anggota kelas yang sudah login.
+
+Data yang ditampilkan:
+
+- Header kelas dalam format `Universitas - Program Studi - Kelas`.
+- **Cash Flow Chart**: grafik arus kas (pemasukan dan pengeluaran) kelas.
+- **Arrears List**: daftar tunggakan uang kas per anggota.
 
 ## 2. Komponen Utama
 
-### 2.1 Header Dashboard
-- **Period Selector**: Pilih rentang waktu (hari, minggu, bulan, tahun)
-- **Export Button**: Download report dalam format PDF/CSV
-- **Settings**: Kustomisasi tampilan dashboard
-- **Refresh**: Update data real-time
+### 2.1 Cash Flow Chart
 
-### 2.2 Summary Cards
-Empat kartu ringkasan utama:
+- Menampilkan grafik pemasukan (`INCOME`) dan pengeluaran (`EXPENSE`).
+- Sumber data adalah seluruh transaksi kelas yang tercatat di modul finance.
+- Berguna untuk melihat tren saldo kelas.
 
-1. **Total Learning Hours**
-   - Jam pembelajaran minggu ini
-   - Comparison dengan minggu sebelumnya
-   - Trend indicator (naik/turun)
+### 2.2 Arrears List (Daftar Tunggakan)
 
-2. **Completed Tasks**
-   - Jumlah task selesai
-   - Percentage dari total task
-   - Overdue tasks warning
+- Setiap anggota dihitung dari jadwal uang kas (`UangKasSchedule`) dan pembayaran yang sudah tercatat (pembayaran tunai `CashPayment` atau transaksi terkait).
+- Kolom yang ditampilkan: nama anggota, total iuran yang seharusnya dibayar, total yang sudah dibayar, dan besar tunggakan.
+- Status **lunas** muncul ketika total pembayaran sudah menutupi seluruh jadwal.
+- Data tanggal yang belum dibayar turut ditampilkan.
 
-3. **AI Interactions**
-   - Jumlah interaksi dengan AI Assistant
-   - Topik paling sering ditanyakan
-   - Response time average
+### 2.3 Pengaturan Uang Kas
 
-4. **Seminar Attendance**
-   - Seminar yang dihadiri
-   - Upcoming registrations
-   - Certificate earned
-
-### 2.3 Progress Chart
-- **Line Chart**: Progress pembelajaran over time
-- **Bar Chart**: Distribution per kategori/topik
-- **Pie Chart**: Time allocation per activity type
-- Interactive: Hover untuk detail, click untuk filter
-
-### 2.4 Activity Timeline
-- Chronological list of activities
-- Filter by type (learning, seminar, AI chat, assessment)
-- Quick actions dari timeline
-- Infinite scroll untuk load more
-
-### 2.5 Performance Metrics
-- **Accuracy Rate**: Persentase jawaban benar
-- **Improvement Trend**: Grafik peningkatan performa
-- **Benchmark**: Comparison dengan peer group
-- **Achievements**: Badges dan milestones
-
-### 2.6 Task Manager
-- **To Do**: Task yang belum dimulai
-- **In Progress**: Task sedang dikerjakan
-- **Completed**: Task selesai
-- Drag-and-drop untuk update status
-- Priority flags (High, Medium, Low)
-
-### 2.7 Recommendations Panel
-- Personalized suggestions based on:
-  - Learning gaps identified
-  - Upcoming deadlines
-  - Interest areas
-  - Peer comparison
+- Pengaturan jadwal uang kas (tanggal dan nominal) dilakukan melalui `/{slug}/cms/finance` oleh pengurus yang memiliki akses finance.
+- Dashboard hanya menampilkan hasil dari pengaturan tersebut.
 
 ## 3. Cara Menggunakan
 
-### 3.1 Navigasi Dashboard
-1. **Overview Tab**: Lihat ringkasan keseluruhan
-2. **Analytics Tab**: Deep dive ke statistik detail
-3. **Tasks Tab**: Manage todo list
-4. **Reports Tab**: Generate dan download reports
+1. Login ke akun yang menjadi anggota kelas.
+2. Buka `/{slug}/dashboard` (slug adalah nama kelas).
+3. Periksa grafik arus kas untuk melihat pemasukan/pengeluaran.
+4. Periksa `ArrearsList` untuk mengetahui siapa yang belum membayar uang kas.
+5. Jika ada data yang salah, hubungi pengurus kelas yang memiliki akses `cms/finance` agar memperbaiki transaksi atau jadwal uang kas.
 
-### 3.2 Customization
-1. Klik **Settings** di header
-2. Pilih metrics yang ingin ditampilkan
-3. Atur layout (grid, list, chart priority)
-4. Save preferences
+## 4. Tips
 
-### 3.3 Interpreting Data
-- **Green indicators**: On track atau improving
-- **Yellow indicators**: Need attention
-- **Red indicators**: Requires immediate action
-- Tooltips tersedia untuk penjelasan metrics
-
-## 4. Fitur Advanced
-
-### 4.1 Goal Setting
-- Set weekly/monthly learning goals
-- Track progress toward goals
-- Get notifications when falling behind
-- Celebrate milestones
-
-### 4.2 Comparative Analytics
-- Compare performance with:
-  - Your own past performance
-  - Peer group average
-  - Platform benchmarks
-- Privacy-safe aggregation
-
-### 4.3 Predictive Insights
-- AI-powered predictions:
-  - Estimated completion dates
-  - Risk of falling behind
-  - Suggested focus areas
-- Based on historical patterns
-
-### 4.4 Integration
-- Sync dengan calendar external (Google Calendar, Outlook)
-- Export to LMS systems
-- API access untuk custom integrations
-
-## 5. Tips & Best Practices
-
-### 5.1 Daily Usage
-- Check dashboard setiap hari untuk stay on track
-- Review weekly summary setiap Senin
-- Update task status secara real-time
-- Set realistic goals
-
-### 5.2 Data-Driven Decisions
-- Gunakan insights untuk prioritize tasks
-- Identify patterns dalam learning habits
-- Adjust strategy berdasarkan performance data
-- Share reports dengan mentor/dosen pembimbing
-
-### 5.3 Optimization
-- Focus on metrics yang actionable
-- Don't overwhelm dengan too much data
-- Regular review dan adjust goals
-- Use recommendations panel
-
-## 6. Troubleshooting
-
-### 6.1 Masalah Umum
-- **Data tidak update**: Click refresh button
-- **Chart tidak muncul**: Clear browser cache
-- **Metrics tidak akurat**: Check period selector
-- **Slow loading**: Reduce date range atau filters
-
-### 6.2 Data Accuracy
-- Data update setiap 5 menit
-- Some metrics may have 24-hour delay
-- Contact support jika discrepancy persists
-
-## 7. Keyboard Shortcuts
-- `D`: Go to Dashboard
-- `T`: Toggle task view
-- `E`: Export current view
-- `R`: Refresh data
-- `?`: Show shortcuts help
+- Cek dashboard secara rutin agar tunggakan terpantau lebih awal.
+- Pastikan transaksi dan jadwal uang kas selalu diinput di CMS finance agar perhitungan dashboard akurat.
+- Data dashboard selalu dimuat dari database terbaru (tidak di-cache).
 
 ---
-**Last Updated:** Januari 2025
+
+**Last Updated:** September 2026

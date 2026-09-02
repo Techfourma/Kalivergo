@@ -1,45 +1,48 @@
 # Privacy Policy - Kalivergo
 
+> Ringkasan untuk knowledge base AI. Laman resmi: `/privacy`.
+
 ## 1. Pengumpulan Data
-Kalivergo mengumpulkan data pengguna untuk meningkatkan pengalaman belajar:
-- Informasi profil (nama, email, institusi)
-- Riwayat aktivitas pembelajaran
-- Preferensi konten dan topik minat
+Kalivergo mengumpulkan data yang diperlukan untuk layanan manajemen kelas:
+
+- Identitas akun dan data kontak (nama, email, NIM, telepon).
+- Data keanggotaan dan peran dalam kelas.
+- Data profil dan portofolio (bio, pengalaman, keahlian, tautan sosial, foto).
+- Data KYC owner (alamat, KTP, selfie) dan dokumen anggota (KTM).
+- Data aktivitas: tugas, submission, jadwal, seminar, informasi, dan transaksi.
+- Log audit dan pertanyaan yang dikirim ke asisten AI.
 
 ## 2. Penggunaan Data
 Data digunakan untuk:
-- Personalisasi pengalaman belajar
-- Rekomendasi konten yang relevan
-- Analisis performa akademik
-- Peningkatan kualitas layanan
+
+- Menyediakan dan mengoperasikan fitur kelas.
+- Verifikasi identitas dan persetujuan keanggotaan/KYC.
+- Pengelolaan keuangan dan audit.
+- Meningkatkan kualitas layanan.
 
 ## 3. Keamanan Data
-- Enkripsi data end-to-end
-- Akses terbatas hanya untuk authorized personnel
-- Backup data secara berkala
-- Compliance dengan standar keamanan industri
+- Secret disimpan di environment variable/secret manager.
+- Akses dibatasi berdasarkan sesi, role, dan tenant.
+- Validasi input dilakukan di server.
+- Password diproses menggunakan bcrypt; token verifikasi disimpan sebagai hash.
 
 ## 4. Berbagi Data
-Kami tidak menjual atau menyewakan data pribadi Anda. Data hanya dibagikan dengan:
-- Partner edukasi terpercaya (dengan persetujuan)
-- Institusi akademik terkait (untuk keperluan pembelajaran)
+- Data tidak dijual atau disewakan.
+- Data hanya dibagikan bila diperlukan untuk operasional (misal penyedia storage Cloudinary, email, atau AI) dan sesuai perjanjian pemrosesan.
 
 ## 5. Hak Pengguna
-- Hak untuk mengakses data pribadi
-- Hak untuk memperbaiki data yang tidak akurat
-- Hak untuk menghapus akun dan data
-- Hak untuk export data dalam format standar
+- Hak untuk mengakses dan memperbaiki data pribadi.
+- Hak untuk menghapus akun/data sesuai kebijakan yang berlaku.
+- Hak untuk ekspor data sesuai ketentuan.
 
 ## 6. Cookie dan Tracking
-- Menggunakan cookie untuk session management
-- Analytics untuk memahami perilaku pengguna
-- Dapat dinonaktifkan melalui pengaturan browser
+- Menggunakan cookie untuk manajemen sesi (`kalivergo_user`, `kalivergo_tenant`).
+- Data sensitif tidak boleh disimpan pada cookie yang dapat dibaca JavaScript.
 
 ## 7. Perubahan Kebijakan
-Kebijakan privasi dapat diperbarui sewaktu-waktu. Perubahan akan dikomunikasikan melalui:
-- Notifikasi dalam aplikasi
-- Email kepada pengguna terdaftar
-- Update pada halaman ini
+- Kebijakan dapat diperbarui; perubahan diumumkan melalui laman ini dan/atau notifikasi.
 
 ## 8. Kontak
-Untuk pertanyaan mengenai privasi, hubungi: privacy@kalivergo.com
+- Untuk pertanyaan privasi, hubungi kontak resmi yang tertera pada laman `/privacy`.
+
+**Terakhir diperbarui:** September 2026

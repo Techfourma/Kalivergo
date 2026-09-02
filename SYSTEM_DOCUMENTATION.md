@@ -1,6 +1,6 @@
 # Kalivergo: System Documentation
 
-> Audit dan dokumentasi teknis berdasarkan source code pada branch `main`. Dokumen ini menjelaskan perilaku yang teridentifikasi saat audit; rekomendasi keamanan dan refactoring diberi label secara eksplisit.
+> Audit dan dokumentasi teknis berdasarkan source code pada branch `development`. Dokumen ini menjelaskan perilaku yang teridentifikasi saat audit; rekomendasi keamanan dan refactoring diberi label secara eksplisit. *(Diperbarui 2026-09-02 — penambahan halaman tasks/schedule/information/statistics, model `Pertemuan`, dan dataset AI.)*
 
 ## 1. Tech Stack & Architecture
 
@@ -37,7 +37,7 @@ Tenant routes menggunakan `dynamic = "force-dynamic"` pada entry point yang rele
 |---|---|
 | Public/auth | `/`, `/login`, `/auth/login`, `/signup`, `/member-signup`, `/forgot-password`, `/verify-forgot-password`, `/callback`, `/terms`, `/privacy`, `/unauthorized` |
 | Platform | `/platform`, `/platform/login`, `/platform/register`, `/platform/kyc`, `/platform/kyc-audit` |
-| Tenant | `/:slug`, `/:slug/home`, `/:slug/dashboard`, `/:slug/profil`, `/:slug/project`, `/:slug/information`, `/:slug/seminar`, `/:slug/tasks`, `/:slug/portofolio/:username` |
+| Tenant | `/:slug`, `/:slug/home`, `/:slug/tasks`, `/:slug/schedule`, `/:slug/information`, `/:slug/dashboard`, `/:slug/statistics`, `/:slug/profil`, `/:slug/seminar`, `/:slug/portofolio/:username` |
 | Tenant CMS | `/:slug/cms`, `/:slug/cms/access`, `/:slug/cms/audit`, `/:slug/cms/finance`, `/:slug/cms/information`, `/:slug/cms/people`, `/:slug/cms/schedule`, `/:slug/cms/seminar`, `/:slug/cms/tasks` |
 
 `(protected)` pada route group platform tidak menjadi bagian URL publik.
@@ -78,9 +78,10 @@ Contoh alur tenant: `src/app/[slug]/page.tsx` -> `resolveTenantFromRoute` -> `re
 
 ### Tenant operations
 
-- `Task` dan `Submission`: tugas serta pengumpulan hasil.
-- `Seminar` dan `SeminarSubmission`: seminar dan pendaftaran/hasil terkait.
-- `Schedule`: jadwal tenant.
+- `Task` dan `Submission`: tugas serta pengumpulan hasil; `Submission` kini menyimpan `pertemuanId` untuk pelacakan per pertemuan.
+- `Pertemuan`: sub-bagian tugas (`taskId`, `name`); setiap tugas umumnya memiliki satu pertemuan (`upsertTaskWithPertemuanForTenant`).
+- `Seminar` dan `SeminarSubmission`: seminar (termasuk `url`) dan pendaftaran/hasil terkait.
+- `Schedule`: jadwal tenant (judul, tanggal, waktu, lokasi, tipe).
 - `Transaction`, `CashPayment`, `UangKasSchedule`, dan `Category`: finance, kas, kategori, serta jadwal pembayaran.
 
 ### Content and interaction
@@ -121,7 +122,7 @@ Portfolio publik dibaca lewat `/api/portofolio/get`; update memakai `/api/portof
 
 ### AI assistant
 
-`ChatWindow` mengirim message ke `POST /api/ai-assistant/chat`. Endpoint memvalidasi tipe/panjang input, memerlukan login, lalu server AI client meneruskan request ke Gemini sehingga credential provider tetap server-side.
+`ChatWindow` mengirim message ke `POST /api/ai-assistant/chat`. Endpoint memvalidasi tipe/panjang input, memerlukan login, lalu server AI client (`src/server/ai/*`) meneruskan request ke Gemini sehingga credential provider tetap server-side. Knowledge base diambil dari folder internal `dataset/` (`src/server/ai/knowledgeBase.ts`): memuat file `.md`/`.txt`, membangun indeks, dan me-retrieve konteks relevan berbasis term-overlap. Konfigurasi diatur lewat `GEMINI_API_KEY`, `GEMINI_MODEL`, `KNOWLEDGE_BASE_DIR`, `AI_MAX_OUTPUT_TOKENS`, `AI_MAX_INPUT_CHARS`, `AI_MAX_HISTORY_MESSAGES`, `AI_MAX_RETRIES`, dan `AI_REQUEST_TIMEOUT_MS`. Unit test tersedia melalui `npm run test:ai`.
 
 ## 5. Audit Findings & Recommendations
 

@@ -1,4 +1,4 @@
-# Kalivergo AI Assistant (internal)
+# Kalivergo AI Assistant 
 
 Layanan AI Assistant internal Kalivergo berbasis **Gemini** dengan dataset
 lokal dari folder `dataset/` — tanpa bergantung pada service AI eksternal.
@@ -7,16 +7,20 @@ lokal dari folder `dataset/` — tanpa bergantung pada service AI eksternal.
 
 ```
 ai-assistant/
-├── ai_assistant.py     # Inti model: Gemini + knowledge base dataset internal
+├── ai_assistant.py     # Inti model: Gemini + knowledge base dataset internal (opsional, FastAPI)
 ├── main.py             # FastAPI server (chat / ask / search / health)
 └── requirements.txt    # Dependensi Python
 ```
 
-`ai_assistant.py` membaca dataset internal dari `../dataset` (folder akar
-proyek), menyusun system prompt otomatis dari konten tersebut, dan menjawab
+`ai_assistant.py` membaca seluruh dataset internal dari `../dataset` (folder akar
+proyek) secara rekursif, menyusun system prompt otomatis dari konten tersebut, dan menjawab
 menggunakan Gemini.
 
-## Menjalankan service FastAPI
+Implementasi utama AI Assistant saat ini berada di **Next.js** (`src/server/ai/*`),
+yang memuat knowledge base dari `dataset/` dan meneruskan pertanyaan ke Gemini.
+File Python opsional ini tetap bisa dijalankan sebagai layanan mandiri.
+
+## Menjalankan service FastAPI (opsional)
 
 ```bash
 pip install -r requirements.txt
@@ -31,6 +35,30 @@ Endpoint utama:
 - `POST /ask`     — tanya sekali (tanpa menyimpan konteks)
 - `POST /search`  — cari konten di knowledge base internal
 - `GET  /datasets`— info dataset yang dimuat
+
+## Memperbarui dataset knowledge base
+
+Knowledge base dibaca dari folder `dataset/` di akar proyek (file `.md`/`.txt`).
+Struktur yang digunakan saat ini:
+
+```text
+dataset/
+├── platform/            # cara kerja, terms, privacy, dan FAQ
+└── page/<nama-halaman>/  # panduan penggunaan tiap halaman
+```
+
+Catatan pemeliharaan:
+
+- Tambahkan atau perbarui file di `dataset/` saat fitur/UI berubah agar
+  jawaban asisten tetap akurat.
+- Knowledge base dimuat dan di-memoize saat server pertama kali dipakai.
+  Setelah mengubah isi `dataset/`, mulai ulang proses server (atau muat
+  ulang indeks via mekanisme `loadKnowledgeBase(force = true)` pada
+  `src/server/ai/knowledgeBase.ts`).
+- Format Markdown polos direkomendasikan; hindari karakter/HTML kompleks
+  agar tokenisasi dan retrieval term-overlap bekerja optimal.
+- Jalankan `npm run test:ai` setelah mengubah dataset untuk memastikan
+  knowledge base masih termuat dan retrieval tetap mengembalikan konteks.
 
 ## Catatan migrasi internal
 

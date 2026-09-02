@@ -93,9 +93,10 @@ Peran platform adalah `SUPER_ADMIN_KYC` dan `ADMIN_KYC`. Peran tenant adalah `OW
 - `University`, `StudyProgram`, `Tenant`: hierarki organisasi dan kelas.
 - `TenantMembership`: keanggotaan pengguna pada tenant beserta role.
 - `OwnerApplication`, `MemberApplication`, `KycReview`: pendaftaran owner/anggota dan review KYC.
-- `Task`, `Submission`: tugas dan pengumpulan pekerjaan.
+- `Task`, `Pertemuan`, `Submission`: tugas, sub-bagian pertemuan, dan pengumpulan pekerjaan per pertemuan.
 - `Transaction`, `Category`, `CashPayment`, `UangKasSchedule`: modul keuangan.
-- `Seminar`, `SeminarSubmission`, `Schedule`: kegiatan dan pendaftaran.
+- `Seminar`, `SeminarSubmission`, `Schedule`: kegiatan, pendaftaran seminar, dan jadwal kelas.
+- `Information`, `Comment`, `Reaction`, `ReadMark`: feed informasi, komentar, reaksi, dan status baca.
 - `CmsAccessPermission`: izin modul CMS per role dan tenant.
 - `AuditLog`: jejak aktivitas administratif.
 
@@ -106,11 +107,11 @@ Peran platform adalah `SUPER_ADMIN_KYC` dan `ADMIN_KYC`. Peran tenant adalah `OW
 | `prisma/` | Skema PostgreSQL/Prisma dan seed data development. |
 | `public/` | Aset statis seperti logo dan favicon. |
 | `src/app/` | Entry point Next.js App Router: laman publik, tenant, platform, auth, legal, dan API. |
-| `src/app/[slug]/` | Area tenant berdasarkan `customSlug`, termasuk home, dashboard, profil, portofolio, project, seminar, dan CMS. |
-| `src/app/api/` | Route handler HTTP untuk auth, finance, member, seminar, task, portofolio, upload, access, dan AI assistant. |
+| `src/app/[slug]/` | Area tenant berdasarkan `customSlug`, termasuk home, tasks, schedule, information, dashboard, statistics, seminar, profil, portofolio, dan CMS. |
+| `src/app/api/` | Route handler HTTP untuk auth, finance, member, seminar, task, submission, portofolio, upload profil/KYC, access, verifikasi email, dan AI assistant. |
 | `src/actions/` | Server actions autentikasi, registrasi, CMS, KYC, dan operasi mutasi lainnya. |
 | `src/components/` | Komponen presentasional dan layout untuk landing, home, dashboard, CMS, platform, security, serta UI umum. |
-| `src/features/` | Modul domain terisolasi: auth, tenant, owner, member, CMS, finance, task, seminar, portfolio, project, KYC, platform, dan AI assistant. |
+| `src/features/` | Modul domain terisolasi: auth, tenant, owner, member, CMS, finance, task, seminar, portfolio, KYC, platform, dan AI assistant. |
 | `src/server/` | Implementasi server-only untuk session, Prisma, tenant context, audit, email, storage, KYC, dan AI. |
 | `src/lib/` | Helper lintas modul, termasuk database, auth, tenant, email, Cloudinary, audit, dan utilitas. |
 | `src/shared/` | Kontrak dan helper bersama, terutama authorization dan komponen/utilitas shared. |
@@ -231,19 +232,23 @@ npx prisma db seed
 | `/verify-email` dan `/verify-forgot-password` | Menyelesaikan verifikasi email atau reset password menggunakan token yang valid. |
 | `/{slug}` | Masuk ke ruang kelas/tenant tertentu; hanya membership yang valid yang dapat melanjutkan. |
 | `/{slug}/home` | Melihat beranda dan informasi aktivitas tenant. |
-| `/{slug}/dashboard` | Melihat ringkasan operasional, termasuk tugas, keuangan, seminar, dan anggota. |
-| `/{slug}/profil` | Mengelola informasi profil pengguna. |
+| `/{slug}/dashboard` | Melihat ringkasan keuangan, termasuk arus kas dan daftar tunggakan uang kas anggota. |
+| `/{slug}/tasks` | Melihat daftar tugas yang belum dikerjakan (Task Tracker) dan siapa saja yang belum mengumpulkan. |
+| `/{slug}/schedule` | Melihat jadwal kegiatan kelas. |
+| `/{slug}/information` | Membaca feed informasi kelas, memberi reaksi, dan berkomentar. |
+| `/{slug}/statistics` | Melihat statistik progres pengerjaan tugas per anggota. |
+| `/{slug}/seminar` | Melihat seminar yang akan datang dan siapa saja yang belum mendaftar. |
+| `/{slug}/profil` | Mengelola foto profil, bio, pengalaman, keahlian, dan tautan sosial. |
 | `/{slug}/portofolio/{username}` | Melihat portofolio publik anggota. Data portofolio diubah melalui fitur profil/portofolio. |
-| `/{slug}/project` | Melihat showcase atau informasi project tenant. |
-| `/{slug}/seminar` | Melihat seminar dan melakukan submission/pendaftaran bila tersedia. |
 | `/{slug}/cms` | Dashboard pengurus dengan ringkasan tugas, saldo, seminar, dan anggota. Memerlukan CMS access. |
-| `/{slug}/cms/tasks` | Membuat serta mengelola tugas dan memantau submission. |
+| `/{slug}/cms/tasks` | Membuat serta mengelola tugas (kategori & pertemuan) dan memantau submission. |
 | `/{slug}/cms/people` | Menyetujui anggota dan mengatur role anggota/pengurus. |
 | `/{slug}/cms/finance` | Mencatat transaksi, kategori, invoice, pembayaran kas, serta melihat saldo/tunggakan. |
 | `/{slug}/cms/schedule` | Menambah dan mengelola agenda kegiatan kelas. |
 | `/{slug}/cms/seminar` | Mengelola seminar dan submission peserta. |
+| `/{slug}/cms/information` | Membuat dan menghapus postingan informasi kelas. |
 | `/{slug}/cms/access` | Mengatur hak akses modul CMS per role; umumnya membutuhkan hak owner. |
-| `/{slug}/cms/audit` | Meninjau jejak aktivitas administratif tenant. |
+| `/{slug}/cms/audit` | Meninjau jejak aktivitas administratif tenant dan mengekspor laporan. |
 | `/platform/login` dan `/platform/register` | Login/registrasi admin platform dengan mekanisme role platform. |
 | `/platform` | Overview panel platform. |
 | `/platform/kyc` | Meninjau aplikasi owner dan keputusan KYC. |
@@ -252,7 +257,7 @@ npx prisma db seed
 | `/terms` | Membaca syarat dan ketentuan penggunaan. |
 | `/unauthorized` | Ditampilkan ketika pengguna tidak memiliki akses ke resource. |
 
-Endpoint API utama berada di `/api/auth`, `/api/access`, `/api/ai-assistant/chat`, `/api/finance`, `/api/member`, `/api/seminar`, `/api/tasks`, `/api/portofolio`, `/api/upload-profile`, `/api/verify-email`, dan `/api/verify-forgot-password`. Endpoint tersebut sebaiknya dipanggil melalui UI atau client resmi agar session, validasi, dan konteks tenant tetap berjalan.
+Endpoint API utama berada di `/api/auth`, `/api/access`, `/api/ai-assistant/chat`, `/api/finance`, `/api/member`, `/api/seminar`, `/api/tasks`, `/api/tasks/[id]/submissions`, `/api/portofolio`, `/api/upload-profile`, `/api/upload-kyc`, `/api/verify-email`, dan `/api/verify-forgot-password`. Endpoint tersebut sebaiknya dipanggil melalui UI atau client resmi agar session, validasi, dan konteks tenant tetap berjalan.
 
 ## Keamanan, Kebijakan, dan Privasi
 
@@ -288,100 +293,17 @@ Jika proyek akan didistribusikan atau digunakan pihak ketiga, pemilik perlu mena
 
 - Seed Prisma ditujukan untuk development; kredensial seed tidak boleh dipakai di production.
 - `.env.example` menggunakan contoh port yang perlu diselaraskan dengan script development pada port `3001`.
-- Sebagian fitur project dapat menggunakan data contoh/mock sehingga perlu diverifikasi sebelum dianggap sumber data production.
+- Asisten AI menjawab berdasarkan dataset internal pada folder `dataset/`. Perbarui dataset tersebut agar jawaban tetap relevan; setelah mengubah dataset, muat ulang knowledge base atau mulai ulang server.
 - Ketersediaan email, Cloudinary, database, dan layanan AI bergantung pada konfigurasi environment.
 - Sebelum deployment, jalankan build, security test, review environment secret, backup database, dan review hukum atas laman privasi serta syarat penggunaan.
-=======
-<h1 align="center">Kalivergo</h1>
 
-<p align="center">
-  <strong>Workspace digital untuk mengelola organisasi, kelas, dan proyek dalam satu ekosistem.</strong>
-</p>
-
-<p align="center">
-  <a href="DOCUMENTATION.MD">Dokumentasi</a> ·
-  <a href="dataset/platform/privacy.md">Privasi</a> ·
-  <a href="dataset/platform/terms.md">Syarat dan Ketentuan</a>
-</p>
-
----
-
-## Tentang Kalivergo
-
-Kalivergo adalah platform manajemen berbasis web untuk membantu organisasi, universitas, program studi, dan kelas bekerja dengan lebih terarah. Platform ini menyatukan informasi, anggota, tugas, jadwal, seminar, portofolio, proyek, keuangan, dan audit dalam satu ruang kerja multi-tenant.
-
-Kalivergo dibangun untuk mengurangi pekerjaan administratif yang terpecah-pecah, memperjelas tanggung jawab, dan membuat setiap aktivitas memiliki konteks yang mudah ditelusuri.
-
-## Filosofi Perusahaan
-
-### Terarah dalam bekerja
-
-Setiap pekerjaan perlu memiliki tujuan, pemilik, tenggat, dan konteks yang jelas. Kalivergo membantu tim bergerak dari rencana menuju eksekusi tanpa kehilangan arah.
-
-### Terhubung dalam satu ekosistem
-
-Informasi, anggota, aktivitas, dan keputusan seharusnya tidak hidup di tempat yang terpisah. Kami merancang pengalaman kerja yang menghubungkan seluruh siklus kegiatan dalam satu platform.
-
-### Tumbuh dengan fondasi yang kuat
-
-Kami percaya sistem yang baik harus mampu berkembang bersama penggunanya. Karena itu, Kalivergo dibangun dengan arsitektur modular, pemisahan tenant, kontrol akses berlapis, dan ruang untuk integrasi baru.
-
-### Bertanggung jawab terhadap data
-
-Kepercayaan dibangun melalui perlindungan data dan akses yang tepat. Privasi, keamanan, auditabilitas, dan penggunaan teknologi yang bertanggung jawab menjadi bagian dari cara kami membangun produk.
-
-### Teknologi yang terasa manusiawi
-
-Teknologi hadir untuk membuat pekerjaan lebih ringan, bukan lebih rumit. Setiap fitur diarahkan untuk membantu pengguna memahami situasi, mengambil tindakan, dan berkolaborasi dengan lebih tenang.
-
-## Modul Utama
-
-- **Dashboard dan beranda** untuk melihat ringkasan aktivitas dan metrik.
-- **Manajemen anggota dan peran** dengan akses yang disesuaikan berdasarkan role dan tenant.
-- **CMS** untuk mengelola informasi, kategori, tugas, jadwal, seminar, dan aktivitas organisasi.
-- **Portofolio dan proyek** untuk menyimpan serta menampilkan karya dan progres kerja.
-- **Keuangan** untuk mencatat dan meninjau transaksi.
-- **AI Assistant** untuk membantu menemukan informasi dan menjawab pertanyaan terkait platform.
-- **Audit dan keamanan** untuk menelusuri aktivitas penting dan menjaga kontrol akses.
-- **Tema terang dan gelap** dengan pengalaman yang responsif di berbagai perangkat.
-
-## Cara Memulai
-
-Prasyarat dan langkah instalasi lengkap tersedia di [DOCUMENTATION.MD](DOCUMENTATION.MD#7-konfigurasi-dan-menjalankan-aplikasi).
-
-```bash
-npm install
-npm run dev
-```
-
-Untuk memahami struktur aplikasi, arsitektur, alur autentikasi, fitur, database, pengujian, dan batasan sistem, baca [dokumentasi teknis lengkap](DOCUMENTATION.MD).
-
-## Struktur Singkat
-
-```text
-src/          Aplikasi, komponen, feature, service, server, dan utilitas
-prisma/       Schema database dan seed
-public/       Asset statis, termasuk logo perusahaan
- dataset/      Konten bantuan dan pengetahuan internal
- tests/        Contract, security, dan unit test
-```
-
-## Dokumentasi dan Kebijakan
+## Dokumentasi Terkait
 
 - [Dokumentasi teknis](DOCUMENTATION.MD)
-- [Panduan penggunaan dashboard](dataset/page/dashboard/how-to-use.md)
-- [Panduan penggunaan home](dataset/page/home/how-to-use.md)
-- [Privacy Policy](dataset/platform/privacy.md)
-- [Terms of Service](dataset/platform/terms.md)
+- [System documentation](SYSTEM_DOCUMENTATION.md)
 - [Audit keamanan](SECURITY_AUDIT.md)
 - [Audit kualitas kode](CODE_QUALITY_AUDIT.md)
-
-## Status Proyek
-
-Kalivergo dikembangkan sebagai platform internal dan proprietary. Detail implementasi dapat berubah mengikuti perkembangan produk dan branch pengembangan. Gunakan `DOCUMENTATION.MD` sebagai sumber rujukan teknis utama.
-
-## Lisensi
-
-**Proprietary & Confidential**
-
-Hak Cipta © 2026 Kalivergo. Semua hak dilindungi undang-undang. Penggunaan, penyalinan, distribusi, modifikasi, dan reverse engineering tanpa izin tertulis tidak diperbolehkan.
+- [Audit performa](PERFORMANCE_AUDIT.md)
+- [Audit skema database](DATABASE_SCHEMA_AUDIT.md)
+- [Panduan AI Assistant](ai-assistant/README.md)
+- Knowledge base asisten AI: folder `dataset/` (halaman, kebijakan, dan cara kerja platform)
