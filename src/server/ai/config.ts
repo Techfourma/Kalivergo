@@ -4,7 +4,7 @@ import { env } from "@/config/env";
 export const AIAssistantConfig = {
   geminiApiKey: env.geminiApiKey?.trim(),
 
-  geminiModel: env.geminiModel || "gemini-2.5-flash",
+  geminiModel: env.geminiModel || "gemini-3.6-flash",
 
   knowledgeBaseDir: env.knowledgeBaseDir || "dataset",
 
