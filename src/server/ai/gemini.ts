@@ -60,6 +60,17 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function getErrorStatus(error: unknown): number | undefined {
+  if (typeof error !== "object" || error === null) return undefined;
+
+  const status = (error as { status?: unknown }).status;
+  if (typeof status === "number") return status;
+
+  const message = error instanceof Error ? error.message : String(error);
+  const match = message.match(/\b(429|500|502|503|504)\b/);
+  return match ? Number(match[1]) : undefined;
+}
+
 export async function generateAnswer(
   message: string,
   context: GeminiContext = {}
@@ -77,12 +88,13 @@ export async function generateAnswer(
       lastError = new Error("Empty response from Gemini");
     } catch (err) {
       lastError = err;
-      const retryable =
-        typeof err === "object" && err !== null && "status" in err
-          ? (err as { status?: number }).status === 429 ||
-            (err as { status?: number }).status === 500 ||
-            (err as { status?: number }).status === 503
-          : false;
+      console.error("[AI] Gemini request failed", {
+        attempt: attempt + 1,
+        model: AIAssistantConfig.geminiModel,
+        status: getErrorStatus(err),
+        message: err instanceof Error ? err.message : String(err),
+      });
+      const retryable = [429, 500, 503].includes(getErrorStatus(err) ?? 0);
       if (!retryable || attempt === AIAssistantConfig.maxRetries) break;
       const backoff = 500 * Math.pow(2, attempt);
       await sleep(backoff);
