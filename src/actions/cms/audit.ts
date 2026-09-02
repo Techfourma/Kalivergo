@@ -67,14 +67,24 @@ export async function getAuditLogs(module?: string, startDate?: Date, endDate?: 
     where.metadata = { path: ['tenantId'], equals: tenantId };
 
     const rows = await prisma.auditLog.findMany({ where, orderBy: { createdAt: 'desc' } });
+    const actorUserIds = rows
+      .map((row) => row.actorUserId)
+      .filter((userId): userId is string => Boolean(userId));
+    const actors = actorUserIds.length > 0
+      ? await prisma.user.findMany({
+          where: { id: { in: actorUserIds } },
+          select: { id: true, name: true },
+        })
+      : [];
+    const actorNames = new Map(actors.map((actor) => [actor.id, actor.name]));
 
     return rows.map((row) => ({
       id: row.id,
       module: row.entityType,
       action: row.action,
       description: (row.metadata as any)?.description ?? '',
-      userId: null,
-      userName: (row.metadata as any)?.userName ?? null,
+      userId: row.actorUserId,
+      userName: actorNames.get(row.actorUserId ?? '') ?? (row.metadata as any)?.userName ?? null,
       metadata: row.metadata,
       createdAt: row.createdAt,
     }));
