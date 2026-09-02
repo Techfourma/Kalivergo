@@ -18,6 +18,34 @@ Prioritas remediation:
 4. Seragamkan validasi Zod pada seluruh JSON/FormData dan perketat upload.
 5. Perbaiki token reset password, rate limiting, CSRF defense, dan test regresi authorization.
 
+## Pembaruan Audit (2026-09-02)
+
+Status temuan di bawah diperbarui berdasarkan inspeksi kode pada branch `development` (commit `b1dcadb`). Penilaian ini bersifat read-only; rekomendasi tetap berlaku sampai diimplementasikan.
+
+### Status per temuan
+
+| Temuan | Status saat ini |
+|---|---|
+| SEC-01 session `kalivergo_user` tidak ditandatangani | **MASIH BERLAKU.** `src/server/auth/session.ts` masih menyimpan object user ke cookie `kalivergo_user`; `parseSessionCookie()` di `src/shared/auth/session.ts` dan `src/middleware.ts` tetap hanya `JSON.parse` + cek `id`. |
+| `POST /api/tasks` tanpa guard CMS | **MASIH BERLAKU.** `src/app/api/tasks/route.ts` hanya memeriksa session dan tenant context (`getCurrentTenantForUser`), belum memanggil `requireCmsActor`/`requireTenantCmsAccess`. |
+| `GET /api/finance` tanpa guard CMS | **MASIH BERLAKU.** `src/app/api/finance/route.ts` GET hanya memeriksa session + tenant context. |
+| `POST /api/finance` authorization | **MEMBAIK.** POST kini memanggil `requireCmsActor(tenantId)` dan menolak selain OWNER/role CMS (403). |
+| Middleware melewati semua `/api` | **MASIH BERLAKU**; tiap route handler bertanggung jawab atas authorization-nya sendiri. |
+| Cookie `kalivergo_tenant` `httpOnly: false` | **MASIH BERLAKU** (`src/server/auth/session.ts`, `src/middleware.ts`). |
+
+### Endpoint yang perlu ikut di-review
+
+- `POST /api/tasks/[id]/submissions` — kelola submission; pastikan membership/role diverifikasi.
+- `POST /api/upload-kyc` — upload dokumen KYC; perlu validasi tipe, ukuran, dan scope user/tenant.
+- `POST /api/upload-profile` — upload foto profil; validasi MIME/ukuran tetap perlu diperketat.
+- `POST /api/ai-assistant/chat` — hanya menerima input teks terbatas; tetap jangan mengirim secret ke client.
+
+### Rekomendasi lanjutan
+
+- Gunakan satu helper `requireTenantCmsRequest` (page/action/API) yang menvalidasi session, tenant dari route, dan permission sebelum mutasi.
+- Tambahkan regression test untuk request dengan cookie sesi palsu, member tanpa role CMS terhadap `POST /api/tasks` dan `GET /api/finance`, serta akses lintas tenant.
+- Pertimbangkan menandatangani cookie session minimal (HMAC) sambil migrasi bertahap ke session server-side.
+
 ## Temuan Terverifikasi
 
 ### SEC-01 - Critical: session identity dapat dipalsukan

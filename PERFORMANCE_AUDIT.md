@@ -10,6 +10,24 @@ Audit statis menemukan bahwa sebagian besar komponen Client memang membutuhkan s
 
 Strategi `no-store` pada halaman privat dan API berbasis session sudah tepat dari sisi keamanan. Namun aplikasi belum memanfaatkan cache Data/Full Route Next.js untuk data yang aman dicache, dan beberapa `revalidatePath` tidak menyertakan prefix `/{slug}` dari route tenant.
 
+## Update Audit (2026-09-02)
+
+Pembaruan berikut mencatat status temuan pada branch `development` (commit `b1dcadb`).
+
+### Perubahan sejak audit awal
+
+1. **P1 - Fetch anggota landing: sebagian diperbaiki.** `src/app/[slug]/page.tsx` kini meresolusi anggota tenant di Server Component dan mengirimnya sebagai prop `members` ke `TenantLanding`. Namun `TenantLanding` masih menjalankan fetch client ke `/api/member` secara tidak bersyarat di `useEffect`, serta tetap mem-fetch ulang pada event `visibilitychange`, `focus`, dan `pageshow`. Rekomendasi: batasi fetch client hanya saat `serverMembers` kosong, atau hapus event listener yang tidak diperlukan.
+2. **P1 - Dashboard over-fetch: masih berlaku.** Dashboard masih mengambil seluruh transaksi, seluruh anggota beserta `cashPayments`, dan seluruh jadwal uang kas tanpa batas periode/`select` minimal.
+3. **P1 - CMS overview: masih berlaku.** `src/app/[slug]/cms/page.tsx` masih `findMany` seluruh transaksi lalu menghitung income/expense di JavaScript.
+4. **P2 - `force-dynamic` luas: masih berlaku.**
+5. **Perbaikan parsial `revalidatePath`.** `POST /api/finance` kini memanggil `revalidatePath(\`/${slug}/cms/finance\`)` dengan menyertakan slug tenant.
+6. **Penambahan pagination.** Feed informasi menggunakan cursor-based pagination (`InformationFeed`), pola yang baik untuk data yang terus bertambah.
+
+### Tambahan temuan
+
+- `src/app/[slug]/statistics/page.tsx` dan `src/app/[slug]/schedule/page.tsx` mengambil seluruh task/schedule tenant; untuk tenant besar, pertimbangkan `select` minimal dan agregasi.
+- CMS tasks memakai `getTaskManagementData` yang mengambil seluruh tugas + seluruh anggota per request; untuk kelas besar pertimbangkan pagination.
+
 ## Findings
 
 ### P1 - Fetch anggota landing dilakukan di client dan berulang

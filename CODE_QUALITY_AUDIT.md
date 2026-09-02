@@ -19,6 +19,25 @@ Prioritas perbaikan:
 4. Tambahkan validasi schema untuk semua body API dan validasi file yang lebih ketat.
 5. Perbaiki transaksi database, audit actor, type safety, dan toolchain test/lint.
 
+## Update Audit (2026-09-02)
+
+Pembaruan ini mencatat status pada branch `development` (commit `b1dcadb`).
+
+### Perbaikan yang sudah masuk
+
+- **Toolchain test bertambah.** `package.json` kini memiliki `test:security` (`tests/security/authorization.test.ts`) dan `test:ai` (`tests/unit/ai-client.test.ts`). Script agregat `test` masih belum ada, dan `lint` masih `next lint`.
+- **Guard finance.** `POST /api/finance` kini memakai `requireCmsActor(tenantId)`.
+- **Landing tenant.** Anggota kini juga diresolusi di Server Component (`src/app/[slug]/page.tsx`).
+- **`revalidatePath` finance** kini menyertakan slug tenant.
+- **Modularisasi bertambah.** Muncul modul feature `owner`, `ai-assistant`, `task` (dengan `Pertemuan`), serta halaman `information`, `statistics`, `tasks`, `schedule` dan CMS `information`.
+
+### Hal yang masih perlu diverifikasi
+
+- `src/actions/cms.ts` masih menjadi barrel campuran action lama dan feature action (catatan audit awal masih berlaku).
+- Ada dua facade Prisma (`src/lib/prisma.ts` dan `src/server/db/prisma.ts`) serta `src/lib/db.ts`; pastikan tim memilih satu sumber.
+- Tipe shared di `src/types/index.ts` masih perlu diselaraskan dengan Prisma (misal `Submission`, `CashPayment`, `Transaction`).
+- `npm run lint` dan `tsc --noEmit` masih perlu dipasang di CI bersama script `test` agregat.
+
 ## Temuan Prioritas Tinggi
 
 ### [CRITICAL] Identitas sesi dapat dipalsukan
