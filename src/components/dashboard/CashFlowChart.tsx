@@ -35,6 +35,7 @@ interface CashFlowTransaction {
   category?: CashFlowCategory | null;
   userId?: string | null;
   createdBy?: string | null;
+  invoiceUrl?: string | null;
   description?: string;
 }
 
@@ -48,6 +49,7 @@ interface CashFlowChartProps {
   universityName?: string;
   programName?: string;
   className?: string;
+  classSlug?: string;
   members?: MemberInfo[];
   incomeCategories?: { id: string; name: string; type?: string }[];
   expenseCategories?: { id: string; name: string; type?: string }[];
@@ -59,6 +61,7 @@ export default function CashFlowChart({
   universityName = "Universitas",
   programName = "Program",
   className = "Kelas",
+  classSlug = "slug",
   members = [],
   incomeCategories = [],
   expenseCategories = [],
@@ -158,15 +161,19 @@ export default function CashFlowChart({
     const { jsPDF } = await import("jspdf");
     const autoTable = (await import("jspdf-autotable")).default;
 
-    const doc = new jsPDF();
+    const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
 
-    doc.setFontSize(14);
+    doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.text(`${universityName} - ${programName} - ${className}`, 14, 20);
+    doc.text(`${className} [${classSlug}]`, 14, 18);
 
-    doc.setFontSize(12);
+    doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
-    doc.text("Mutasi Arus Kas", 14, 28);
+    doc.text(`${universityName} - ${programName} - ${className}`, 14, 25);
+
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.text("Mutasi Arus Kas", 14, 34);
 
     let dateInfo = "Semua Transaksi";
     if (startDate || endDate) {
@@ -178,41 +185,62 @@ export default function CashFlowChart({
         : "sekarang";
       dateInfo = `${startStr} - ${endStr}`;
     }
-    doc.setFontSize(10);
-    doc.text(`Periode: ${dateInfo}`, 14, 35);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Periode: ${dateInfo}`, 14, 41);
+    doc.text(`Total: ${filtered.length} transaksi`, 14, 47);
 
     const tableData = filtered.map((t) => {
       const member = members.find(m => m.userId === t.userId);
-      const memberName = member?.userName || t.createdBy || "-";
+      const memberName = member?.userName || "-";
       const inputterName = t.createdBy || "-";
+      const dateStr = new Date(t.date).toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
       const typeLabel = t.type === "INCOME" ? "Pemasukan" : "Pengeluaran";
       const categoryName = t.category?.name || "Tanpa Kategori";
       const amountFormatted = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(t.amount);
 
       return [
+        dateStr,
+        t.description || "-",
         memberName,
         inputterName,
         typeLabel,
         categoryName,
         amountFormatted,
+        t.invoiceUrl || "-",
       ];
     });
 
-    const head = [["Nama Anggota", "Input Oleh", "Jenis Transaksi", "Kategori", "Nominal"]];
+    const head = [["Tanggal", "Keterangan", "Anggota", "Input Oleh", "Jenis", "Kategori", "Nominal", "Bukti"]];
 
     autoTable(doc, {
-      startY: 42,
+      startY: 53,
       head,
       body: tableData,
       theme: "striped",
-      headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: "bold" },
+      headStyles: { fillColor: [15, 118, 110], textColor: 255, fontStyle: "bold", fontSize: 8 },
       alternateRowStyles: { fillColor: [245, 245, 245] },
-      margin: { top: 42 },
-      didParseCell: (data) => {
+      styles: { fontSize: 8, cellPadding: 2.2, valign: "middle" },
+      columnStyles: {
+        0: { cellWidth: 24 },
+        1: { cellWidth: 48 },
+        2: { cellWidth: 35 },
+        3: { cellWidth: 35 },
+        4: { cellWidth: 27 },
+        5: { cellWidth: 32 },
+        6: { cellWidth: 34, halign: "right" },
+        7: { cellWidth: 20, halign: "center" },
+      },
+      margin: { top: 53, left: 14, right: 14 },
+      didParseCell: (data: any) => {
         if (data.section === "body") {
-          if (data.column.index === 4) {
-            data.cell.styles.halign = "right";
-          }
+          data.cell.styles.textColor = data.column.index === 4
+            ? (data.cell.raw === "Pemasukan" ? [5, 150, 105] : [220, 38, 38])
+            : [31, 41, 55];
         }
       },
     });
@@ -239,7 +267,16 @@ export default function CashFlowChart({
     doc.text(`Total Pengeluaran: ${expenseFormatted}`, 14, finalY + 14);
     doc.text(`Saldo: ${balanceFormatted}`, 14, finalY + 21);
 
-    doc.save(`mutasi-arus-kas-${className}-${new Date().toISOString().split("T")[0]}.pdf`);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text(
+      `Dicetak pada: ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}`,
+      14,
+      finalY + 31
+    );
+    doc.text("Dokumen ini dibuat otomatis oleh Kalivergo.", 14, finalY + 36);
+
+    doc.save(`mutasi-arus-kas-${classSlug}-${new Date().toISOString().split("T")[0]}.pdf`);
   };
 
   const hasFilter = Boolean(startDate || endDate);
@@ -344,6 +381,16 @@ export default function CashFlowChart({
             >
               <RotateCcw className="h-4 w-4" />
               Reset
+            </button>
+            <button
+              type="button"
+              onClick={handleExportPDF}
+              disabled={shouldLockFeatures}
+              title="Export mutasi arus kas ke PDF"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <FileDown className="h-4 w-4" />
+              Export PDF
             </button>
           </div>
         </div>

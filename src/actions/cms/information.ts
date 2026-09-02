@@ -7,6 +7,14 @@ import { revalidatePath } from 'next/cache';
 import { uploadToCloudinary, deleteFromCloudinary } from '@/lib/cloudinary';
 import { InformationType } from '@prisma/client';
 
+function sanitizeFileName(name: string): string {
+  return name
+    .normalize('NFKD')
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
 export async function createInformation(formData: FormData) {
   try {
     const session = await getCurrentSessionUser();
@@ -39,6 +47,8 @@ export async function createInformation(formData: FormData) {
 
       let resourceType: 'image' | 'video' | 'raw' = 'image';
       let folder = 'kalivergo/information/images';
+      let publicId: string | undefined;
+      let accessMode: 'public' | 'authenticated' | 'private' | undefined;
 
       if (type === InformationType.VIDEO) {
         resourceType = 'video';
@@ -46,11 +56,18 @@ export async function createInformation(formData: FormData) {
       } else if (type === InformationType.PDF) {
         resourceType = 'raw';
         folder = 'kalivergo/information/pdfs';
+        accessMode = 'public';
+        const originalName = file.name || `document_${Date.now()}`;
+        const baseName = originalName.replace(/\.[^/.]+$/, '');
+        const ext = originalName.match(/\.[^/.]+$/)?.[0] || '.pdf';
+        publicId = `${Date.now()}_${sanitizeFileName(baseName)}${ext}`;
       }
 
       const uploadResult = await uploadToCloudinary(buffer, {
         folder,
         resourceType,
+        publicId,
+        accessMode,
       });
 
       mediaUrl = uploadResult.secure_url;

@@ -34,7 +34,7 @@ export const env = {
   },
   get aiMaxOutputTokens(): number {
     const value = Number(process.env.AI_MAX_OUTPUT_TOKENS);
-    return Number.isFinite(value) && value > 0 ? value : 1500;
+    return Number.isFinite(value) && value > 0 ? value : 3000;
   },
   get brevoApiKey(): string | undefined {
     return process.env.BREVO_API_KEY;
