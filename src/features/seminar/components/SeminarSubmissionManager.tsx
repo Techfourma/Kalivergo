@@ -101,54 +101,54 @@ export default function SeminarSubmissionManager({
       )}
 
       <div
-        className="fixed inset-0 z-[100] bg-white sm:bg-black/50 sm:flex sm:items-center sm:justify-center"
+        className="fixed inset-0 z-[100] bg-white dark:bg-dark-950 sm:bg-black/50 dark:sm:bg-black/70 sm:flex sm:items-center sm:justify-center"
         style={{ animation: "modalIn 0.2s cubic-bezier(0.34,1.56,0.64,1)" }}
       >
-        <div className="w-full h-full sm:h-auto sm:max-h-[85vh] sm:max-w-lg sm:rounded-2xl flex flex-col overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-dark-100 shrink-0">
+        <div className="w-full h-full sm:h-auto sm:max-h-[85vh] sm:max-w-lg sm:rounded-2xl flex flex-col overflow-hidden bg-white dark:bg-dark-900 sm:border sm:border-dark-100 dark:sm:border-dark-700/60">
+          <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-dark-100 dark:border-dark-700/60 shrink-0">
             <div className="flex-1 min-w-0">
-              <h2 className="text-base sm:text-lg font-bold text-dark-900">Kelola Submission</h2>
-              <p className="text-xs text-dark-500 mt-0.5 truncate max-w-[200px] sm:max-w-[300px]">
+              <h2 className="text-base sm:text-lg font-bold text-dark-900 dark:text-dark-50">Kelola Submission</h2>
+              <p className="text-xs text-dark-500 dark:text-dark-400 mt-0.5 truncate max-w-[200px] sm:max-w-[300px]">
                 {seminarTitle}
               </p>
             </div>
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-dark-100 transition-colors text-dark-500 shrink-0 ml-2"
+              className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-dark-100 dark:hover:bg-dark-800 transition-colors text-dark-500 dark:text-dark-400 shrink-0 ml-2"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
 
-          <div className="px-4 pt-3 pb-2 sm:px-6 sm:pt-4 sm:pb-3 border-b border-dark-50 shrink-0 space-y-2 sm:space-y-3">
+          <div className="px-4 pt-3 pb-2 sm:px-6 sm:pt-4 sm:pb-3 border-b border-dark-50 dark:border-dark-700/60 shrink-0 space-y-2 sm:space-y-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-dark-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-dark-400 dark:text-dark-500" />
               <input
                 type="text"
                 placeholder="Cari nama anggota..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-dark-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                className="w-full pl-9 pr-4 py-2 border border-dark-200 dark:border-dark-600 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-50 placeholder:text-dark-400 dark:placeholder:text-dark-500 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-dark-500">
-                <span className="font-semibold text-blue-600">{selected.size}</span>
+              <span className="text-xs text-dark-500 dark:text-dark-400">
+                <span className="font-semibold text-blue-600 dark:text-blue-400">{selected.size}</span>
                 {" "}/{" "}{allUsers.length} dipilih
               </span>
               <div className="flex gap-1.5 sm:gap-2">
                 <button
                   type="button"
                   onClick={selectAll}
-                  className="text-xs px-2 sm:px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors font-medium"
+                  className="text-xs px-2 sm:px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors font-medium"
                 >
                   Pilih Semua
                 </button>
                 <button
                   type="button"
                   onClick={clearAll}
-                  className="text-xs px-2 sm:px-2.5 py-1 rounded-md bg-dark-100 text-dark-600 hover:bg-dark-200 transition-colors font-medium"
+                  className="text-xs px-2 sm:px-2.5 py-1 rounded-md bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700 transition-colors font-medium"
                 >
                   Hapus Semua
                 </button>
@@ -158,7 +158,7 @@ export default function SeminarSubmissionManager({
 
           <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-2 overscroll-contain">
             {filtered.length === 0 ? (
-              <div className="text-center py-8 text-dark-400 text-sm">
+              <div className="text-center py-8 text-dark-400 dark:text-dark-500 text-sm">
                 Tidak ada anggota ditemukan
               </div>
             ) : (
@@ -172,14 +172,14 @@ export default function SeminarSubmissionManager({
                       onClick={() => toggle(user.id)}
                       className={`w-full flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-left transition-all ${
                         isChecked
-                          ? "bg-blue-50 border border-blue-200"
-                          : "hover:bg-dark-50 border border-transparent"
+                          ? "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50"
+                          : "hover:bg-dark-50 dark:hover:bg-dark-800 border border-transparent"
                       }`}
                     >
                       {isChecked ? (
-                        <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 shrink-0" />
+                        <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400 shrink-0" />
                       ) : (
-                        <Circle className="h-4 w-4 sm:h-5 sm:w-5 text-dark-300 shrink-0" />
+                        <Circle className="h-4 w-4 sm:h-5 sm:w-5 text-dark-300 dark:text-dark-600 shrink-0" />
                       )}
                       <Avatar
                         src={user.image}
@@ -188,15 +188,15 @@ export default function SeminarSubmissionManager({
                         size="sm"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium truncate ${isChecked ? "text-blue-900" : "text-dark-900"}`}>
+                        <p className={`text-sm font-medium truncate ${isChecked ? "text-blue-900 dark:text-blue-200" : "text-dark-900 dark:text-dark-50"}`}>
                           {user.name}
                         </p>
                         {user.email && (
-                          <p className="text-xs text-dark-400 truncate hidden sm:block">{user.email}</p>
+                          <p className="text-xs text-dark-400 dark:text-dark-500 truncate hidden sm:block">{user.email}</p>
                         )}
                       </div>
                       {isChecked && (
-                        <span className="text-xs bg-blue-600 text-white px-1.5 sm:px-2 py-0.5 rounded-full shrink-0">
+                        <span className="text-xs bg-blue-600 dark:bg-blue-500 text-white px-1.5 sm:px-2 py-0.5 rounded-full shrink-0">
                           ✓
                         </span>
                       )}
@@ -207,15 +207,15 @@ export default function SeminarSubmissionManager({
             )}
           </div>
 
-          <div className="px-4 py-3 sm:px-6 sm:py-4 border-t border-dark-100 shrink-0 flex items-center justify-between bg-dark-50/50">
-            <p className="text-xs text-dark-500 hidden sm:block">
+          <div className="px-4 py-3 sm:px-6 sm:py-4 border-t border-dark-100 dark:border-dark-700/60 shrink-0 flex items-center justify-between bg-dark-50/50 dark:bg-dark-800/50">
+            <p className="text-xs text-dark-500 dark:text-dark-400 hidden sm:block">
               {selected.size} anggota akan tercatat sudah mendaftar
             </p>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="px-3 sm:px-4 py-2 text-sm font-medium text-dark-700 hover:bg-dark-100 rounded-lg transition-colors"
+                className="px-3 sm:px-4 py-2 text-sm font-medium text-dark-700 dark:text-dark-300 hover:bg-dark-100 dark:hover:bg-dark-800 rounded-lg transition-colors"
               >
                 Batal
               </button>
@@ -255,11 +255,11 @@ export default function SeminarSubmissionManager({
           setSearch("");
           setIsOpen(true);
         }}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-sm font-medium transition-all hover:scale-105 active:scale-95"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-700/50 text-blue-700 dark:text-blue-300 text-sm font-medium transition-all hover:scale-105 active:scale-95"
       >
         <Users className="h-3.5 w-3.5" />
         <span>Submission</span>
-        <span className="ml-1 bg-blue-600 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center leading-none">
+        <span className="ml-1 bg-blue-600 dark:bg-blue-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center leading-none">
           {savedCount}
         </span>
       </button>
