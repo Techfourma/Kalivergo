@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Eye, EyeOff, CheckCircle2, Mail, ArrowLeft, Upload, University } from "lucide-react";
 import Loading from "@/components/layout/Loading";
+import PageBackground from "@/components/ui/PageBackground";
 
 type OwnerSignupValues = {
   fullName: string;
@@ -136,7 +137,8 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-dark-950 via-dark-900 to-primary-950 p-4 relative">
+    <div className="relative flex min-h-screen items-center justify-center bg-dark-50 p-4 dark:bg-dark-950">
+      <PageBackground />
       <Loading
         isVisible={isLoading}
         message="Mendaftarkan kelas"
@@ -189,7 +191,7 @@ export default function SignupPage() {
         </div>
       )}
 
-      <div className={`bg-white dark:bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md transition-opacity ${showPopup ? "opacity-40 blur-sm" : ""}`}>
+      <div className={`relative z-10 bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md dark:bg-dark-800 ${showPopup ? "opacity-40 blur-sm" : ""}`}>
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 shadow-lg overflow-hidden">
