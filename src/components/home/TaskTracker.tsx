@@ -1,15 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
-import { Calendar, Clock, Filter, CheckCircle2, Search } from "lucide-react";
+import { Calendar, Clock, Filter, CheckCircle2, Search, ClipboardCheck, X, Loader2 } from "lucide-react";
 import { formatDateTime, getDaysRemaining } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import {
   DEFAULT_TASK_CATEGORY,
   getTaskCategoryLabel,
 } from "@/shared/task-category";
+import { submitTaskForReviewAction } from "@/features/task/actions/task.action";
 
 interface Task {
   id: string;
@@ -28,15 +30,25 @@ interface TaskTrackerProps {
   currentUserId: string;
 }
 
+type Submission = { userId: string; status: string };
+
 export default function TaskTracker({
   tasks,
   allTasks,
   currentUserId,
 }: TaskTrackerProps) {
+  const router = useRouter();
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [filteredTasks, setFilteredTasks] = useState<Task[]>(tasks);
+  const [pendingTaskIds, setPendingTaskIds] = useState<Set<string>>(new Set());
+  const [confirmTask, setConfirmTask] = useState<Task | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isPending, startTransition] = useTransition();
+  const gestureStartX = useRef<number | null>(null);
+  const gestureTaskId = useRef<string | null>(null);
+  const didSwipe = useRef(false);
 
   useEffect(() => {
     if (dateRange.start && dateRange.end) {
@@ -61,6 +73,84 @@ export default function TaskTracker({
         submission.userId === currentUserId &&
         submission.status === "SUBMITTED"
     ) ?? false;
+
+  const currentSubmission = (task: Task) =>
+    (task.submissions as Submission[] | undefined)?.find(
+      (submission) => submission.userId === currentUserId
+    );
+
+  const submitAfterSwipe = (task: Task) => {
+    if (currentSubmission(task)?.status === "PENDING_REVIEW") return;
+    setConfirmTask(task);
+  };
+
+  const confirmSubmission = () => {
+    if (!confirmTask) return;
+    const task = confirmTask;
+    setConfirmTask(null);
+
+    setPendingTaskIds((previous) => new Set(previous).add(task.id));
+    startTransition(async () => {
+      const result = await submitTaskForReviewAction(task.id);
+      setPendingTaskIds((previous) => {
+        const next = new Set(previous);
+        next.delete(task.id);
+        return next;
+      });
+      if ("error" in result && result.error) {
+        window.alert(result.error);
+      } else {
+        router.refresh();
+      }
+    });
+  };
+
+  const handlePointerDown = (taskId: string, event: React.PointerEvent<HTMLElement>) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    gestureStartX.current = event.clientX;
+    gestureTaskId.current = taskId;
+    didSwipe.current = false;
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLElement>) => {
+    if (gestureStartX.current === null) return;
+    const distance = event.clientX - gestureStartX.current;
+    if (Math.abs(distance) > 10) {
+      event.preventDefault();
+      setSwipeOffset(Math.max(-140, Math.min(140, distance)));
+    }
+  };
+
+  const handlePointerUp = (event: React.PointerEvent<HTMLElement>) => {
+    const startX = gestureStartX.current;
+    const taskId = gestureTaskId.current;
+    gestureStartX.current = null;
+    gestureTaskId.current = null;
+    const distance = startX === null ? 0 : event.clientX - startX;
+    setSwipeOffset(0);
+    if (startX === null || !taskId) return;
+
+    if (Math.abs(distance) < 60) return;
+    didSwipe.current = true;
+    const task = allTasks.find((candidate) => candidate.id === taskId);
+    if (task) submitAfterSwipe(task);
+  };
+
+  const handleCardClick = (event: React.MouseEvent<HTMLElement>) => {
+    if (!didSwipe.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+    didSwipe.current = false;
+  };
+
+  const swipeStyle = (taskId: string) => ({
+    transform: `translateX(${gestureTaskId.current === taskId ? swipeOffset : 0}px)`,
+    transition: gestureTaskId.current === taskId && swipeOffset !== 0
+      ? "none"
+      : "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)",
+    userSelect: "none" as const,
+  });
 
   const matchesCategory = (task: Task) =>
     categoryFilter === "all" ||
@@ -116,7 +206,7 @@ export default function TaskTracker({
             <div>
               <h2 className="text-xl font-bold text-dark-900 dark:text-white">Task Tracker</h2>
               <p className="text-sm text-dark-500 dark:text-dark-400 mt-1">
-                Pantau semua tugas berdasarkan rentang waktu
+                Geser kartu tugas ke kiri/kanan jika tugas sudah selesai.
               </p>
             </div>
             <div className="flex flex-col">
@@ -177,7 +267,7 @@ export default function TaskTracker({
             const card = (
               <div
                 key={task.id}
-                className="group rounded-xl border border-dark-100 dark:border-dark-800 bg-dark-50/50 dark:bg-dark-800/40 p-4 hover:border-primary-200 dark:hover:border-primary-800/50 hover:bg-primary-50/30 dark:hover:bg-primary-950/20 transition-all duration-200"
+                className="group select-none rounded-xl border border-dark-100 dark:border-dark-800 bg-dark-50/50 dark:bg-dark-800/40 p-4 hover:border-primary-200 dark:hover:border-primary-800/50 hover:bg-primary-50/30 dark:hover:bg-primary-950/20 transition-all duration-200"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -222,10 +312,33 @@ export default function TaskTracker({
                     </span>
                   )}
                 </div>
+                {currentSubmission(task)?.status === "PENDING_REVIEW" && (
+                  <p className="mt-3 text-xs font-medium text-amber-700 dark:text-amber-300">
+                    Menunggu validasi administrator
+                  </p>
+                )}
+                {currentSubmission(task)?.status === "REJECTED" && (
+                  <p className="mt-3 text-xs font-medium text-red-700 dark:text-red-300">
+                    Submission dikembalikan. Silakan kerjakan kembali.
+                  </p>
+                )}
               </div>
             );
 
-            if (!task.url) return card;
+            if (!task.url) {
+              return (
+                <div
+                  key={task.id}
+                  onPointerDown={(event) => handlePointerDown(task.id, event)}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onClick={handleCardClick}
+                  style={{ ...swipeStyle(task.id), touchAction: "pan-y" }}
+                >
+                  {card}
+                </div>
+              );
+            }
 
             return (
               <a
@@ -234,7 +347,13 @@ export default function TaskTracker({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`Buka tugas ${task.title} di tab baru`}
-                className="block"
+                onPointerDown={(event) => handlePointerDown(task.id, event)}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onClick={handleCardClick}
+                aria-busy={isPending && pendingTaskIds.has(task.id)}
+                className="block touch-pan-y"
+                style={swipeStyle(task.id)}
               >
                 {card}
               </a>
@@ -259,6 +378,45 @@ export default function TaskTracker({
           </div>
         )}
       </div>
+
+      {confirmTask && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-md rounded-2xl border border-dark-100 bg-white p-6 text-center shadow-2xl dark:border-dark-700 dark:bg-dark-900 sm:p-8">
+            <button
+              type="button"
+              onClick={() => setConfirmTask(null)}
+              className="absolute right-4 top-4 rounded-lg p-1.5 text-dark-400 transition-colors hover:bg-dark-100 hover:text-dark-600 dark:hover:bg-dark-800 dark:hover:text-dark-200"
+              aria-label="Tutup"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400">
+              <ClipboardCheck className="h-8 w-8" />
+            </div>
+            <p className="mt-3 text-sm leading-6 text-dark-600 dark:text-dark-300">
+              Apakah Anda yakin telah menyelesaikan tugas <span className="font-semibold text-dark-900 dark:text-white">{confirmTask.title}</span>?
+            </p>
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-center">
+              <button
+                type="button"
+                onClick={() => setConfirmTask(null)}
+                className="rounded-lg border border-dark-200 px-5 py-2.5 text-sm font-medium text-dark-700 transition-colors hover:bg-dark-50 dark:border-dark-700 dark:text-dark-200 dark:hover:bg-dark-800"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmSubmission}
+                disabled={isPending}
+                className="flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-primary-600/20 transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                Iya
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }

@@ -10,6 +10,10 @@ import {
   findTasksForTenant,
   deleteTaskById,
   replaceTaskSubmissions,
+  findPendingTaskSubmissions,
+  findSubmissionWithTask,
+  submitTaskForReview,
+  reviewTaskSubmission,
   updateTaskById,
   createPertemuan,
   setTaskPertemuan,
@@ -108,6 +112,34 @@ export async function getTaskManagementData(tenantId: string) {
     findTenantTaskMembers(tenantId),
   ]);
   return { tasks, allUsers: memberships.map((membership) => membership.user) };
+}
+
+export async function getPendingTaskSubmissionsForTenant(tenantId: string) {
+  return findPendingTaskSubmissions(tenantId);
+}
+
+export async function submitTaskForReviewForTenant(taskId: string, tenantId: string, userId: string) {
+  const task = await findTaskWithTenant(taskId);
+  if (!task) return { error: "Tugas tidak ditemukan" } as const;
+  if (task.tenantId !== tenantId) {
+    return { error: "Akses ditolak: Tugas bukan milik kelas Anda" } as const;
+  }
+  return submitTaskForReview(taskId, userId);
+}
+
+export async function reviewTaskSubmissionForTenant(
+  submissionId: string,
+  tenantId: string,
+  status: "SUBMITTED" | "REJECTED"
+) {
+  const submission = await findSubmissionWithTask(submissionId);
+  if (!submission || submission.task.tenantId !== tenantId) {
+    return { error: "Submission tidak ditemukan" } as const;
+  }
+  if (submission.status !== "PENDING_REVIEW") {
+    return { error: "Submission ini sudah diproses" } as const;
+  }
+  return { submission: await reviewTaskSubmission(submissionId, status) } as const;
 }
 export async function deleteTaskForTenant(id: string, tenantId: string) {
   const task = await findTaskWithTenant(id);

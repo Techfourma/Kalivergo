@@ -102,6 +102,32 @@ export function findTaskSubmissions(taskId: string) {
   });
 }
 
+export function findPendingTaskSubmissions(tenantId: string) {
+  return prisma.submission.findMany({
+    where: { status: "PENDING_REVIEW", task: { tenantId } },
+    include: {
+      task: {
+        select: {
+          id: true,
+          title: true,
+          category: true,
+          pertemuan: { select: { id: true, name: true }, orderBy: { createdAt: "asc" }, take: 1 },
+        },
+      },
+      pertemuan: { select: { id: true, name: true } },
+      user: { select: { id: true, name: true, email: true, image: true } },
+    },
+    orderBy: { submittedAt: "asc" },
+  });
+}
+
+export function findSubmissionWithTask(submissionId: string) {
+  return prisma.submission.findUnique({
+    where: { id: submissionId },
+    include: { task: { select: { tenantId: true } } },
+  });
+}
+
 export function findTenantTaskMembers(tenantId: string) {
   return prisma.tenantMembership.findMany({
     where: { tenantId },
@@ -131,6 +157,39 @@ export async function replaceTaskSubmissions(
     });
   }
   return prisma.submission.count({ where: { taskId } });
+}
+
+export async function submitTaskForReview(taskId: string, userId: string) {
+  const task = await prisma.task.findUnique({
+    where: { id: taskId },
+    select: { pertemuan: { select: { id: true }, orderBy: { createdAt: "asc" }, take: 1 } },
+  });
+  if (!task) return { error: "Tugas tidak ditemukan" } as const;
+
+  const pertemuanId = task.pertemuan[0]?.id ?? null;
+  const existing = await prisma.submission.findFirst({ where: { taskId, userId } });
+
+  if (existing?.status === "SUBMITTED") {
+    return { error: "Tugas ini sudah disetujui administrator" } as const;
+  }
+
+  const submission = existing
+    ? await prisma.submission.update({
+        where: { id: existing.id },
+        data: { status: "PENDING_REVIEW", submittedAt: new Date(), pertemuanId },
+      })
+    : await prisma.submission.create({
+        data: { taskId, userId, status: "PENDING_REVIEW", pertemuanId },
+      });
+
+  return { submission } as const;
+}
+
+export function reviewTaskSubmission(
+  submissionId: string,
+  status: "SUBMITTED" | "REJECTED"
+) {
+  return prisma.submission.update({ where: { id: submissionId }, data: { status } });
 }
 
 export function createPertemuan(taskId: string, name: string) {

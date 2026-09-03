@@ -1,8 +1,6 @@
 import { getAllOwners } from "@/actions/platform-owners";
 import DeletePlatformOwnerButton from "@/components/cms/DeletePlatformOwnerButton";
 import PageBackground from "@/components/ui/PageBackground";
-import { Eye } from "lucide-react";
-import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -48,9 +46,6 @@ export default async function PlatformUsersPage() {
                     Status Aplikasi
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wider">
-                    KYC
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wider">
                     Aksi
                   </th>
                 </tr>
@@ -65,15 +60,6 @@ export default async function PlatformUsersPage() {
                 ) : (
                   owners.map((owner) => {
                     const appStatus = statusConfig[owner.applicationStatus] || statusConfig.NO_APPLICATION;
-                    const kycStatusLabel =
-                      owner.kycStatus === "APPROVED"
-                        ? "Disetujui"
-                        : owner.kycStatus === "REJECTED"
-                        ? "Ditolak"
-                        : owner.kycStatus === "PENDING"
-                        ? "Menunggu"
-                        : owner.kycStatus || "-";
-
                     return (
                       <tr key={owner.userId} className="hover:bg-dark-50/50 dark:hover:bg-dark-900/30 transition-colors">
                         <td className="px-6 py-4">
