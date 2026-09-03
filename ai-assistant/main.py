@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Optional
@@ -6,17 +7,18 @@ from datetime import datetime
 import uvicorn
 
 from ai_assistant import AIAssistant
+from providers import get_provider_order, is_any_provider_configured
 
 
 app = FastAPI(
     title="Kalivergo AI Assistant API",
-    description="Internal AI Assistant API untuk platform Kalivergo menggunakan Gemini dan dataset internal",
-    version="1.0.0"
+    description="Internal AI Assistant API untuk platform Kalivergo dengan multi-provider fallback (Groq → Cerebras → Gemini → OpenRouter)",
+    version="2.0.0",
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,6 +30,8 @@ assistant: Optional[AIAssistant] = None
 class ChatRequest(BaseModel):
     message: str = Field(..., description="Pesan dari pengguna")
     use_context: bool = Field(default=True, description="Gunakan chat history untuk context")
+    history: Optional[List[dict]] = Field(default=None, description="Riwayat percakapan")
+    user_id: str = Field(default="anonymous", description="User identifier untuk rate limiting")
 
 
 class ChatResponse(BaseModel):
@@ -36,6 +40,9 @@ class ChatResponse(BaseModel):
     response_time_ms: float
     model: str
     context_used: bool
+    provider: str = "unknown"
+    fallback_used: bool = False
+    fallback_chain: List[str] = Field(default_factory=list)
 
 
 class SearchRequest(BaseModel):
@@ -59,95 +66,152 @@ class HealthCheck(BaseModel):
     status: str
     timestamp: str
     datasets_loaded: int
+    providers: List[str]
 
 
 @app.on_event("startup")
 async def startup_event():
-    """Initialize AI Assistant saat aplikasi start"""
     global assistant
     try:
         assistant = AIAssistant()
-        print(f"✓ AI Assistant initialized with {len(assistant.dataset_contents)} datasets")
+        assistant.load_knowledge_base()
+        print(f"✓ AI Assistant initialized with {assistant.get_dataset_info()['total_datasets']} datasets")
+        print(f"✓ Active providers: {assistant.active_providers}")
     except Exception as e:
         print(f"✗ Failed to initialize AI Assistant: {e}")
-        raise
 
 
 @app.get("/", tags=["Root"])
 async def root():
-    """Root endpoint dengan informasi API"""
     return {
         "name": "Kalivergo AI Assistant API",
-        "version": "1.0.0",
-        "description": "Internal AI Assistant menggunakan Gemini dan dataset internal Kalivergo",
+        "version": "2.0.0",
+        "description": "Multi-provider AI Assistant (Groq → Cerebras → Gemini → OpenRouter) dengan dataset internal Kalivergo",
         "docs": "/docs",
-        "health": "/health"
+        "health": "/health",
     }
 
 
 @app.get("/health", response_model=HealthCheck, tags=["Health"])
 async def health_check():
-    """Health check endpoint"""
     if not assistant:
         raise HTTPException(status_code=503, detail="AI Assistant not initialized")
 
     return HealthCheck(
-        status="healthy",
+        status="healthy" if is_any_provider_configured() else "degraded",
         timestamp=datetime.now().isoformat(),
-        datasets_loaded=len(assistant.dataset_contents)
+        datasets_loaded=assistant.get_dataset_info()["total_datasets"],
+        providers=assistant.active_providers,
     )
 
 
 @app.post("/chat", response_model=ChatResponse, tags=["Chat"])
 async def chat(request: ChatRequest):
-    """
-    Chat dengan AI Assistant
-
-    - **message**: Pesan dari pengguna
-    - **use_context**: Apakah menggunakan chat history untuk context (default: True)
-    """
     if not assistant:
         raise HTTPException(status_code=503, detail="AI Assistant not initialized")
 
+    history = None
+    if request.history:
+        history = [
+            {"role": h.get("role", "user"), "content": h.get("content", "")}
+            for h in request.history
+        ]
+
     try:
-        result = assistant.chat(request.message)
-        return ChatResponse(**result)
+        from datetime import datetime as dt
+        start_time = dt.now()
+        result = assistant.ask(
+            request.message,
+            use_context=request.use_context,
+            history=history,
+            user_id=request.user_id,
+        )
+        end_time = dt.now()
+
+        if result.get("error"):
+            status_code = 429 if result.get("error_code") == "RATE_LIMITED" else 503
+            raise HTTPException(status_code=status_code, detail=result["response"])
+
+        metadata = result.get("metadata", {})
+        return ChatResponse(
+            response=result["response"],
+            timestamp=datetime.now().isoformat(),
+            response_time_ms=(end_time - start_time).total_seconds() * 1000,
+            model=metadata.get("provider", "unknown"),
+            context_used=True,
+            provider=metadata.get("provider", "unknown"),
+            fallback_used=metadata.get("fallback_used", False),
+            fallback_chain=metadata.get("fallback_chain", []),
+        )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/chat/stream", tags=["Chat"])
+async def chat_stream(request: ChatRequest):
+    if not assistant:
+        raise HTTPException(status_code=503, detail="AI Assistant not initialized")
+
+    history = None
+    if request.history:
+        from providers import Message
+        history = [
+            Message(role=h.get("role", "user"), content=h.get("content", ""))
+            for h in request.history
+        ]
+
+    stream = assistant.ask_stream(
+        request.message,
+        use_context=request.use_context,
+        history=history,
+        user_id=request.user_id,
+    )
+
+    async def event_generator():
+        import json
+        async for stream_chunk in stream:
+            yield f"event: chunk\ndata: {json.dumps(stream_chunk.chunk)}\n\n"
+        yield "event: done\ndata: {}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
 @app.post("/ask", response_model=ChatResponse, tags=["Chat"])
 async def ask(request: ChatRequest):
-    """
-    Tanya pertanyaan ke AI Assistant (tanpa menyimpan context)
-
-    - **message**: Pertanyaan dari pengguna
-    - **use_context**: Tidak digunakan untuk endpoint ini
-    """
     if not assistant:
         raise HTTPException(status_code=503, detail="AI Assistant not initialized")
 
     try:
-        response = assistant.ask(request.message, use_context=False)
+        from datetime import datetime as dt
+        start_time = dt.now()
+        result = assistant.ask(request.message, use_context=False, user_id=request.user_id)
+        end_time = dt.now()
+
+        if result.get("error"):
+            status_code = 429 if result.get("error_code") == "RATE_LIMITED" else 503
+            raise HTTPException(status_code=status_code, detail=result["response"])
+
+        metadata = result.get("metadata", {})
         return ChatResponse(
-            response=response,
+            response=result["response"],
             timestamp=datetime.now().isoformat(),
-            response_time_ms=0,  # Not tracked for simple ask
-            model=assistant.model.model_name,
-            context_used=False
+            response_time_ms=(end_time - start_time).total_seconds() * 1000,
+            model=metadata.get("provider", "unknown"),
+            context_used=False,
+            provider=metadata.get("provider", "unknown"),
+            fallback_used=metadata.get("fallback_used", False),
+            fallback_chain=metadata.get("fallback_chain", []),
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/search", response_model=List[SearchResult], tags=["Knowledge Base"])
 async def search_knowledge_base(request: SearchRequest):
-    """
-    Search dalam knowledge base dataset internal
-
-    - **query**: Query pencarian
-    - **top_k**: Jumlah hasil teratas yang dikembalikan (1-10)
-    """
     if not assistant:
         raise HTTPException(status_code=503, detail="AI Assistant not initialized")
 
@@ -160,16 +224,15 @@ async def search_knowledge_base(request: SearchRequest):
 
 @app.get("/datasets", response_model=DatasetInfo, tags=["Knowledge Base"])
 async def get_datasets():
-    """Get informasi tentang dataset yang loaded"""
     if not assistant:
         raise HTTPException(status_code=503, detail="AI Assistant not initialized")
 
-    return DatasetInfo(**assistant.get_dataset_info())
+    info = assistant.get_dataset_info()
+    return DatasetInfo(**info)
 
 
 @app.post("/clear-history", tags=["Chat"])
 async def clear_chat_history():
-    """Clear chat history untuk memulai sesi baru"""
     if not assistant:
         raise HTTPException(status_code=503, detail="AI Assistant not initialized")
 
@@ -177,10 +240,22 @@ async def clear_chat_history():
     return {"status": "success", "message": "Chat history cleared"}
 
 
+@app.get("/providers", tags=["Config"])
+async def get_providers():
+    if not assistant:
+        raise HTTPException(status_code=503, detail="AI Assistant not initialized")
+
+    return {
+        "provider_order": ["groq", "cerebras", "gemini", "openrouter"],
+        "active_providers": assistant.active_providers,
+        "configured": is_any_provider_configured(),
+    }
+
+
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
         port=8000,
-        reload=True
+        reload=True,
     )

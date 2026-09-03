@@ -108,23 +108,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let parsedHistory: Array<{ role: "user" | "assistant"; content: string }> | undefined;
+    const history = reqBody.history;
+    if (history !== undefined) {
+      if (!Array.isArray(history)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "INVALID_HISTORY",
+              message: "Riwayat percakapan harus berupa array.",
+            },
+          },
+          { status: 400 }
+        );
+      }
+      parsedHistory = history
+        .filter((h): h is { role: string; content: string } =>
+          typeof h === "object" && h !== null &&
+          (h.role === "user" || h.role === "assistant") &&
+          typeof h.content === "string"
+        )
+        .map((h) => ({ role: h.role as "user" | "assistant", content: h.content }));
+    }
+
     const aiResult = await sendToAIAssistant({
       message: trimmedMessage,
       userId,
-      conversationId: typeof conversationId === "string" ? conversationId : "",
+      conversationId: typeof conversationId === "string" && conversationId.length > 0 ? conversationId : undefined,
+      history: parsedHistory,
     });
 
     if (!aiResult.success) {
+      const isRateLimited = aiResult.response?.error?.code === "RATE_LIMITED";
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: "AI_BACKEND_ERROR",
+            code: isRateLimited ? "RATE_LIMITED" : "AI_BACKEND_ERROR",
             message:
               aiResult.error?.message || "Terjadi masalah saat memproses pertanyaan.",
           },
         },
-        { status: 503 }
+        { status: isRateLimited ? 429 : 503 }
       );
     }
 
