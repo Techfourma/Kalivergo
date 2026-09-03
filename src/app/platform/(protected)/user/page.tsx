@@ -7,12 +7,12 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 const statusConfig: Record<string, { label: string; className: string }> = {
-  PENDING_EMAIL: { label: "Menunggu Email", className: "bg-yellow-50 text-yellow-700 border-yellow-200" },
-  PENDING_KYC: { label: "Menunggu KYC", className: "bg-blue-50 text-blue-700 border-blue-200" },
-  APPROVED: { label: "Disetujui", className: "bg-green-50 text-green-700 border-green-200" },
-  REJECTED: { label: "Ditolak", className: "bg-red-50 text-red-700 border-red-200" },
-  CANCELLED: { label: "Dibatalkan", className: "bg-gray-50 text-gray-700 border-gray-200" },
-  NO_APPLICATION: { label: "Tidak Ada", className: "bg-gray-50 text-gray-600 border-gray-200" },
+  PENDING_EMAIL: { label: "Menunggu Email", className: "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-700/40" },
+  PENDING_KYC: { label: "Menunggu KYC", className: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-700/40" },
+  APPROVED: { label: "Disetujui", className: "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-700/40" },
+  REJECTED: { label: "Ditolak", className: "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-700/40" },
+  CANCELLED: { label: "Dibatalkan", className: "bg-gray-50 text-gray-700 border-gray-200 dark:bg-dark-800 dark:text-dark-300 dark:border-dark-600" },
+  NO_APPLICATION: { label: "Tidak Ada", className: "bg-gray-50 text-gray-600 border-gray-200 dark:bg-dark-800 dark:text-dark-400 dark:border-dark-600" },
 };
 
 export default async function PlatformUsersPage() {
@@ -24,8 +24,8 @@ export default async function PlatformUsersPage() {
       <PageBackground />
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold font-display">Data Owner Kelas</h1>
-          <p className="text-dark-500 mt-1">
+          <h1 className="text-2xl font-bold font-display text-dark-900 dark:text-white">Data Owner Kelas</h1>
+          <p className="text-dark-500 dark:text-dark-400 mt-1">
             Daftar seluruh owner kelas yang terdaftar di platform kalivergo.
           </p>
         </div>
@@ -58,7 +58,7 @@ export default async function PlatformUsersPage() {
               <tbody className="divide-y divide-dark-200 dark:divide-dark-700">
                 {owners.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-dark-500">
+                    <td colSpan={6} className="px-6 py-12 text-center text-dark-500 dark:text-dark-400">
                       Belum ada data owner kelas.
                     </td>
                   </tr>
@@ -137,10 +137,10 @@ export default async function PlatformUsersPage() {
                           <span
                             className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
                               owner.kycStatus === "APPROVED"
-                                ? "bg-green-50 text-green-700 border-green-200"
+                                ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-700/40"
                                 : owner.kycStatus === "REJECTED"
-                                ? "bg-red-50 text-red-700 border-red-200"
-                                : "bg-yellow-50 text-yellow-700 border-yellow-200"
+                                ? "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-700/40"
+                                : "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-700/40"
                             }`}
                           >
                             {kycStatusLabel}
@@ -152,7 +152,7 @@ export default async function PlatformUsersPage() {
                               <Link
                                 href={`/${owner.tenantSlug || owner.tenantId}/dashboard`}
                                 target="_blank"
-                                className="inline-flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 font-medium"
+                                className="inline-flex items-center gap-1 text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
                               >
                                 <Eye className="h-3.5 w-3.5" />
                                 Lihat Kelas
