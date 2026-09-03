@@ -20,10 +20,10 @@ export default function PlatformLogoutButton() {
     <button
       onClick={handleLogout}
       disabled={isPending}
-      className="flex items-center gap-2 rounded-lg border border-dark-200 px-3 py-2 text-sm text-dark-600 hover:bg-dark-100 hover:text-dark-900 disabled:opacity-50 transition-colors"
+      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-dark-600 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-50 dark:text-dark-300 dark:hover:bg-red-950/30 dark:hover:text-red-300"
     >
       <LogOut className="h-4 w-4" />
-      <span className="hidden sm:inline">Keluar</span>
+      <span>Sign Out</span>
     </button>
   );
 }
