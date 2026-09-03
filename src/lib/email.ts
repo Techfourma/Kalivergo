@@ -117,7 +117,7 @@ export async function sendOwnerApprovalEmail(
       </p>
       <p>Jika tombol tidak bisa diklik, salin link berikut:</p>
       <p style="word-break: break-all; color: #6b7280;">${link}</p>
-      <p>Link ini berlaku selama 1 jam.</p>
+      <p>Link verifikasi ini tidak memiliki batas waktu.</p>
       <p>Jika Anda tidak merasa mengajukan owner di Kalivergo, abaikan email ini.</p>
     </div>
   `;

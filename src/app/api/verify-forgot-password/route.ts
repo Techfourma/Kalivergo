@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid or expired token' }, { status: 400 });
     }
 
-    if (verificationToken.expiresAt < new Date()) {
+    if (verificationToken.expiresAt && verificationToken.expiresAt < new Date()) {
       await prisma.verificationToken.delete({
         where: { id: verificationToken.id },
       });

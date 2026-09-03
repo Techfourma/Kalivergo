@@ -410,7 +410,7 @@ model VerificationToken {
   id              String   @id @default(cuid())
   tokenHash       String   @unique
   email           String
-  expiresAt       DateTime
+  expiresAt       DateTime?
   createdAt       DateTime @default(now())
   newPasswordHash String?
 

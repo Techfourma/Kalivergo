@@ -188,7 +188,7 @@ export async function approveOwnerApplication(
       throw new Error("Aplikasi tidak ditemukan");
     }
 
-    if (application.status !== "PENDING_KYC") {
+    if (application.status !== "PENDING_KYC" && application.status !== "PENDING_EMAIL") {
       throw new Error(`Aplikasi sudah dalam status ${application.status}. Tidak dapat diproses.`);
     }
 
@@ -346,11 +346,9 @@ export async function approveOwnerApplication(
       if (applicantEmail) {
         const plainToken = generateVerificationToken();
         const tokenHash = hashToken(plainToken);
-        const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
-
         await prisma.verificationToken.deleteMany({ where: { email: applicantEmail } });
         await prisma.verificationToken.create({
-          data: { tokenHash, email: applicantEmail, expiresAt },
+          data: { tokenHash, email: applicantEmail, expiresAt: null },
         });
 
         await sendOwnerApprovalEmail(applicantEmail, applicantName ?? "User", plainToken);
@@ -385,7 +383,7 @@ export async function rejectOwnerApplication(
         throw new Error("Aplikasi tidak ditemukan");
       }
 
-      if (application.status !== "PENDING_KYC") {
+      if (application.status !== "PENDING_KYC" && application.status !== "PENDING_EMAIL") {
         throw new Error(
           `Aplikasi sudah dalam status ${application.status}. Tidak dapat ditolak.`
         );
@@ -444,7 +442,7 @@ export async function rejectOwnerApplication(
 export async function getPendingOwnerApplications() {
   try {
     const applications = await prisma.ownerApplication.findMany({
-      where: { status: "PENDING_KYC" },
+      where: { status: { in: ["PENDING_KYC", "PENDING_EMAIL"] } },
       include: {
         user: {
           select: {
