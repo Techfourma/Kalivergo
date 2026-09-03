@@ -8,6 +8,8 @@ import {
   deleteTaskForTenant,
   updateTaskForTenant,
   updateTaskSubmissionsForTenant,
+  submitTaskForReviewForTenant,
+  reviewTaskSubmissionForTenant,
 } from "@/features/task/services/task.service";
 import {
   DEFAULT_TASK_CATEGORY,
@@ -249,4 +251,49 @@ export async function updateTaskSubmissionsAction(taskId: string, userIds: strin
     revalidatePath(`/${tenantSlug}/home`);
   }
   return { success: "Submission berhasil diperbarui" };
+}
+
+export async function submitTaskForReviewAction(taskId: string) {
+  const session = await readSessionUser();
+  if (!session?.id) return { error: "Unauthorized" };
+
+  const tenantId = await getTenantIdFromCookie();
+  if (!tenantId) return { error: "Konteks kelas tidak ditemukan." };
+
+  const result = await submitTaskForReviewForTenant(taskId, tenantId, session.id);
+  if ("error" in result) return result;
+
+  const tenantSlug = await resolveTenantSlug();
+  revalidatePath(`/${tenantSlug}/tasks`);
+  revalidatePath(`/${tenantSlug}/cms`);
+  return { success: "Tugas dikirim untuk divalidasi administrator" };
+}
+
+export async function reviewTaskSubmissionAction(
+  submissionId: string,
+  decision: "APPROVE" | "REJECT"
+) {
+  const session = await readSessionUser();
+  if (!session?.id) return { error: "Unauthorized" };
+
+  const tenantId = await getTenantIdFromCookie();
+  if (!tenantId) return { error: "Konteks kelas tidak ditemukan." };
+
+  const membership = await validateTenantMembership(session.id, tenantId);
+  if (!membership.valid || !(membership.role === "OWNER" || membership.cmsRole)) {
+    return { error: "Akses ditolak: hanya OWNER atau role CMS." };
+  }
+
+  const result = await reviewTaskSubmissionForTenant(
+    submissionId,
+    tenantId,
+    decision === "APPROVE" ? "SUBMITTED" : "REJECTED"
+  );
+  if ("error" in result) return result;
+
+  const tenantSlug = await resolveTenantSlug();
+  revalidatePath(`/${tenantSlug}/cms`);
+  revalidatePath(`/${tenantSlug}/cms/tasks`);
+  revalidatePath(`/${tenantSlug}/tasks`);
+  return { success: decision === "APPROVE" ? "Tugas disetujui" : "Tugas dikembalikan kepada anggota" };
 }
