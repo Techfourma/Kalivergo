@@ -323,7 +323,7 @@ function HeroSection({
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
         <button
           onClick={() => navigateWithLoading("/signup")}
-          className="flex items-center gap-2 rounded-xl bg-white text-dark-900 px-8 py-3.5 text-base font-semibold hover:bg-gray-100 transition-all shadow-xl shadow-white/10 hover:shadow-2xl hover:scale-105"
+          className="flex items-center gap-2 rounded-xl bg-white text-dark-900 dark:bg-dark-900 dark:text-white px-8 py-3.5 text-base font-semibold hover:bg-gray-100 dark:hover:bg-dark-800 transition-all shadow-xl shadow-white/10 hover:shadow-2xl hover:scale-105"
         >
           Daftar Sekarang
           <ArrowRight className="h-5 w-5" />
@@ -335,7 +335,7 @@ function HeroSection({
 
 function StatsSection({ memberCount }: { memberCount: number }) {
   return (
-    <div className="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
+    <div className="mt-20 grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
       {STATS.map((stat) => {
         const Icon = stat.icon;
         const value = (stat as { dynamicMemberCount?: boolean }).dynamicMemberCount
@@ -344,7 +344,7 @@ function StatsSection({ memberCount }: { memberCount: number }) {
         return (
           <div
             key={stat.label}
-            className="rounded-2xl bg-dark-100/80 dark:bg-dark-800/70 backdrop-blur-md border border-dark-200/60 dark:border-dark-800 p-6 text-center hover:bg-dark-100/80 dark:bg-dark-800/70 transition-all hover:scale-105"
+            className="rounded-2xl bg-white/80 dark:bg-dark-800/70 backdrop-blur-md border border-dark-200/60 dark:border-dark-800 p-6 text-center hover:bg-white dark:bg-dark-800/70 transition-all hover:scale-105"
           >
             <Icon className="h-6 w-6 mx-auto mb-2 text-primary-400" />
             <p className="text-3xl font-bold font-display text-dark-900 dark:text-white">
@@ -365,7 +365,7 @@ function AboutSection({ tenantLabel }: { tenantLabel?: string }) {
         Tentang {tenantLabel ? tenantLabel.split(" ")[0] : "kalivergo"}
       </h2>
 
-      <div className="bg-dark-100/80 dark:bg-dark-800/70 backdrop-blur-md border border-dark-200/60 dark:border-dark-800 rounded-2xl p-8 hover:bg-dark-100/80 dark:bg-dark-800/70 transition-all">
+      <div className="bg-white/80 dark:bg-dark-800/70 backdrop-blur-md border border-dark-200/60 dark:border-dark-800 rounded-2xl p-8 hover:bg-white dark:bg-dark-800/70 transition-all">
         <div className="space-y-6 text-muted">
           <div>
             <h3 className="text-xl font-semibold text-dark-900 dark:text-white mb-3">
@@ -526,8 +526,8 @@ function OrganizationSection({
         }
         className={cn(
           "group relative rounded-2xl border border-dark-200/60 dark:border-dark-800 p-6 text-center",
-          "bg-dark-100/80 dark:bg-dark-800/70 backdrop-blur-md",
-          "hover:bg-dark-100/80 dark:bg-dark-800/70 transition-all duration-300 hover:scale-105 hover:-translate-y-1",
+          "bg-white/80 dark:bg-dark-800/70 backdrop-blur-md",
+          "hover:bg-white dark:bg-dark-800/70 transition-all duration-300 hover:scale-105 hover:-translate-y-1",
           "block no-underline w-full cursor-pointer",
         )}
       >

@@ -1,16 +1,18 @@
 import { getAllOwners } from "@/actions/platform-owners";
 import DeletePlatformOwnerButton from "@/components/cms/DeletePlatformOwnerButton";
 import PageBackground from "@/components/ui/PageBackground";
+import { Eye } from "lucide-react";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 const statusConfig: Record<string, { label: string; className: string }> = {
-  PENDING_EMAIL: { label: "Menunggu Email", className: "bg-yellow-50 text-yellow-700 border-yellow-200" },
-  PENDING_KYC: { label: "Menunggu KYC", className: "bg-blue-50 text-blue-700 border-blue-200" },
-  APPROVED: { label: "Disetujui", className: "bg-green-50 text-green-700 border-green-200" },
-  REJECTED: { label: "Ditolak", className: "bg-red-50 text-red-700 border-red-200" },
-  CANCELLED: { label: "Dibatalkan", className: "bg-gray-50 text-gray-700 border-gray-200" },
-  NO_APPLICATION: { label: "Tidak Ada", className: "bg-gray-50 text-gray-600 border-gray-200" },
+  PENDING_EMAIL: { label: "Menunggu Email", className: "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700/40" },
+  PENDING_KYC: { label: "Menunggu KYC", className: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700/40" },
+  APPROVED: { label: "Disetujui", className: "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700/40" },
+  REJECTED: { label: "Ditolak", className: "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700/40" },
+  CANCELLED: { label: "Dibatalkan", className: "bg-gray-50 text-gray-700 border-gray-200 dark:bg-dark-800 dark:text-dark-300 dark:border-dark-600" },
+  NO_APPLICATION: { label: "Tidak Ada", className: "bg-gray-50 text-gray-600 border-gray-200 dark:bg-dark-800 dark:text-dark-400 dark:border-dark-600" },
 };
 
 export default async function PlatformUsersPage() {
@@ -22,13 +24,13 @@ export default async function PlatformUsersPage() {
       <PageBackground />
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold font-display">Data Owner Kelas</h1>
-          <p className="text-dark-500 mt-1">
+          <h1 className="text-2xl font-bold font-display text-dark-900 dark:text-white">Data Owner Kelas</h1>
+          <p className="text-dark-500 dark:text-dark-400 mt-1">
             Daftar seluruh owner kelas yang terdaftar di platform kalivergo.
           </p>
         </div>
 
-        <div className="bg-white dark:bg-dark-800 rounded-2xl shadow-sm border border-dark-200 dark:border-dark-700 overflow-hidden">
+        <div className="bg-white/90 dark:bg-dark-900/80 rounded-2xl shadow-sm border border-dark-200 dark:border-dark-700 overflow-hidden backdrop-blur-xl">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-dark-200 dark:divide-dark-700">
               <thead className="bg-dark-50 dark:bg-dark-900/50">
@@ -46,6 +48,9 @@ export default async function PlatformUsersPage() {
                     Status Aplikasi
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wider">
+                    KYC
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wider">
                     Aksi
                   </th>
                 </tr>
@@ -53,13 +58,22 @@ export default async function PlatformUsersPage() {
               <tbody className="divide-y divide-dark-200 dark:divide-dark-700">
                 {owners.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-dark-500">
+                    <td colSpan={6} className="px-6 py-12 text-center text-dark-500 dark:text-dark-400">
                       Belum ada data owner kelas.
                     </td>
                   </tr>
                 ) : (
                   owners.map((owner) => {
                     const appStatus = statusConfig[owner.applicationStatus] || statusConfig.NO_APPLICATION;
+                    const kycStatusLabel =
+                      owner.kycStatus === "APPROVED"
+                        ? "Disetujui"
+                        : owner.kycStatus === "REJECTED"
+                        ? "Ditolak"
+                        : owner.kycStatus === "PENDING"
+                        ? "Menunggu"
+                        : owner.kycStatus || "-";
+
                     return (
                       <tr key={owner.userId} className="hover:bg-dark-50/50 dark:hover:bg-dark-900/30 transition-colors">
                         <td className="px-6 py-4">
@@ -120,7 +134,30 @@ export default async function PlatformUsersPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
+                              owner.kycStatus === "APPROVED"
+                                ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700/40"
+                                : owner.kycStatus === "REJECTED"
+                                  ? "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700/40"
+                                  : "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700/40"
+                            }`}
+                          >
+                            {kycStatusLabel}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
+                            {owner.tenantId && (
+                              <Link
+                                href={`/${owner.tenantSlug || owner.tenantId}/dashboard`}
+                                target="_blank"
+                                className="inline-flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 font-medium"
+                              >
+                                <Eye className="h-3.5 w-3.5" />
+                                Lihat Kelas
+                              </Link>
+                            )}
                             <DeletePlatformOwnerButton
                               userId={owner.userId}
                               userName={owner.name}
