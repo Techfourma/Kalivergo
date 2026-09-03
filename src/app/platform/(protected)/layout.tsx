@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentSessionUserId } from "@/server/auth/session";
 import PlatformNavbar from "@/components/platform/PlatformNavbar";
+import PageBackground from "@/components/ui/PageBackground";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,10 @@ export default async function PlatformProtectedLayout({
     <>
       <PlatformNavbar adminName={admin.name} />
 
-      <main className="flex-1 w-full">{children}</main>
+      <main className="relative flex-1 w-full">
+        <PageBackground />
+        <div className="relative z-10">{children}</div>
+      </main>
     </>
   );
 }

@@ -5,12 +5,12 @@ import PageBackground from "@/components/ui/PageBackground";
 export const dynamic = "force-dynamic";
 
 const statusConfig: Record<string, { label: string; className: string }> = {
-  PENDING_EMAIL: { label: "Menunggu Email", className: "bg-yellow-50 text-yellow-700 border-yellow-200" },
-  PENDING_KYC: { label: "Menunggu KYC", className: "bg-blue-50 text-blue-700 border-blue-200" },
-  APPROVED: { label: "Disetujui", className: "bg-green-50 text-green-700 border-green-200" },
-  REJECTED: { label: "Ditolak", className: "bg-red-50 text-red-700 border-red-200" },
-  CANCELLED: { label: "Dibatalkan", className: "bg-gray-50 text-gray-700 border-gray-200" },
-  NO_APPLICATION: { label: "Tidak Ada", className: "bg-gray-50 text-gray-600 border-gray-200" },
+  PENDING_EMAIL: { label: "Menunggu Email", className: "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800" },
+  PENDING_KYC: { label: "Menunggu KYC", className: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800" },
+  APPROVED: { label: "Disetujui", className: "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800" },
+  REJECTED: { label: "Ditolak", className: "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800" },
+  CANCELLED: { label: "Dibatalkan", className: "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700" },
+  NO_APPLICATION: { label: "Tidak Ada", className: "bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700" },
 };
 
 export default async function PlatformUsersPage() {
@@ -23,7 +23,7 @@ export default async function PlatformUsersPage() {
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-8">
           <h1 className="text-2xl font-bold font-display">Data Owner Kelas</h1>
-          <p className="text-dark-500 mt-1">
+          <p className="text-dark-500 dark:text-dark-400 mt-1">
             Daftar seluruh owner kelas yang terdaftar di platform kalivergo.
           </p>
         </div>
@@ -53,7 +53,7 @@ export default async function PlatformUsersPage() {
               <tbody className="divide-y divide-dark-200 dark:divide-dark-700">
                 {owners.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-dark-500">
+                    <td colSpan={5} className="px-6 py-12 text-center text-dark-500 dark:text-dark-400">
                       Belum ada data owner kelas.
                     </td>
                   </tr>

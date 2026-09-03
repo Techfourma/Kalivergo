@@ -10,8 +10,8 @@ interface PlatformNavbarProps {
 }
 
 const linkBaseClass = "flex items-center gap-2 rounded-lg px-3 py-2 transition-colors";
-const activeClass = "bg-primary-50 text-primary-700";
-const inactiveClass = "text-dark-600 hover:bg-dark-100 hover:text-dark-900";
+const activeClass = "bg-primary-50 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300";
+const inactiveClass = "text-dark-600 hover:bg-dark-100 hover:text-dark-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-dark-100";
 
 export default function PlatformNavbar({ adminName }: PlatformNavbarProps) {
   const pathname = usePathname();
@@ -22,15 +22,15 @@ export default function PlatformNavbar({ adminName }: PlatformNavbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-dark-200 bg-white/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-dark-200 bg-white/90 backdrop-blur-md dark:border-dark-800 dark:bg-dark-950/90">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-600 to-accent-600 text-white">
             <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-sm font-bold leading-tight">Panel Platform</p>
-            <p className="text-xs text-dark-500">{adminName || "Admin"}</p>
+            <p className="text-sm font-bold leading-tight text-dark-900 dark:text-dark-100">Panel Platform</p>
+            <p className="text-xs text-dark-500 dark:text-dark-400">{adminName || "Admin"}</p>
           </div>
         </div>
 
@@ -53,7 +53,7 @@ export default function PlatformNavbar({ adminName }: PlatformNavbarProps) {
           </Link>
           <Link
             href="/"
-            className="ml-2 rounded-lg border border-dark-200 px-3 py-2 text-dark-600 transition-colors hover:bg-dark-100"
+            className="ml-2 rounded-lg border border-dark-200 px-3 py-2 text-dark-600 transition-colors hover:bg-dark-100 dark:border-dark-700 dark:text-dark-300 dark:hover:bg-dark-800"
           >
             Ke Situs
           </Link>
