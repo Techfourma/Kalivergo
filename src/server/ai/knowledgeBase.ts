@@ -20,15 +20,95 @@ export interface RetrievedKnowledge {
   sources: Source[];
 }
 
+interface IndexedFile {
+  name: string;
+  path: string;
+  category: string;
+  content: string;
+  bodyTokens: string[];
+  headerTokens: string[];
+  tokenSet: Set<string>;
+}
+
+interface InvertedIndexEntry {
+  fileIndex: number;
+  bodyScore: number;
+  headerScore: number;
+}
+
 const SUPPORTED_EXTENSIONS = new Set([".md", ".txt"]);
 const EXCLUDED_DIRS = new Set(["node_modules", "dist", ".git", ".next"]);
 
-/** Low-value words (Indonesian/English) that carry no retrieval signal. */
+/**
+ * Indonesian affixes used for a conservative "lite stemmer". The stemmer is
+ * only applied to make retrieval morphology-robust (e.g. `mendaftar`,
+ * `pendaftaran` and `daftar` collapse to the same stem). It is NOT used for
+ * answer fidelity — the original document text is still what is sent to the
+ * LLM as context.
+ *
+ * Rules are deliberately conservative:
+ * - remove at most ONE suffix and ONE prefix,
+ * - never leave a stem shorter than 4 characters,
+ * - any token shorter than 4 characters is left untouched.
+ */
+const STEM_SUFFIXES = ["nya", "kah", "lah", "pun", "kan", "i", "an"];
+const STEM_PREFIXES = [
+  "meng", "meny", "mem", "men", "peng", "pen", "pem", "per",
+  "ber", "ter", "ke", "se", "di", "me", "pe",
+] as const;
+
+/**
+ * Query-expansion synonyms for high-value Kalivergo vocabulary. Exact
+ * keyword matching alone misses questions that use a different word for the
+ * same concept (e.g. "daftar" vs "registrasi"). Expanding the query with
+ * these synonyms improves recall; the ranking still keeps precision.
+ */
+const QUERY_SYNONYMS: Record<string, string[]> = {
+  daftar: ["registrasi", "signup", "register"],
+  registrasi: ["daftar", "signup"],
+  signup: ["daftar", "registrasi"],
+  kelas: ["tenant", "organisasi"],
+  tenant: ["kelas"],
+  tugas: ["task"],
+  jadwal: ["schedule"],
+  schedule: ["jadwal"],
+  informasi: ["pengumuman", "info"],
+  info: ["informasi", "pengumuman"],
+  verifikasi: ["persetujuan", "approve", "konfirmasi"],
+  login: ["masuk"],
+  seminar: ["acara"],
+  asal: ["tentang", "sejarah", "about", "identitas"],
+  sejarah: ["asal", "tentang", "about"],
+  tentang: ["asal", "sejarah", "about", "identitas"],
+};
+
+export function stemToken(token: string): string {
+  if (token.length < 4) return token;
+
+  let stem = token;
+
+  for (const suffix of STEM_SUFFIXES) {
+    if (stem.endsWith(suffix) && stem.length - suffix.length >= 4) {
+      stem = stem.slice(0, -suffix.length);
+      break;
+    }
+  }
+
+  for (const prefix of STEM_PREFIXES) {
+    if (stem.startsWith(prefix) && stem.length - prefix.length >= 4) {
+      stem = stem.slice(prefix.length);
+      break;
+    }
+  }
+
+  return stem;
+}
+
 const STOPWORDS = new Set<string>([
   "yang", "dan", "di", "ke", "dari", "untuk", "pada", "dengan", "atau", "ini",
   "itu", "akan", "tidak", "tak", "bisa", "dapat", "saya", "anda", "kami",
   "kita", "mereka", "adalah", "apakah", "bagaimana", "kapan", "dimana",
-  "mengapa", "apa", "siapa", "sesuai", "per", "karena", "agar", "supaya",
+  "mengapa", "apa", "sesuai", "per", "karena", "agar", "supaya",
   "sebagai", "secara", "tersebut", "beserta", "oleh", "juga", "sudah",
   "belum", "harus", "wajib", "boleh", "mohon", "silakan", "tolong", "harap",
   "melalui", "antara", "sejak", "setiap", "bila", "jika", "kalau", "maka",
@@ -47,11 +127,12 @@ const STOPWORDS = new Set<string>([
   "up", "out", "over", "under", "again", "once", "here", "there",
 ]);
 
-let knowledgeIndex: KnowledgeFile[] = [];
+let knowledgeIndex: IndexedFile[] = [];
+let invertedIndex: Map<string, InvertedIndexEntry[]> = new Map();
 let isLoaded = false;
 let currentVersion = 0;
 let loadPromise: Promise<void> | null = null;
-/** Absolute path of the internal dataset folder. */
+
 function getDatasetDirectory(): string {
   const dir = AIAssistantConfig.knowledgeBaseDir;
   return path.isAbsolute(dir) ? dir : path.resolve(process.cwd(), dir);
@@ -86,13 +167,121 @@ async function collectDirectory(
   }
 }
 
-/**
- * Load (or refresh) the internal knowledge. The result is memoized; pass
- * `force: true` to rebuild the index.
- */
+export function tokenize(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .split(" ")
+    .filter((t) => t.length >= 2 && !STOPWORDS.has(t))
+    .map(stemToken)
+    .filter((t) => t.length >= 3);
+}
+
+function buildInvertedIndex(files: IndexedFile[]): void {
+  invertedIndex = new Map();
+
+  files.forEach((file, fileIndex) => {
+    const seenInBody = new Set<string>();
+
+    for (const token of file.bodyTokens) {
+      seenInBody.add(token);
+
+      const entry = invertedIndex.get(token);
+      if (entry) {
+        let updated = false;
+        for (const e of entry) {
+          if (e.fileIndex === fileIndex) {
+            e.bodyScore += 1;
+            updated = true;
+            break;
+          }
+        }
+        if (!updated) {
+          entry.push({ fileIndex, bodyScore: 1, headerScore: 0 });
+        }
+      } else {
+        invertedIndex.set(token, [{ fileIndex, bodyScore: 1, headerScore: 0 }]);
+      }
+    }
+
+    for (const token of file.headerTokens) {
+      if (seenInBody.has(token)) continue;
+
+      const entry = invertedIndex.get(token);
+      if (entry) {
+        let updated = false;
+        for (const e of entry) {
+          if (e.fileIndex === fileIndex) {
+            e.headerScore += 1;
+            updated = true;
+            break;
+          }
+        }
+        if (!updated) {
+          entry.push({ fileIndex, bodyScore: 0, headerScore: 1 });
+        }
+      } else {
+        invertedIndex.set(token, [{ fileIndex, bodyScore: 0, headerScore: 1 }]);
+      }
+    }
+  });
+}
+
+function extractRelevantExcerpts(
+  file: IndexedFile,
+  queryTokens: string[],
+  maxChars: number = 1500
+): string {
+  const paragraphs = file.content
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0);
+
+  if (paragraphs.length === 0) return "";
+
+  const queryTokenSet = new Set(queryTokens);
+  let bestStart = 0;
+  let bestScore = -1;
+
+  for (let i = 0; i < paragraphs.length; i++) {
+    const pTokens = tokenize(paragraphs[i]);
+    let score = 0;
+    for (const t of pTokens) {
+      if (queryTokenSet.has(t)) score += 1;
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      bestStart = i;
+    }
+  }
+
+  const windowSize = 3;
+  let selected: string[] = [];
+  let currentLength = 0;
+
+  for (let i = 0; i < Math.min(windowSize, paragraphs.length); i++) {
+    const idx = bestStart + i;
+    if (idx >= paragraphs.length) break;
+    const para = paragraphs[idx];
+    if (currentLength + para.length > maxChars) {
+      const remaining = Math.max(0, maxChars - currentLength);
+      if (remaining > 0) selected.push(para.slice(0, remaining));
+      break;
+    }
+    selected.push(para);
+    currentLength += para.length;
+  }
+
+  if (selected.length === 0 && paragraphs.length > 0) {
+    selected = [paragraphs.slice(0, Math.min(3, paragraphs.length)).join("\n\n")];
+  }
+
+  return selected.join("\n\n");
+}
+
 export async function loadKnowledgeBase(force: boolean = false): Promise<KnowledgeFile[]> {
-  if (loadPromise) return loadPromise.then(() => [...knowledgeIndex]);
-  if (isLoaded && !force) return [...knowledgeIndex];
+  if (loadPromise) return loadPromise.then(() => knowledgeIndex.map(toKnowledgeFile));
+  if (isLoaded && !force) return knowledgeIndex.map(toKnowledgeFile);
 
   loadPromise = (async () => {
     const baseDir = getDatasetDirectory();
@@ -102,7 +291,15 @@ export async function loadKnowledgeBase(force: boolean = false): Promise<Knowled
       await collectDirectory(baseDir, baseDir, collected);
     } catch {
     }
-    knowledgeIndex = collected;
+
+    knowledgeIndex = collected.map((f) => ({
+      ...f,
+      bodyTokens: tokenize(f.content),
+      headerTokens: tokenize(`${f.name} ${f.category}`),
+      tokenSet: new Set(tokenize(f.content)),
+    }));
+
+    buildInvertedIndex(knowledgeIndex);
     currentVersion += 1;
     isLoaded = true;
   })();
@@ -113,7 +310,16 @@ export async function loadKnowledgeBase(force: boolean = false): Promise<Knowled
     loadPromise = null;
   }
 
-  return [...knowledgeIndex];
+  return knowledgeIndex.map(toKnowledgeFile);
+}
+
+function toKnowledgeFile(file: IndexedFile): KnowledgeFile {
+  return {
+    name: file.name,
+    path: file.path,
+    category: file.category,
+    content: file.content,
+  };
 }
 
 export function isKnowledgeLoaded(): boolean {
@@ -125,34 +331,17 @@ export function getKnowledgeVersion(): number {
 }
 
 export function getKnowledgeFiles(): KnowledgeFile[] {
-  return [...knowledgeIndex];
+  return knowledgeIndex.map(toKnowledgeFile);
 }
 
-/** Reset module state (used by tests). */
 export function resetKnowledgeBase(): void {
   knowledgeIndex = [];
+  invertedIndex = new Map();
   isLoaded = false;
   currentVersion = 0;
   loadPromise = null;
 }
 
-/** Split text into normalized, meaningful tokens. */
-function tokenize(text: string): string[] {
-  return text
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, " ")
-    .split(" ")
-    .filter((t) => t.length >= 2 && !STOPWORDS.has(t));
-}
-
-function containsToken(tokens: string[], queryToken: string): boolean {
-  return tokens.some((t) => t === queryToken || t.startsWith(queryToken));
-}
-
-/**
- * Retrieve the most relevant excerpts for a query using a deterministic
- * term-overlap score. Returns `null` when nothing matches.
- */
 export function retrieveRelevantContext(
   query: string,
   maxFiles: number = 3
@@ -162,21 +351,63 @@ export function retrieveRelevantContext(
   const queryTokens = tokenize(query);
   if (queryTokens.length === 0) return null;
 
-  const scored = knowledgeIndex
-    .map((file) => {
-      const bodyTokens = tokenize(file.content);
-      const headerTokens = tokenize(`${file.name} ${file.category}`);
-      let score = 0;
-      let matched = 0;
-      for (const qToken of queryTokens) {
-        if (containsToken(bodyTokens, qToken)) {
-          score += 2;
-          matched += 1;
-        }
-        if (containsToken(headerTokens, qToken)) score += 1;
+  // Expand the query with synonyms (e.g. daftar <-> registrasi) so retrieval
+  // catches questions worded differently from the dataset. Synonym tokens are
+  // scored at half weight below, keeping direct keyword matches dominant.
+  const baseTokenSet = new Set<string>(queryTokens);
+  const synonymSet = new Set<string>();
+  for (const qt of queryTokens) {
+    const synonyms = QUERY_SYNONYMS[qt];
+    if (!synonyms) continue;
+    for (const syn of synonyms) {
+      const stemmed = stemToken(syn.toLowerCase().trim());
+      if (stemmed.length >= 3) synonymSet.add(stemmed);
+    }
+  }
+  const expandedTokens = Array.from(new Set([...baseTokenSet, ...synonymSet]));
+
+  const scores: Map<number, { score: number; matched: number }> = new Map();
+  let totalMatchedTokens = 0;
+
+  const isExpandedToken = (t: string): boolean => !baseTokenSet.has(t);
+  const totalDocs = knowledgeIndex.length;
+
+  for (const qToken of expandedTokens) {
+    const postings = invertedIndex.get(qToken);
+    if (!postings || postings.length === 0) continue;
+
+    const weight = isExpandedToken(qToken) ? 0.5 : 1;
+
+    const df = postings.length;
+    const idf = 1 + Math.log(totalDocs / Math.max(1, df));
+
+    totalMatchedTokens += 1;
+    for (const entry of postings) {
+      const contribution = (entry.bodyScore * 2 + entry.headerScore * 1) * weight * idf;
+      const existing = scores.get(entry.fileIndex);
+      if (existing) {
+        existing.score += contribution;
+        existing.matched += 1;
+      } else {
+        scores.set(entry.fileIndex, {
+          score: contribution,
+          matched: 1,
+        });
       }
-      return { file, score, matched };
-    })
+    }
+  }
+
+  if (scores.size === 0 || totalMatchedTokens === 0) return null;
+
+  const maxInputChars = AIAssistantConfig.maxInputChars;
+
+  const scored = Array.from(scores.entries())
+    .map(([fileIndex, { score, matched }]) => ({
+      fileIndex,
+      file: knowledgeIndex[fileIndex],
+      score,
+      matched,
+    }))
     .filter((s) => s.score > 0)
     .sort(
       (a, b) =>
@@ -188,12 +419,22 @@ export function retrieveRelevantContext(
 
   if (scored.length === 0) return null;
 
-  const context = scored
-    .map(({ file }) => {
-      const body = file.content.trim();
-      return `[${file.path}](${file.path})\nKategori: ${file.category}\n${body}`;
-    })
-    .join("\n\n---\n\n");
+  const contextParts: string[] = [];
+  let currentLength = 0;
+
+  for (const { file } of scored) {
+    const excerpt = extractRelevantExcerpts(file, expandedTokens, Math.floor(maxInputChars / scored.length));
+    if (excerpt.length > 0) {
+      const block = `[${file.path}](${file.path})\nKategori: ${file.category}\n${excerpt}`;
+      if (currentLength + block.length > maxInputChars) break;
+      contextParts.push(block);
+      currentLength += block.length;
+    }
+  }
+
+  if (contextParts.length === 0) return null;
+
+  const context = contextParts.join("\n\n---\n\n");
 
   const sources: Source[] = scored.map(({ file }) => ({
     title: file.name,

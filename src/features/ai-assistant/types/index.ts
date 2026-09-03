@@ -7,6 +7,7 @@ export interface AIAssistantMessage {
 export interface AIAssistantRequest {
   message: string;
   conversationId?: string;
+  history?: AIAssistantMessage[];
 }
 
 export interface AIAssistantResponse {

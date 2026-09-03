@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "@/styles/global.css";
-import Image from "next/image";
-import { AssistantWidget } from "@/features/ai-assistant";
 import ThemeProvider from "@/components/ThemeProvider";
+import AssistantWidgetLoader from "./AssistantWidgetLoader";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -57,7 +56,7 @@ export default function RootLayout({
         <ThemeProvider>
           <div className="min-h-screen flex flex-col bg-dark-50 dark:bg-dark-950 text-dark-900 dark:text-dark-100" suppressHydrationWarning>
             {children}
-            <AssistantWidget />
+            <AssistantWidgetLoader />
           </div>
         </ThemeProvider>
       </body>
