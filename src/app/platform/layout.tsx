@@ -14,6 +14,6 @@ export default function PlatformLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col bg-dark-50 text-dark-900">{children}</div>
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-dark-50 text-dark-900 dark:bg-dark-950 dark:text-dark-100">{children}</div>
   );
 }
