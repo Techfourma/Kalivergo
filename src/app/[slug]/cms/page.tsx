@@ -16,6 +16,8 @@ import { getCurrentSessionUser } from '@/server/auth/session';
 import type { CmsRole } from '@prisma/client';
 
 import PageBackground from '@/components/ui/PageBackground';
+import TaskSubmissionReview from '@/components/cms/TaskSubmissionReview';
+import { getPendingTaskSubmissionsForTenant } from '@/features/task/services/task.service';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,11 +82,12 @@ export default async function CMSOverviewPage({
   const seminarWhere = { tenantId };
   const memberWhere = { tenantMemberships: { some: { tenantId } } };
 
-  const [tasksCount, transactions, seminarsCount, membersCount] = await Promise.all([
+  const [tasksCount, transactions, seminarsCount, membersCount, pendingSubmissions] = await Promise.all([
     prisma.task.count({ where: taskWhere }),
     prisma.transaction.findMany({ where: transactionWhere }),
     prisma.seminar.count({ where: seminarWhere }),
     prisma.user.count({ where: memberWhere }),
+    hasTasksAccess ? getPendingTaskSubmissionsForTenant(tenantId) : Promise.resolve([]),
   ]);
 
   const totalIncome = transactions
@@ -166,6 +169,18 @@ export default async function CMSOverviewPage({
             </div>
           </div>
         </div>
+
+        {hasTasksAccess && pendingSubmissions.length > 0 && (
+          <TaskSubmissionReview
+            submissions={pendingSubmissions.map((submission) => ({
+              id: submission.id,
+              submittedAt: submission.submittedAt.toISOString(),
+              task: submission.task,
+              pertemuan: submission.pertemuan,
+              user: submission.user,
+            }))}
+          />
+        )}
 
         {hasTasksAccess && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 dark:bg-dark-900 dark:border-dark-800">
