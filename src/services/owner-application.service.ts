@@ -346,11 +346,9 @@ export async function approveOwnerApplication(
       if (applicantEmail) {
         const plainToken = generateVerificationToken();
         const tokenHash = hashToken(plainToken);
-        const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
-
         await prisma.verificationToken.deleteMany({ where: { email: applicantEmail } });
         await prisma.verificationToken.create({
-          data: { tokenHash, email: applicantEmail, expiresAt },
+          data: { tokenHash, email: applicantEmail, expiresAt: null },
         });
 
         await sendOwnerApprovalEmail(applicantEmail, applicantName ?? "User", plainToken);

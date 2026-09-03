@@ -332,7 +332,7 @@ export async function registerOwnerClass(formData: FormData) {
             selfieStorageKey: upload.publicId,
             ktmStorageKey: ktmUpload.publicId,
             whatsappNumber: phone || undefined,
-            status: "PENDING_EMAIL",
+            status: "PENDING_KYC",
             submittedAt: new Date(),
           },
         });

@@ -1,8 +1,6 @@
 import { getAllOwners } from "@/actions/platform-owners";
 import DeletePlatformOwnerButton from "@/components/cms/DeletePlatformOwnerButton";
 import PageBackground from "@/components/ui/PageBackground";
-import { Eye } from "lucide-react";
-import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -48,9 +46,6 @@ export default async function PlatformUsersPage() {
                     Status Aplikasi
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wider">
-                    KYC
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wider">
                     Aksi
                   </th>
                 </tr>
@@ -58,22 +53,13 @@ export default async function PlatformUsersPage() {
               <tbody className="divide-y divide-dark-200 dark:divide-dark-700">
                 {owners.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-dark-500">
+                    <td colSpan={5} className="px-6 py-12 text-center text-dark-500">
                       Belum ada data owner kelas.
                     </td>
                   </tr>
                 ) : (
                   owners.map((owner) => {
                     const appStatus = statusConfig[owner.applicationStatus] || statusConfig.NO_APPLICATION;
-                    const kycStatusLabel =
-                      owner.kycStatus === "APPROVED"
-                        ? "Disetujui"
-                        : owner.kycStatus === "REJECTED"
-                        ? "Ditolak"
-                        : owner.kycStatus === "PENDING"
-                        ? "Menunggu"
-                        : owner.kycStatus || "-";
-
                     return (
                       <tr key={owner.userId} className="hover:bg-dark-50/50 dark:hover:bg-dark-900/30 transition-colors">
                         <td className="px-6 py-4">
@@ -134,30 +120,7 @@ export default async function PlatformUsersPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
-                              owner.kycStatus === "APPROVED"
-                                ? "bg-green-50 text-green-700 border-green-200"
-                                : owner.kycStatus === "REJECTED"
-                                ? "bg-red-50 text-red-700 border-red-200"
-                                : "bg-yellow-50 text-yellow-700 border-yellow-200"
-                            }`}
-                          >
-                            {kycStatusLabel}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            {owner.tenantId && (
-                              <Link
-                                href={`/${owner.tenantSlug || owner.tenantId}/dashboard`}
-                                target="_blank"
-                                className="inline-flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 font-medium"
-                              >
-                                <Eye className="h-3.5 w-3.5" />
-                                Lihat Kelas
-                              </Link>
-                            )}
                             <DeletePlatformOwnerButton
                               userId={owner.userId}
                               userName={owner.name}

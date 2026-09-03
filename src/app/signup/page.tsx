@@ -8,6 +8,32 @@ import Link from "next/link";
 import { Eye, EyeOff, CheckCircle2, Mail, ArrowLeft, Upload, University } from "lucide-react";
 import Loading from "@/components/layout/Loading";
 
+type OwnerSignupValues = {
+  fullName: string;
+  nim: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+  customSlug: string;
+  universityName: string;
+  programName: string;
+  className: string;
+};
+
+const initialOwnerSignupValues: OwnerSignupValues = {
+  fullName: "",
+  nim: "",
+  email: "",
+  phone: "",
+  password: "",
+  confirmPassword: "",
+  customSlug: "",
+  universityName: "",
+  programName: "",
+  className: "",
+};
+
 export default function SignupPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -16,11 +42,27 @@ export default function SignupPage() {
   const [showPopup, setShowPopup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formValues, setFormValues] = useState<OwnerSignupValues>(initialOwnerSignupValues);
+  const [selfieFile, setSelfieFile] = useState<File | null>(null);
+  const [ktmFile, setKtmFile] = useState<File | null>(null);
   const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
   const [ktmPreview, setKtmPreview] = useState<string | null>(null);
   const [submitStatus, setSubmitStatus] = useState("");
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleFormChange = (event: React.ChangeEvent<HTMLFormElement>) => {
+    if (!(event.target instanceof HTMLInputElement)) return;
+
+    const target = event.target;
+    if (target.name in initialOwnerSignupValues) {
+      setFormValues((currentValues) => ({
+        ...currentValues,
+        [target.name]: target.value,
+      }));
+    }
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setIsLoading(true);
     setError("");
     setSuccess("");
@@ -28,6 +70,26 @@ export default function SignupPage() {
     setSubmitStatus("Mengunggah data ke server...");
 
     try {
+      const formData = new FormData();
+      formData.append("fullName", formValues.fullName);
+      formData.append("nim", formValues.nim);
+      formData.append("email", formValues.email);
+      formData.append("phone", formValues.phone);
+      formData.append("password", formValues.password);
+      formData.append("confirmPassword", formValues.confirmPassword);
+      formData.append("customSlug", formValues.customSlug);
+      formData.append("universityName", formValues.universityName);
+      formData.append("programName", formValues.programName);
+      formData.append("className", formValues.className);
+
+      if (selfieFile) {
+        formData.append("selfieFile", selfieFile);
+      }
+
+      if (ktmFile) {
+        formData.append("ktmFile", ktmFile);
+      }
+
       const result = await registerOwnerClass(formData);
       if (result?.error) {
         setError(result.error);
@@ -52,6 +114,7 @@ export default function SignupPage() {
   const handleSelfieChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setSelfieFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setSelfiePreview(reader.result as string);
@@ -63,6 +126,7 @@ export default function SignupPage() {
   const handleKtmChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setKtmFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setKtmPreview(reader.result as string);
@@ -159,7 +223,8 @@ export default function SignupPage() {
         )}
 
         <form
-          action={handleSubmit}
+          onSubmit={handleSubmit}
+          onChange={handleFormChange}
           onSubmitCapture={() => {
             setSubmitStatus("Menyiapkan upload selfie dan KTM...");
           }}
@@ -170,6 +235,7 @@ export default function SignupPage() {
             <input
               type="text"
               name="fullName"
+              value={formValues.fullName}
               required
               disabled={isLoading || showPopup}
               className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
@@ -182,6 +248,7 @@ export default function SignupPage() {
             <input
               type="text"
               name="nim"
+              value={formValues.nim}
               required
               disabled={isLoading || showPopup}
               className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
@@ -194,6 +261,7 @@ export default function SignupPage() {
             <input
               type="email"
               name="email"
+              value={formValues.email}
               required
               disabled={isLoading || showPopup}
               className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
@@ -206,6 +274,7 @@ export default function SignupPage() {
             <input
               type="tel"
               name="phone"
+              value={formValues.phone}
               required
               disabled={isLoading || showPopup}
               className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
@@ -219,6 +288,7 @@ export default function SignupPage() {
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
+                value={formValues.password}
                 required
                 disabled={isLoading || showPopup}
                 minLength={6}
@@ -242,6 +312,7 @@ export default function SignupPage() {
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
+                value={formValues.confirmPassword}
                 required
                 disabled={isLoading || showPopup}
                 className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 pr-10"
@@ -263,6 +334,7 @@ export default function SignupPage() {
             <input
               type="text"
               name="customSlug"
+              value={formValues.customSlug}
               required
               disabled={isLoading || showPopup}
               className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
@@ -279,6 +351,7 @@ export default function SignupPage() {
               <input
                 type="text"
                 name="universityName"
+                value={formValues.universityName}
                 required
                 disabled={isLoading || showPopup}
                 className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
@@ -291,6 +364,7 @@ export default function SignupPage() {
               <input
                 type="text"
                 name="programName"
+                value={formValues.programName}
                 required
                 disabled={isLoading || showPopup}
                 className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
@@ -303,6 +377,7 @@ export default function SignupPage() {
               <input
                 type="text"
                 name="className"
+                value={formValues.className}
                 required
                 disabled={isLoading || showPopup}
                 className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
