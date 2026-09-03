@@ -137,7 +137,7 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
         )}
 
         {/* Header Section */}
-        <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+        <Card padding="lg">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             <div className="relative">
               <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center overflow-hidden">
@@ -207,7 +207,7 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
         </Card>
 
         {/* About Me / Bio */}
-        <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+        <Card padding="lg">
           <h2 className="text-xl font-bold text-dark-900 dark:text-white mb-4 flex items-center gap-2">
             <User className="h-5 w-5 text-primary-400" />
             Tentang Saya
@@ -228,7 +228,7 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
         </Card>
 
         {/* Work Experience */}
-        <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+        <Card padding="lg">
           <h2 className="text-xl font-bold text-dark-900 dark:text-white mb-4 flex items-center gap-2">
             <Briefcase className="h-5 w-5 text-primary-400" />
             Pengalaman Kerja
@@ -249,7 +249,7 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
         </Card>
 
         {/* Skills */}
-        <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+        <Card padding="lg">
           <h2 className="text-xl font-bold text-dark-900 dark:text-white mb-4 flex items-center gap-2">
             <GraduationCap className="h-5 w-5 text-primary-400" />
             Keahlian
@@ -281,7 +281,7 @@ export default function PortfolioView({ portfolioUser, currentUser }: PortfolioV
         </Card>
 
         {/* Social Media Links */}
-        <Card padding="lg" className="bg-white/5 border-dark-200/60 dark:border-dark-800">
+        <Card padding="lg">
           <h2 className="text-xl font-bold text-dark-900 dark:text-white mb-4 flex items-center gap-2">
             <LinkIcon className="h-5 w-5 text-primary-400" />
             Social Media & Links
