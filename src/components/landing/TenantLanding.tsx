@@ -323,7 +323,7 @@ function HeroSection({
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
         <button
           onClick={() => navigateWithLoading("/signup")}
-          className="flex items-center gap-2 rounded-xl bg-white text-dark-900 px-8 py-3.5 text-base font-semibold hover:bg-gray-100 transition-all shadow-xl shadow-white/10 hover:shadow-2xl hover:scale-105"
+          className="flex items-center gap-2 rounded-xl bg-white text-dark-900 dark:bg-dark-900 dark:text-white px-8 py-3.5 text-base font-semibold hover:bg-gray-100 dark:hover:bg-dark-800 transition-all shadow-xl shadow-white/10 hover:shadow-2xl hover:scale-105"
         >
           Daftar Sekarang
           <ArrowRight className="h-5 w-5" />
