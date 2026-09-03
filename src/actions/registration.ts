@@ -1,6 +1,6 @@
 "use server";
 
-import { unstable_cache } from "next/cache";
+import { revalidatePath, unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { hash } from "bcryptjs";
 import { createAuditLog } from "@/server/audit";
@@ -332,7 +332,7 @@ export async function registerOwnerClass(formData: FormData) {
             selfieStorageKey: upload.publicId,
             ktmStorageKey: ktmUpload.publicId,
             whatsappNumber: phone || undefined,
-            status: "PENDING_EMAIL",
+            status: "PENDING_KYC",
             submittedAt: new Date(),
           },
         });
@@ -356,6 +356,8 @@ export async function registerOwnerClass(formData: FormData) {
       });
 
       applicationId = result.applicationId;
+      revalidatePath("/platform/kyc");
+      revalidatePath("/platform");
     } catch (error: any) {
       await deleteSelfieFromKYC(upload.publicId);
       await deleteKtmFromKYC(ktmUpload.publicId);

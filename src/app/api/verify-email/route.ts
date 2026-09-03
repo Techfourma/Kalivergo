@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
       where: {
         tokenHash,
         email: normalizedEmail,
-        expiresAt: { gt: now },
+        newPasswordHash: null,
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
       },
     });
 
