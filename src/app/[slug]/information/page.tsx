@@ -60,7 +60,7 @@ export default async function InformationPage({
   return (
     <>
       <PageBackground />
-      <div className="relative z-10">
+      <div className="relative z-10 lg:pl-[18rem] xl:pl-[20rem]">
         <div className="max-w-3xl mx-auto px-4 py-6">
           <CreatePostForm tenantId={tenant.id} currentUser={currentUser} />
 
