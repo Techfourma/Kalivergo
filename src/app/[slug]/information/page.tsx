@@ -3,6 +3,7 @@ import { getCurrentSessionUser } from '@/server/auth/session';
 import { requireTenantMembership } from '@/lib/tenant';
 import { InformationType } from '@prisma/client';
 import PageBackground from '@/components/ui/PageBackground';
+import TenantNavbar from '@/components/layout/TenantNavbar';
 import { redirect } from 'next/navigation';
 
 export default async function InformationPage({
@@ -33,11 +34,17 @@ export default async function InformationPage({
     );
   }
 
+  let membership;
   try {
-    await requireTenantMembership(session.id, tenant.id);
+    membership = await requireTenantMembership(session.id, tenant.id);
   } catch {
     redirect('/unauthorized');
   }
+
+  const membershipDetails = await prisma.tenantMembership.findUnique({
+    where: { id: membership.id },
+    select: { cmsRole: true },
+  });
 
   const CreatePostForm = (await import('@/components/information/CreatePostForm')).default;
   const InformationFeed = (await import('@/components/information/InformationFeed')).default;
@@ -51,13 +58,20 @@ export default async function InformationPage({
     id: session.id,
     name: dbUser?.name || session.name || 'User',
     image: dbUser?.image || session.image,
+    role: membership.role,
+    cmsRole: membershipDetails?.cmsRole,
+    canAccessCms: membership.role === 'OWNER' || !!membershipDetails?.cmsRole,
   };
+  const tenantPath = `/${routeParams.slug}`;
 
   return (
     <>
       <PageBackground />
-      <div className="relative z-10 lg:pl-[18rem] xl:pl-[20rem]">
-        <div className="max-w-3xl mx-auto px-4 py-6">
+      <div className="fixed top-0 left-0 right-0 z-50 nav-shell">
+        <TenantNavbar user={currentUser} tenantPath={tenantPath} />
+      </div>
+      <main className="relative z-10 pt-24 pb-8 lg:pl-[18rem] xl:pl-[20rem]">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
           <CreatePostForm tenantId={tenant.id} currentUser={currentUser} />
 
           <InformationFeed
@@ -66,7 +80,7 @@ export default async function InformationPage({
             currentUserId={session.id}
           />
         </div>
-      </div>
+      </main>
     </>
   );
 }
