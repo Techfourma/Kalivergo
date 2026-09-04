@@ -184,7 +184,7 @@ export default async function CMSOverviewPage({
 
         {hasTasksAccess && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 dark:bg-dark-900 dark:border-dark-800">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400">
                 <FileText className="h-6 w-6" />
@@ -200,7 +200,7 @@ export default async function CMSOverviewPage({
             </div>
             <Link
               href={`${tenantPath}/cms/tasks`}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+              className="flex w-full items-center justify-center gap-2 whitespace-nowrap px-3 py-2 text-sm sm:w-40 sm:px-6 sm:py-3 sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
             >
               <span>+</span>
               <span>Tambah Tugas</span>
@@ -211,7 +211,7 @@ export default async function CMSOverviewPage({
 
         {hasFinanceAccess && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 dark:bg-dark-900 dark:border-dark-800">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 text-green-600 dark:bg-green-500/15 dark:text-green-400">
                 <TrendingUp className="h-6 w-6" />
@@ -227,7 +227,7 @@ export default async function CMSOverviewPage({
             </div>
             <Link
               href={`${tenantPath}/cms/finance`}
-              className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm"
+              className="flex w-full items-center justify-center gap-2 whitespace-nowrap px-3 py-2 text-sm sm:w-40 sm:px-6 sm:py-3 sm:text-base bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm"
             >
               <span>+</span>
               <span>Tambah</span>
