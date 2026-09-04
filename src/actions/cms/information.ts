@@ -6,6 +6,10 @@ import { requireTenantMembership } from '@/lib/tenant';
 import { revalidatePath } from 'next/cache';
 import { uploadToCloudinary, deleteFromCloudinary } from '@/lib/cloudinary';
 import { InformationType } from '@prisma/client';
+import {
+  isSupportedInformationFile,
+  MAX_INFORMATION_FILE_SIZE,
+} from '@/shared/information-file';
 
 function sanitizeFileName(name: string): string {
   return name
@@ -13,6 +17,31 @@ function sanitizeFileName(name: string): string {
     .replace(/[^a-zA-Z0-9._-]/g, '_')
     .replace(/_+/g, '_')
     .replace(/^_+|_+$/g, '');
+}
+
+function getUploadErrorMessage(error: unknown): string {
+  const uploadError = error as { http_code?: number; message?: string };
+  const message = uploadError?.message?.toLowerCase() || '';
+
+  if (
+    uploadError?.http_code === 413 ||
+    message.includes('too large') ||
+    message.includes('file size') ||
+    message.includes('payload')
+  ) {
+    return 'Ukuran file melebihi batas maksimal 50 MB.';
+  }
+
+  if (
+    message.includes('format') ||
+    message.includes('unsupported') ||
+    message.includes('codec') ||
+    message.includes('invalid video')
+  ) {
+    return 'Format video tidak didukung. Gunakan file MP4, WebM, atau OGG.';
+  }
+
+  return 'Video gagal diunggah. Silakan coba lagi.';
 }
 
 export async function createInformation(formData: FormData) {
@@ -42,6 +71,16 @@ export async function createInformation(formData: FormData) {
 
     const file = formData.get('file') as File | null;
     if (file && file.size > 0) {
+      if (file.size > MAX_INFORMATION_FILE_SIZE) {
+        return { error: 'Ukuran file melebihi batas maksimal 50 MB.' };
+      }
+
+      if (!isSupportedInformationFile(file, type)) {
+        return type === InformationType.VIDEO
+          ? { error: 'Format video tidak didukung. Gunakan file MP4, WebM, atau OGG.' }
+          : { error: 'Format file tidak didukung.' };
+      }
+
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
@@ -63,12 +102,18 @@ export async function createInformation(formData: FormData) {
         publicId = `${Date.now()}_${sanitizeFileName(baseName)}${ext}`;
       }
 
-      const uploadResult = await uploadToCloudinary(buffer, {
-        folder,
-        resourceType,
-        publicId,
-        accessMode,
-      });
+      let uploadResult;
+      try {
+        uploadResult = await uploadToCloudinary(buffer, {
+          folder,
+          resourceType,
+          publicId,
+          accessMode,
+        });
+      } catch (error) {
+        console.error('Error uploading information media:', error);
+        return { error: getUploadErrorMessage(error) };
+      }
 
       mediaUrl = uploadResult.secure_url;
       mediaPublicId = uploadResult.public_id;
@@ -105,7 +150,7 @@ export async function createInformation(formData: FormData) {
     return { success: true, data: information };
   } catch (error) {
     console.error('Error creating information:', error);
-    return { error: 'Failed to create information' };
+    return { error: 'Post gagal dibuat. Silakan coba lagi.' };
   }
 }
 
