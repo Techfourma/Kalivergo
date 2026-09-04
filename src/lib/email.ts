@@ -267,6 +267,24 @@ export async function sendForgotPasswordVerificationEmail(
   await transporter.sendMail(mailOptions);
 }
 
+export async function sendPlatformAdminForgotPasswordVerificationEmail(
+  email: string,
+  verificationLink: string
+) {
+  const transporter = createTransporter();
+  await transporter.sendMail({
+    from: env.smtpUser,
+    to: email,
+    subject: 'Verifikasi Reset Password Admin Platform',
+    html: `
+      <h2>Verifikasi Reset Password Admin Platform</h2>
+      <p>Klik link berikut untuk mengubah password akun admin platform Anda:</p>
+      <a href="${verificationLink}">Verifikasi Reset Password</a>
+      <p>Link akan kadaluarsa dalam 1 jam.</p>
+    `,
+  });
+}
+
 export async function sendMemberRejectionEmail(
   to: string,
   name: string
