@@ -15,10 +15,14 @@ export async function createAuditLog(
 ) {
   try {
     let resolvedUserName = userName;
+    let actorUserId: string | null = null;
+
     if (!resolvedUserName || resolvedUserName === 'System') {
       const session = await readSessionUser();
       if (session?.name) resolvedUserName = session.name;
+      actorUserId = session?.id ?? null;
     }
+
     if (!resolvedUserName) resolvedUserName = 'System';
 
     const payload: Record<string, any> = { description, userName: resolvedUserName };
@@ -33,7 +37,7 @@ export async function createAuditLog(
 
     await prisma.auditLog.create({
       data: {
-        actorUserId: null,
+        actorUserId,
         action,
         entityType: module,
         entityId: null,

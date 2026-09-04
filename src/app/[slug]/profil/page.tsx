@@ -3,6 +3,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import Footer from "@/components/layout/Footer";
 import PageBackground from "@/components/ui/PageBackground";
 import ProfileForm from "./ProfileForm";
+import TenantNavbar from "@/components/layout/TenantNavbar";
 import CacheGuard from "@/components/security/CacheGuard";
 import { cookies } from "next/headers";
 import {
@@ -64,16 +65,17 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         <CacheGuard />
 
         <PageBackground />
-        <main className="flex-1 py-12 relative z-10 min-h-screen lg:pl-[18rem] xl:pl-[20rem]">
+        <div className="fixed top-0 left-0 right-0 z-50 nav-shell">
+          <TenantNavbar user={currentUser} tenantPath={`/${slug}`} />
+        </div>
+
+        <main className="flex-1 py-8 pt-24 pb-12 relative z-10 min-h-screen lg:pl-[18rem] xl:pl-[20rem]">
           <div className="mx-auto w-full max-w-4xl min-w-0 px-4 sm:px-6 lg:px-8">
             <div className="relative min-w-0 rounded-3xl border-2 border-dark-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/70 backdrop-blur-xl p-4 sm:p-10 shadow-[0_20px_50px_-15px_rgba(15,23,42,0.15)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.55)]">
               {/* subtle top highlight for a lifted, 3D feel */}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-3xl bg-gradient-to-r from-transparent via-white/80 dark:via-white/10 to-transparent" />
 
               <div className="mb-10">
-                <p className="text-xs font-semibold tracking-widest uppercase text-dark-400 dark:text-dark-500 mb-2">
-                  Akun Saya
-                </p>
                 <h1 className="text-3xl font-bold text-dark-900 dark:text-white font-display tracking-tight">
                   Profil Pengguna
                 </h1>
