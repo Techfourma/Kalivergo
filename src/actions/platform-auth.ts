@@ -7,12 +7,15 @@ import { generateVerificationToken, hashToken } from "@/lib/auth";
 import { sendVerificationEmail } from "@/lib/email";
 import { env } from "@/config/env";
 import { requireSuperAdminKyc } from "@/lib/tenant";
+import { createAuditLog } from "@/server/audit";
 import {
   clearCurrentSession,
   getCurrentSessionUserId,
   setCurrentSessionUser,
 } from "@/server/auth/session";
 import { authenticatePlatformAdmin } from "@/features/platform/services/platform-auth.service";
+import { KYC_STORAGE_FOLDER } from "@/server/kyc/validation";
+import { deleteFromCloudinary } from "@/server/storage/cloudinary";
 
 interface SessionUser {
   id: string;
@@ -67,6 +70,7 @@ export async function registerPlatformAdmin(
     const address = (formData.get("address")?.toString() || "").trim();
     const phone = (formData.get("phone")?.toString() || "").trim();
     const ktpFile = formData.get("ktpFile");
+    const selfieFile = formData.get("selfieFile");
     const registrationCode = (formData.get("registrationCode")?.toString() || "").trim();
 
     if (name.length < 2) return { error: "Nama lengkap minimal 2 karakter." };
@@ -76,6 +80,9 @@ export async function registerPlatformAdmin(
     if (!address || address.length < 10) return { error: "Alamat lengkap minimal 10 karakter." };
     if (!phone || phone.length < 10) return { error: "Nomor telepon minimal 10 digit." };
     if (!(ktpFile instanceof File) || ktpFile.size === 0) return { error: "Foto KTP wajib diunggah." };
+    if (!(selfieFile instanceof File) || selfieFile.size === 0) return { error: "Foto selfie wajib diunggah." };
+    if (!["image/jpeg", "image/png", "image/webp"].includes(selfieFile.type)) return { error: "Foto selfie harus berformat JPEG, PNG, atau WebP." };
+    if (selfieFile.size > 5 * 1024 * 1024) return { error: "Foto selfie maksimal 5MB." };
 
     const expectedCode = env.platformAdminRegistrationCode;
     if (expectedCode && registrationCode !== expectedCode) {
@@ -95,6 +102,13 @@ export async function registerPlatformAdmin(
       publicId: `ktp_${Date.now()}_${Math.random().toString(36).substring(7)}`,
     });
 
+    const selfieBuffer = Buffer.from(await selfieFile.arrayBuffer());
+    const selfieUploadResult = await uploadToCloudinary(selfieBuffer, {
+      folder: KYC_STORAGE_FOLDER,
+      resourceType: "image",
+      publicId: `kyc_admin_selfie_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+    });
+
     await prisma.user.create({
       data: {
         name,
@@ -106,6 +120,8 @@ export async function registerPlatformAdmin(
         address,
         phone,
         ktpStorageKey: uploadResult.public_id,
+        selfieStorageKey: selfieUploadResult.public_id,
+        image: selfieUploadResult.secure_url,
       },
     });
 
@@ -143,16 +159,24 @@ export async function approveKycAdminRegistration(
 
     const admin = await prisma.user.findUnique({
       where: { id: adminUserId },
-      select: { id: true, email: true, name: true, platformRole: true, kycStatus: true },
+      select: { id: true, email: true, name: true, platformRole: true, kycStatus: true, selfieStorageKey: true, image: true },
     });
 
     if (!admin) return { error: "User tidak ditemukan." };
     if (admin.platformRole !== "ADMIN_KYC") return { error: "User ini bukan ADMIN_KYC." };
     if (admin.kycStatus !== "PENDING") return { error: "Status pendaftaran bukan PENDING." };
 
+    const cloudName = env.cloudinaryCloudName;
+    const selfieUrl = cloudName && admin.selfieStorageKey
+      ? `https://res.cloudinary.com/${cloudName}/image/upload/${admin.selfieStorageKey}`
+      : admin.image;
+
     await prisma.user.update({
       where: { id: adminUserId },
-      data: { kycStatus: "APPROVED" },
+      data: {
+        kycStatus: "APPROVED",
+        image: selfieUrl ?? undefined,
+      },
     });
 
     const plainToken = generateVerificationToken();
@@ -165,6 +189,19 @@ export async function approveKycAdminRegistration(
     });
 
     await sendVerificationEmail(admin.email!, admin.name!, plainToken);
+
+    try {
+      await createAuditLog(
+        "ADMIN_KYC",
+        "APPROVE",
+        `Pendaftaran admin KYC "${admin.name}" (${admin.email}) disetujui`,
+        approverId,
+        { adminUserId, applicantName: admin.name, applicantEmail: admin.email }
+      );
+    } catch {}
+
+    revalidatePath("/platform/kyc/admin");
+    revalidatePath("/platform");
 
     return { success: true };
   } catch (error) {
@@ -201,7 +238,7 @@ export async function rejectKycAdminRegistration(
 
     const admin = await prisma.user.findUnique({
       where: { id: adminUserId },
-      select: { id: true, platformRole: true, kycStatus: true, ktpStorageKey: true },
+      select: { id: true, name: true, email: true, platformRole: true, kycStatus: true, ktpStorageKey: true, selfieStorageKey: true },
     });
 
     if (!admin) return { error: "User tidak ditemukan." };
@@ -214,13 +251,32 @@ export async function rejectKycAdminRegistration(
     });
 
     if (admin.ktpStorageKey) {
-      const { deleteFromCloudinary } = await import("@/server/storage/cloudinary");
       try {
         await deleteFromCloudinary(admin.ktpStorageKey, "image");
       } catch (cleanupError) {
         console.error("Failed to delete KTP during rejection:", cleanupError);
       }
     }
+
+    if (admin.selfieStorageKey) {
+      try {
+        await deleteFromCloudinary(admin.selfieStorageKey, "image");
+      } catch (cleanupError) {
+        console.error("Failed to delete selfie during rejection:", cleanupError);
+      }
+    }
+
+    try {
+      await createAuditLog(
+        "ADMIN_KYC",
+        "REJECT",
+        `Pendaftaran admin KYC "${admin.name}" (${admin.email}) ditolak${reason ? ` — alasan: ${reason}` : ""}`,
+        approverId,
+        { adminUserId, applicantName: admin.name, applicantEmail: admin.email, reason }
+      );
+    } catch {}
+
+    revalidatePath("/platform/kyc/admin");
 
     return { success: true };
   } catch (error) {
@@ -238,6 +294,7 @@ export async function getPendingKycAdminRegistrations(): Promise<{
     phone: string | null;
     address: string | null;
     ktpUrl: string | null;
+    selfieUrl: string | null;
     createdAt: string;
   }>;
   error?: string;
@@ -266,6 +323,8 @@ export async function getPendingKycAdminRegistrations(): Promise<{
         phone: true,
         address: true,
         ktpStorageKey: true,
+        selfieStorageKey: true,
+        image: true,
         createdAt: true,
       },
       orderBy: { createdAt: "desc" },
@@ -282,6 +341,10 @@ export async function getPendingKycAdminRegistrations(): Promise<{
         cloudName && reg.ktpStorageKey
           ? `https://res.cloudinary.com/${cloudName}/image/upload/${reg.ktpStorageKey}`
           : null,
+      selfieUrl:
+        cloudName && reg.selfieStorageKey
+          ? `https://res.cloudinary.com/${cloudName}/image/upload/${reg.selfieStorageKey}`
+          : reg.image,
       createdAt: reg.createdAt.toISOString(),
     }));
 

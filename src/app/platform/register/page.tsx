@@ -15,6 +15,7 @@ export default function PlatformRegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [ktpPreview, setKtpPreview] = useState<string | null>(null);
+  const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
 
   const handleSubmit = async (formData: FormData) => {
     setIsLoading(true);
@@ -42,6 +43,17 @@ export default function PlatformRegisterPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setKtpPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSelfieChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelfiePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -229,6 +241,55 @@ export default function PlatformRegisterPage() {
                           disabled={isLoading || !!success}
                           className="sr-only"
                           onChange={handleKtpChange}
+                        />
+                      </label>
+                    </div>
+                    <p className="text-xs text-dark-500 dark:text-dark-400">PNG, JPG, JPEG maksimal 5MB</p>
+                  </>
+                )}
+                </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
+              Upload Foto Selfie
+            </label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dark-300 dark:border-dark-600 border-dashed rounded-lg hover:border-primary-500 transition-colors bg-dark-50 dark:bg-dark-700">
+              <div className="space-y-1 text-center">
+                {selfiePreview ? (
+                  <div className="relative">
+                    <img src={selfiePreview} alt="Selfie Preview" className="mx-auto h-32 w-32 object-cover rounded-xl" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelfiePreview(null);
+                        const input = document.getElementById('selfieFile') as HTMLInputElement;
+                        if (input) input.value = '';
+                      }}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                    >
+                      <EyeOff className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="mx-auto h-12 w-12 text-dark-400 dark:text-dark-500" />
+                    <div className="flex text-sm text-dark-600 dark:text-dark-400">
+                      <label
+                        htmlFor="selfieFile"
+                        className="relative cursor-pointer bg-white dark:bg-dark-600 rounded-md font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500"
+                      >
+                        <span>Upload foto selfie</span>
+                        <input
+                          id="selfieFile"
+                          name="selfieFile"
+                          type="file"
+                          accept="image/*"
+                          required
+                          disabled={isLoading || !!success}
+                          className="sr-only"
+                          onChange={handleSelfieChange}
                         />
                       </label>
                     </div>

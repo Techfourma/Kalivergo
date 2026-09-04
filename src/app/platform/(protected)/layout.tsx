@@ -18,7 +18,7 @@ export default async function PlatformProtectedLayout({
   }
 
   const admin = await prisma.user
-    .findUnique({ where: { id: adminId }, select: { id: true, name: true, platformRole: true } })
+    .findUnique({ where: { id: adminId }, select: { id: true, name: true, platformRole: true, image: true } })
     .catch(() => null);
 
   if (!admin || (admin.platformRole !== "ADMIN_KYC" && admin.platformRole !== "SUPER_ADMIN_KYC")) {
@@ -27,7 +27,7 @@ export default async function PlatformProtectedLayout({
 
   return (
     <>
-      <PlatformNavbar adminName={admin.name} adminRole={admin.platformRole} />
+      <PlatformNavbar adminName={admin.name} adminRole={admin.platformRole} adminImage={admin.image} />
 
       <main className="min-w-0 flex-1 w-full overflow-x-hidden pt-16 md:ml-72 md:w-auto md:pt-0">{children}</main>
     </>
