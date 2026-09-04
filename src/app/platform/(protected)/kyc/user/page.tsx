@@ -6,8 +6,8 @@ import PageBackground from "@/components/ui/PageBackground";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Review KYC - kalivergo Platform",
-  description: "Tinjau dan verifikasi aplikasi owner kelas (KYC).",
+  title: "Review KYC User - kalivergo Platform",
+  description: "Tinjau dan verifikasi aplikasi owner kelas.",
 };
 
 export default async function PlatformKycPage() {
@@ -19,11 +19,10 @@ export default async function PlatformKycPage() {
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-8">
           <h1 className="text-2xl font-bold font-display text-dark-900 dark:text-white">
-            Review KYC Owner Kelas
+            Review KYC User
           </h1>
           <p className="text-dark-500 dark:text-dark-400 mt-1">
-            Verifikasi identitas owner sebelum kelas diaktifkan. Hanya ADMIN_KYC dan SUPER_ADMIN_KYC
-            yang dapat menyetujui atau menolak aplikasi.
+            Verifikasi identitas owner sebelum kelas diaktifkan.
           </p>
         </div>
 

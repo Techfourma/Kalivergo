@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
@@ -18,6 +19,7 @@ import ThemeToggle from "@/components/ui/ThemeToggle";
 interface PlatformNavbarProps {
   adminName: string | null;
   adminRole: string | null;
+  adminImage: string | null;
 }
 
 const linkBaseClass =
@@ -26,7 +28,7 @@ const activeClass = "bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:
 const inactiveClass =
   "text-dark-600 hover:bg-dark-100 hover:text-dark-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-white";
 
-export default function PlatformNavbar({ adminName, adminRole }: PlatformNavbarProps) {
+export default function PlatformNavbar({ adminName, adminRole, adminImage }: PlatformNavbarProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -35,9 +37,14 @@ export default function PlatformNavbar({ adminName, adminRole }: PlatformNavbarP
     return pathname === href || pathname?.startsWith(`${href}/`);
   };
 
+  const isSuperAdmin = adminRole === "SUPER_ADMIN_KYC";
+
   const menuItems = [
     { href: "/platform", label: "Overview", icon: Home },
-    { href: "/platform/kyc", label: "Review KYC", icon: FileSearch },
+    { href: "/platform/kyc/user", label: "Review User", icon: FileSearch },
+    ...(isSuperAdmin
+      ? [{ href: "/platform/kyc/admin", label: "Review Admin", icon: ShieldCheck }]
+      : []),
     { href: "/platform/kyc-audit", label: "Audit KYC", icon: FileText },
     { href: "/platform/user", label: "User", icon: Users },
   ];
@@ -102,8 +109,20 @@ export default function PlatformNavbar({ adminName, adminRole }: PlatformNavbarP
         </div>
 
         <div className="mt-8 flex items-center gap-3 rounded-2xl border border-dark-200 bg-dark-50 p-3 dark:border-dark-700 dark:bg-dark-800/60">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-100 text-sm font-bold text-primary-700 dark:bg-primary-900/50 dark:text-primary-300">
-            {initials}
+          <div className="flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
+            {adminImage ? (
+              <Image
+                src={adminImage}
+                alt={adminName || "Admin"}
+                width={40}
+                height={40}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-sm font-bold text-primary-700 dark:bg-primary-900/50 dark:text-primary-300">
+                {initials}
+              </span>
+            )}
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-dark-900 dark:text-white">{adminName || "Admin"}</p>
