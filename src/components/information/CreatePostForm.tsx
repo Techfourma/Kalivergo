@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createInformation } from '@/actions/cms/information';
 import { InformationType } from '@prisma/client';
 import Avatar from '@/components/ui/Avatar';
+import { FileText, Image, Video } from 'lucide-react';
 
 interface CreatePostFormProps {
   tenantId: string;
@@ -122,7 +123,7 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
                 onClick={() => { setType(InformationType.TEXT); setIsExpanded(true); }}
                 className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors"
               >
-                <span className="text-green-500 text-lg">📝</span>
+                <FileText className="h-5 w-5 text-green-500" />
                 <span className="text-sm text-gray-600 dark:text-dark-300 font-medium">Text</span>
               </button>
               <button
@@ -130,7 +131,7 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
                 onClick={() => { setType(InformationType.IMAGE); setIsExpanded(true); }}
                 className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors"
               >
-                <span className="text-green-500 text-lg">📷</span>
+                <Image className="h-5 w-5 text-green-500" />
                 <span className="text-sm text-gray-600 dark:text-dark-300 font-medium">Photo</span>
               </button>
               <button
@@ -138,7 +139,7 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
                 onClick={() => { setType(InformationType.VIDEO); setIsExpanded(true); }}
                 className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors"
               >
-                <span className="text-blue-500 text-lg">🎥</span>
+                <Video className="h-5 w-5 text-blue-500" />
                 <span className="text-sm text-gray-600 dark:text-dark-300 font-medium">Video</span>
               </button>
             </div>
@@ -240,7 +241,7 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
                   className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors ${!isMediaMode ? 'bg-gray-200 dark:bg-dark-700' : ''}`}
                   title="Text"
                 >
-                  <span className="text-xl">📝</span>
+                  <FileText className="h-5 w-5" />
                 </button>
                 <button
                   type="button"
@@ -251,7 +252,7 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
                   className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors ${type === InformationType.IMAGE ? 'bg-gray-200 dark:bg-dark-700' : ''}`}
                   title="Photo"
                 >
-                  <span className="text-xl">📷</span>
+                  <Image className="h-5 w-5" />
                 </button>
                 <button
                   type="button"
@@ -262,7 +263,7 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
                   className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors ${type === InformationType.VIDEO ? 'bg-gray-200 dark:bg-dark-700' : ''}`}
                   title="Video"
                 >
-                  <span className="text-xl">🎥</span>
+                  <Video className="h-5 w-5" />
                 </button>
               </div>
 
