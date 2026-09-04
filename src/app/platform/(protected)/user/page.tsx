@@ -2,8 +2,6 @@ import { getAllOwners } from "@/actions/platform-owners";
 import DeletePlatformOwnerButton from "@/components/cms/DeletePlatformOwnerButton";
 import PageBackground from "@/components/ui/PageBackground";
 import SubscriptionControl from "@/components/platform/SubscriptionControl";
-import { Eye } from "lucide-react";
-import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -152,16 +150,6 @@ export default async function PlatformUsersPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            {owner.tenantId && (
-                              <Link
-                                href={`/${owner.tenantSlug || owner.tenantId}/dashboard`}
-                                target="_blank"
-                                className="inline-flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 font-medium"
-                              >
-                                <Eye className="h-3.5 w-3.5" />
-                                Lihat Kelas
-                              </Link>
-                            )}
                             <DeletePlatformOwnerButton
                               userId={owner.userId}
                               userName={owner.name}
