@@ -48,7 +48,7 @@ export default function Modal({
       />
       <div
         className={cn(
-          "relative w-full sm:my-auto sm:w-full rounded-t-2xl sm:rounded-2xl bg-white shadow-2xl animate-slide-up max-h-[90vh] sm:max-h-none overflow-y-auto",
+          "relative w-full sm:my-auto sm:w-full rounded-t-2xl sm:rounded-2xl bg-white shadow-2xl animate-slide-up max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]",
           sizes[size]
         )}
       >
