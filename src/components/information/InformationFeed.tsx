@@ -626,7 +626,7 @@ export default function InformationFeed({ tenantId, sharePostId }: InformationFe
                           handleAddComment(post.id);
                         }
                       }}
-                      className="flex-1 px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      className="flex-1 px-4 py-2 bg-gray-100 dark:bg-dark-800 text-gray-900 dark:text-dark-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     />
                     <button
                       onClick={() => handleAddComment(post.id)}
