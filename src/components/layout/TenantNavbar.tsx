@@ -24,6 +24,8 @@ import {
   BarChart3,
   PanelLeftClose,
   PanelLeftOpen,
+  FileText,
+  Shield,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import ThemeToggle from "@/components/ui/ThemeToggle";
@@ -41,6 +43,7 @@ interface TenantNavbarProps {
   onSignIn?: () => void;
   onSignOut?: () => void;
   tenantPath: string;
+  cmsModules?: string[];
 }
 
 interface NavItem {
@@ -48,14 +51,16 @@ interface NavItem {
   label: string;
   icon: any;
   requiresAuth?: boolean;
+  module?: string;
+  ownerOnly?: boolean;
 }
 
-export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: TenantNavbarProps) {
+export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath, cmsModules }: TenantNavbarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [academicOpen, setAcademicOpen] = useState(false);
+  const [academicOpen, setAcademicOpen] = useState<boolean | null>(null);
   const [desktopCollapsed, setDesktopCollapsed] = useState(false);
   const [isDesktopViewport, setIsDesktopViewport] = useState(false);
 
@@ -112,58 +117,77 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
     }
   };
 
-  const navItems: NavItem[] = [
-    { href: `${tenantPath}/home`, label: "Home", icon: Home },
-    {
-      href: `${tenantPath}/tasks`,
-      label: "Tasks",
-      icon: ClipboardList,
-      requiresAuth: true
-    },
-    {
-      href: `${tenantPath}/schedule`,
-      label: "Schedule",
-      icon: Calendar,
-      requiresAuth: true
-    },
-    {
-      href: `${tenantPath}/information`,
-      label: "Information",
-      icon: Newspaper,
-      requiresAuth: true
-    },
-    {
-      href: `${tenantPath}/dashboard`,
-      label: "Dashboard",
-      icon: LayoutDashboard,
-      requiresAuth: true
-    },
-    {
-      href: `${tenantPath}/statistics`,
-      label: "Statistics",
-      icon: BarChart3,
-      requiresAuth: true
-    },
-    {
-      href: `${tenantPath}/seminar`,
-      label: "Seminar",
-      icon: Presentation,
-      requiresAuth: true
-    },
-    {
-      href: `${tenantPath}/profil`,
-      label: "Profil",
-      icon: User,
-      requiresAuth: true
-    },
-  ];
+  const isCms = cmsModules !== undefined;
+  const navItems: NavItem[] = isCms
+    ? [
+        { href: `${tenantPath}/home`, label: "Home", icon: Home },
+        { href: `${tenantPath}/cms`, label: "Overview", icon: LayoutDashboard },
+        { href: `${tenantPath}/cms/tasks`, label: "Manage Tasks", icon: ClipboardList, module: "tasks" },
+        { href: `${tenantPath}/cms/people`, label: "People Management", icon: User, module: "people" },
+        { href: `${tenantPath}/cms/finance`, label: "Finance", icon: Wallet, module: "finance" },
+        { href: `${tenantPath}/cms/schedule`, label: "Schedule", icon: Calendar, module: "schedule" },
+        { href: `${tenantPath}/cms/seminar`, label: "Seminar", icon: GraduationCap, module: "seminar" },
+        { href: `${tenantPath}/cms/information`, label: "Information", icon: Newspaper, module: "information" },
+        { href: `${tenantPath}/cms/audit`, label: "Audit Log", icon: FileText, module: "audit" },
+        { href: `${tenantPath}/cms/access`, label: "Access Control", icon: Shield, ownerOnly: true },
+      ].filter((item) => {
+        if (item.label === "Home" || item.label === "Overview") return true;
+        if (user?.role === "OWNER") return true;
+        if (item.ownerOnly) return false;
+        return !!item.module && cmsModules.includes(item.module);
+      })
+    : [
+        { href: `${tenantPath}/home`, label: "Home", icon: Home },
+        {
+          href: `${tenantPath}/tasks`,
+          label: "Tasks",
+          icon: ClipboardList,
+          requiresAuth: true
+        },
+        {
+          href: `${tenantPath}/schedule`,
+          label: "Schedule",
+          icon: Calendar,
+          requiresAuth: true
+        },
+        {
+          href: `${tenantPath}/information`,
+          label: "Information",
+          icon: Newspaper,
+          requiresAuth: true
+        },
+        {
+          href: `${tenantPath}/dashboard`,
+          label: "Dashboard",
+          icon: LayoutDashboard,
+          requiresAuth: true
+        },
+        {
+          href: `${tenantPath}/statistics`,
+          label: "Statistics",
+          icon: BarChart3,
+          requiresAuth: true
+        },
+        {
+          href: `${tenantPath}/seminar`,
+          label: "Seminar",
+          icon: Presentation,
+          requiresAuth: true
+        },
+        {
+          href: `${tenantPath}/profil`,
+          label: "Profil",
+          icon: User,
+          requiresAuth: true
+        },
+      ];
 
   const canAccessCms =
     !!user &&
     (user.canAccessCms === true ||
       user.role === "OWNER" ||
       !!user.cmsRole);
-  if (canAccessCms) {
+  if (!isCms && canAccessCms) {
     navItems.push({
       href: `${tenantPath}/cms`,
       label: "CMS",
@@ -210,12 +234,18 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
     const np = normalize(current);
     const nh = normalize(href);
     if (np === nh) return true;
+    if (isCms && nh === normalize(`${tenantPath}/cms`)) return false;
     if (nh !== "/" && nh !== `${tenantPath}/home` && np.startsWith(nh + "/")) return true;
     if (nh === `${tenantPath}/home` && np === tenantPath) return true;
     return false;
   };
 
   const academicActive = academicItems.some((item) => isActiveHref(item.href));
+  const academicExpanded = academicOpen ?? academicActive;
+
+  useEffect(() => {
+    setAcademicOpen(null);
+  }, [pathname]);
 
   const desktopSidebarWidth = desktopCollapsed ? "w-[88px]" : "w-72";
 
@@ -319,10 +349,10 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
             );
           })}
 
-          <div className="pt-1">
+          {!isCms && <div className="pt-1">
             <button
               type="button"
-              onClick={() => setAcademicOpen((prev) => !prev)}
+              onClick={() => setAcademicOpen((prev) => !(prev ?? academicActive))}
               className={cn(
                 "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-dark-700 transition-colors hover:bg-dark-50 dark:text-dark-200 dark:hover:bg-dark-800",
                 academicActive && "bg-primary-50 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300",
@@ -336,12 +366,12 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
               </span>
               {!desktopCollapsed && (
                 <span className="text-xs text-dark-500 dark:text-dark-400">
-                  {academicOpen ? "−" : "+"}
+                  {academicExpanded ? "−" : "+"}
                 </span>
               )}
             </button>
 
-            {academicOpen && (
+            {academicExpanded && (
               <div className="mt-1 space-y-1 pl-3">
                 {academicItems.map((item) => {
                   const Icon = item.icon;
@@ -355,7 +385,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                         desktopCollapsed ? "justify-center px-2" : "",
                         isActive
-                          ? "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
+                          ? "bg-blue-50 font-semibold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
                           : "text-dark-600 hover:bg-dark-50 hover:text-dark-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-dark-100"
                       )}
                       title={desktopCollapsed ? item.label : undefined}
@@ -367,7 +397,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                 })}
               </div>
             )}
-          </div>
+          </div>}
 
           {topLevelMenuItems.map((item) => {
             const Icon = item.icon;
@@ -577,10 +607,10 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                   );
                 })}
 
-                <div className="pt-1">
+                {!isCms && <div className="pt-1">
                   <button
                     type="button"
-                    onClick={() => setAcademicOpen((prev) => !prev)}
+                    onClick={() => setAcademicOpen((prev) => !(prev ?? academicActive))}
                     className={cn(
                       "flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-dark-700 transition-colors hover:bg-dark-50 dark:text-dark-200 dark:hover:bg-dark-800",
                       academicActive && "bg-primary-50 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300"
@@ -591,11 +621,11 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                       Academic
                     </span>
                     <span className="text-xs text-dark-500 dark:text-dark-400">
-                      {academicOpen ? "−" : "+"}
+                      {academicExpanded ? "−" : "+"}
                     </span>
                   </button>
 
-                  {academicOpen && (
+                  {academicExpanded && (
                     <div className="mt-1 space-y-1 pl-3">
                       {academicItems.map((item) => {
                         const Icon = item.icon;
@@ -608,7 +638,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                             className={cn(
                               "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
                               isActive
-                                ? "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
+                                ? "bg-blue-50 font-semibold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
                                 : "text-dark-600 hover:bg-dark-50 hover:text-dark-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-dark-100"
                             )}
                           >
@@ -619,7 +649,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                       })}
                     </div>
                   )}
-                </div>
+                </div>}
 
                 {topLevelMenuItems.map((item) => {
                   const Icon = item.icon;

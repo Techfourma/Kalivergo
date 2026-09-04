@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { loginPlatformAdmin } from "@/actions/platform-auth";
 import Loading from "@/components/layout/Loading";
@@ -9,9 +10,21 @@ import PageBackground from "@/components/ui/PageBackground";
 
 export default function PlatformLoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const verificationStatus = searchParams.get("verified");
+    if (!verificationStatus) return;
+    window.alert(
+      verificationStatus === "1"
+        ? "Password admin platform berhasil diubah. Silakan login dengan password baru."
+        : "Link verifikasi reset password tidak valid atau sudah kedaluwarsa."
+    );
+    router.replace("/platform/login");
+  }, [router, searchParams]);
 
   const handleSubmit = async (formData: FormData) => {
     setIsLoading(true);
@@ -113,6 +126,12 @@ export default function PlatformLoginPage() {
         </form>
 
         <div className="mt-6 text-center space-y-2">
+          <Link
+            href="/platform/forgot-password"
+            className="block text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors"
+          >
+            Lupa password admin platform?
+          </Link>
           <p className="text-sm text-dark-500 dark:text-dark-400">
             Belum punya akun admin?{" "}
             <Link

@@ -133,8 +133,9 @@ export default function Sidebar({ variant, userRole, tenantPath, cmsModules }: S
       {isCollapsed && (
         <button
           onClick={toggleSidebar}
-          className="fixed left-0 top-0 z-40 p-2 bg-white border border-dark-200 rounded-lg shadow-lg hover:bg-dark-50 transition-colors dark:bg-dark-950 dark:border-dark-800 dark:hover:bg-dark-900"
+          className="fixed left-4 top-4 z-[60] flex h-10 w-10 items-center justify-center rounded-lg bg-white border border-dark-200 shadow-lg hover:bg-dark-50 transition-colors dark:bg-dark-950 dark:border-dark-800 dark:hover:bg-dark-900"
           title="Open Menu"
+          aria-label="Open Menu"
         >
           <Menu className="h-5 w-5 text-dark-600 dark:text-dark-300" />
         </button>
@@ -142,8 +143,8 @@ export default function Sidebar({ variant, userRole, tenantPath, cmsModules }: S
 
       <aside
         className={cn(
-          "relative z-10 w-64 min-w-[16rem] shrink-0 bg-white border-r border-dark-200 min-h-screen transition-all duration-300 ease-in-out max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-40 dark:bg-dark-950 dark:border-dark-800",
-          isCollapsed ? "w-0 min-w-0 overflow-hidden" : "w-64"
+          "relative z-50 w-64 min-w-[16rem] shrink-0 bg-white border-r border-dark-200 min-h-screen transition-all duration-300 ease-in-out max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 dark:bg-dark-950 dark:border-dark-800",
+          isCollapsed ? "hidden" : "block"
         )}
       >
         <div className="p-4 h-screen sticky top-0 overflow-y-auto text-dark-900 dark:text-dark-100">
@@ -169,7 +170,7 @@ export default function Sidebar({ variant, userRole, tenantPath, cmsModules }: S
                 const normalize = (p: string) => p?.replace(/\/$/, "") || "";
                 const np = normalize(pathname);
                 const nh = normalize(href);
-                const isActive = np === nh || np.startsWith(nh + "/");
+                const isActive = item.href === "/cms" ? np === nh : np === nh || np.startsWith(nh + "/");
                 return (
                   <Link
                     key={item.href}
@@ -194,6 +195,14 @@ export default function Sidebar({ variant, userRole, tenantPath, cmsModules }: S
             </div>
         </div>
       </aside>
+      {!isCollapsed && (
+        <button
+          type="button"
+          onClick={toggleSidebar}
+          className="fixed inset-0 z-40 hidden bg-black/30 max-md:block"
+          aria-label="Close Menu"
+        />
+      )}
     </>
   );
 }

@@ -1,0 +1,2 @@
+ALTER TABLE "verification_tokens"
+  ADD COLUMN "purpose" TEXT NOT NULL DEFAULT 'MEMBER_PASSWORD_RESET';
