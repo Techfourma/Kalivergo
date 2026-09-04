@@ -4,6 +4,17 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { getInformationFeed, markAsRead, addReaction, removeReaction, addComment } from '@/actions/cms/information';
 import { InformationType } from '@prisma/client';
 import Avatar from '@/components/ui/Avatar';
+import {
+  Angry,
+  CircleHelp,
+  Frown,
+  Heart,
+  Laugh,
+  MessageCircle,
+  Share2,
+  ThumbsUp,
+  type LucideIcon,
+} from 'lucide-react';
 
 interface User {
   id: string;
@@ -40,16 +51,26 @@ interface InformationPost {
 
 interface InformationFeedProps {
   tenantId: string;
+  sharePostId?: string;
 }
 
-const REACTION_EMOJIS: Record<string, string> = {
-  LIKE: '👍',
-  LOVE: '❤️',
-  LAUGH: '😂',
-  WOW: '😮',
-  SAD: '😢',
-  ANGRY: '😠',
+const REACTION_ICONS: Record<string, LucideIcon> = {
+  LIKE: ThumbsUp,
+  LOVE: Heart,
+  LAUGH: Laugh,
+  WOW: CircleHelp,
+  SAD: Frown,
+  ANGRY: Angry,
 };
+const REACTION_LABELS: Record<string, string> = {
+  LIKE: 'Like',
+  LOVE: 'Love',
+  LAUGH: 'Funny',
+  WOW: 'Wow',
+  SAD: 'Sad',
+  ANGRY: 'Angry',
+};
+const reactionEntries = Object.entries(REACTION_ICONS) as [string, LucideIcon][];
 
 function formatJakartaTime(date: Date): string {
   const jakartaDate = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
@@ -94,7 +115,7 @@ function formatJakartaDateTime(date: Date): string {
   });
 }
 
-export default function InformationFeed({ tenantId }: InformationFeedProps) {
+export default function InformationFeed({ tenantId, sharePostId }: InformationFeedProps) {
   const [posts, setPosts] = useState<InformationPost[]>([]);
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const [hasMore, setHasMore] = useState(true);
@@ -106,6 +127,7 @@ export default function InformationFeed({ tenantId }: InformationFeedProps) {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const reactionPickerRef = useRef<HTMLDivElement>(null);
+  const sharedPostRef = useRef<string | undefined>(undefined);
 
   const fetchPosts = useCallback(async (isRefresh = false) => {
     if (loading) return;
@@ -117,7 +139,11 @@ export default function InformationFeed({ tenantId }: InformationFeedProps) {
         if (isRefresh) {
           setPosts(result.data);
         } else {
-          setPosts((prev) => [...prev, ...result.data]);
+          setPosts((prev) => {
+            const postsById = new Map(prev.map((post) => [post.id, post]));
+            result.data.forEach((post) => postsById.set(post.id, post));
+            return Array.from(postsById.values());
+          });
         }
         setCursor(result.nextCursor);
         setHasMore(!!result.nextCursor);
@@ -175,6 +201,16 @@ export default function InformationFeed({ tenantId }: InformationFeedProps) {
     }
   }, [reactionPickerOpen]);
 
+  useEffect(() => {
+    if (sharePostId && sharePostId !== sharedPostRef.current && posts.some((post) => post.id === sharePostId)) {
+      sharedPostRef.current = sharePostId;
+      document.getElementById(`information-post-${sharePostId}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  }, [posts, sharePostId]);
+
   const handlePostClick = async (postId: string) => {
     const post = posts.find((p) => p.id === postId);
     if (post && !post.hasRead) {
@@ -224,6 +260,28 @@ export default function InformationFeed({ tenantId }: InformationFeedProps) {
             : p
         )
       );
+    }
+  };
+
+  const handleShare = async (postId: string) => {
+    const post = posts.find((item) => item.id === postId);
+    if (!post) return;
+
+    const shareUrl = `${window.location.origin}${window.location.pathname}?post=${encodeURIComponent(postId)}`;
+    const shareText = [post.title || 'Information post', shareUrl].join('\n\n');
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: post.title || 'Information post',
+          text: shareText,
+          url: shareUrl,
+        });
+      } else {
+        window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank', 'noopener,noreferrer');
+      }
+    } catch {
+      return;
     }
   };
 
@@ -407,6 +465,7 @@ export default function InformationFeed({ tenantId }: InformationFeedProps) {
         {posts.map((post) => (
           <div
             key={post.id}
+            id={`information-post-${post.id}`}
             className={`bg-white rounded-xl shadow-sm border overflow-hidden ${
               !post.hasRead
                 ? 'border-blue-200 dark:border-blue-800'
@@ -455,12 +514,11 @@ export default function InformationFeed({ tenantId }: InformationFeedProps) {
             {/* Stats */}
             {post._count.reactions > 0 && (
               <div className="px-4 py-2 flex items-center gap-2 text-sm text-gray-500 border-b border-gray-100">
-                <span className="text-base">
-                  {Object.entries(REACTION_EMOJIS)
-                    .filter(([, emoji]) => (post.reactionCounts[Object.keys(REACTION_EMOJIS).find(k => REACTION_EMOJIS[k] === emoji) || ''] || 0) > 0)
-                    .map(([, emoji]) => emoji)
+                <span className="flex items-center -space-x-1">
+                  {reactionEntries
+                    .filter(([type]) => (post.reactionCounts[type] || 0) > 0)
                     .slice(0, 3)
-                    .join(' ')}
+                    .map(([type, Icon]) => <Icon key={type} className="w-4 h-4 bg-white rounded-full" />)}
                 </span>
                 <span>{post._count.reactions}</span>
                 {post._count.comments > 0 && (
@@ -481,17 +539,18 @@ export default function InformationFeed({ tenantId }: InformationFeedProps) {
                     post.userReaction ? 'text-blue-600' : 'text-gray-600'
                   }`}
                 >
-                  <span className="text-xl">
-                    {post.userReaction ? REACTION_EMOJIS[post.userReaction] || '👍' : '👍'}
-                  </span>
+                  {(() => {
+                    const Icon = post.userReaction ? REACTION_ICONS[post.userReaction] || ThumbsUp : ThumbsUp;
+                    return <Icon className="w-5 h-5" />;
+                  })()}
                   <span className="text-sm font-medium">
-                    {post.userReaction || 'Like'}
+                    {post.userReaction ? REACTION_LABELS[post.userReaction] || 'Like' : 'Like'}
                   </span>
                 </button>
                 
                 {reactionPickerOpen === post.id && (
                   <div className="absolute bottom-full left-0 mb-2 bg-white rounded-full shadow-lg border border-gray-200 p-1.5 flex gap-1 z-10">
-                    {Object.entries(REACTION_EMOJIS).map(([type, emoji]) => (
+                    {reactionEntries.map(([type, Icon]) => (
                       <button
                         key={type}
                         onClick={(e) => {
@@ -503,7 +562,7 @@ export default function InformationFeed({ tenantId }: InformationFeedProps) {
                           post.userReaction === type ? 'bg-blue-100' : ''
                         }`}
                       >
-                        <span className="text-2xl">{emoji}</span>
+                        <Icon className="w-5 h-5" />
                       </button>
                     ))}
                   </div>
@@ -513,14 +572,14 @@ export default function InformationFeed({ tenantId }: InformationFeedProps) {
                 onClick={() => toggleComments(post.id)}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex-1 justify-center text-gray-600"
               >
-                <span className="text-xl">💬</span>
+                <MessageCircle className="w-5 h-5" />
                 <span className="text-sm font-medium">Comment</span>
               </button>
               <button
-                onClick={() => {}}
+                onClick={() => handleShare(post.id)}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex-1 justify-center text-gray-600"
               >
-                <span className="text-xl">↗️</span>
+                <Share2 className="w-5 h-5" />
                 <span className="text-sm font-medium">Share</span>
               </button>
             </div>
