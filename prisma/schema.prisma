@@ -110,6 +110,11 @@ enum TenantStatus {
   ARCHIVED
 }
 
+enum SubscriptionPlan {
+  FREE
+  PAID
+}
+
 model Tenant {
   id             String             @id @default(cuid())
   universityId   String
@@ -119,6 +124,11 @@ model Tenant {
   customSlug     String?
 
   status         TenantStatus       @default(ACTIVE)
+  subscriptionPlan SubscriptionPlan @default(FREE)
+  subscriptionEndsAt DateTime?
+  subscriptionGraceEndsAt DateTime?
+  subscriptionNoticeSentAt DateTime?
+  subscriptionExpiredNoticeSentAt DateTime?
   university       University          @relation(fields: [universityId], references: [id], onDelete: Restrict)
   program          StudyProgram        @relation(fields: [programId], references: [id], onDelete: Restrict)
   memberships      TenantMembership[]

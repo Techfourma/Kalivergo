@@ -1,6 +1,7 @@
 import { getAllOwners } from "@/actions/platform-owners";
 import DeletePlatformOwnerButton from "@/components/cms/DeletePlatformOwnerButton";
 import PageBackground from "@/components/ui/PageBackground";
+import SubscriptionControl from "@/components/platform/SubscriptionControl";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,9 @@ export default async function PlatformUsersPage() {
                     Status Aplikasi
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wider">
+                    Subscription
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wider">
                     Aksi
                   </th>
                 </tr>
@@ -53,7 +57,7 @@ export default async function PlatformUsersPage() {
               <tbody className="divide-y divide-dark-200 dark:divide-dark-700">
                 {owners.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-dark-500">
+                    <td colSpan={6} className="px-6 py-12 text-center text-dark-500">
                       Belum ada data owner kelas.
                     </td>
                   </tr>
@@ -79,6 +83,9 @@ export default async function PlatformUsersPage() {
                               </p>
                             </div>
                           </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {owner.tenantId && <SubscriptionControl tenantId={owner.tenantId} plan={owner.subscriptionPlan} endsAt={owner.subscriptionEndsAt} />}
                         </td>
                         <td className="px-6 py-4">
                           <div className="min-w-0">

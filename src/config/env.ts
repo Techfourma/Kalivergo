@@ -48,6 +48,9 @@ export const env = {
   get databaseUrl(): string | undefined {
     return process.env.DATABASE_URL;
   },
+  get cronSecret(): string | undefined {
+    return process.env.CRON_SECRET;
+  },
   get nextPublicBaseUrl(): string | undefined {
     return process.env.NEXT_PUBLIC_BASE_URL;
   },
