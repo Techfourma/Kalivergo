@@ -71,9 +71,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-3xl bg-gradient-to-r from-transparent via-white/80 dark:via-white/10 to-transparent" />
 
               <div className="mb-10">
-                <p className="text-xs font-semibold tracking-widest uppercase text-dark-400 dark:text-dark-500 mb-2">
-                  Akun Saya
-                </p>
                 <h1 className="text-3xl font-bold text-dark-900 dark:text-white font-display tracking-tight">
                   Profil Pengguna
                 </h1>

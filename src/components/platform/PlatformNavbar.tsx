@@ -39,7 +39,7 @@ export default function PlatformNavbar({ adminName, adminRole }: PlatformNavbarP
     { href: "/platform", label: "Overview", icon: Home },
     { href: "/platform/kyc", label: "Review KYC", icon: FileSearch },
     { href: "/platform/kyc-audit", label: "Audit KYC", icon: FileText },
-    { href: "/platform/user", label: "Owner", icon: Users },
+    { href: "/platform/user", label: "User", icon: Users },
   ];
   const initials = (adminName || "Admin")
     .split(" ")
