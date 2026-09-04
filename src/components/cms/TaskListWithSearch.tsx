@@ -133,7 +133,7 @@ export default function TaskListWithSearch({ tasks, allUsers }: TaskListWithSear
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-row items-center justify-between md:justify-end gap-3 w-full md:w-auto pt-2 md:pt-0 border-t md:border-0 border-dark-100 dark:border-dark-800">
+                <div className="flex flex-row flex-wrap items-center justify-start md:justify-end gap-2 w-full md:w-auto pt-2 md:pt-0 border-t md:border-0 border-dark-100 dark:border-dark-800">
                   <TaskSubmissionManager
                     taskId={task.id}
                     taskTitle={task.title}
