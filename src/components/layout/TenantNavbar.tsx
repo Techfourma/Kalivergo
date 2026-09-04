@@ -55,7 +55,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [academicOpen, setAcademicOpen] = useState(false);
+  const [academicOpen, setAcademicOpen] = useState<boolean | null>(null);
   const [desktopCollapsed, setDesktopCollapsed] = useState(false);
   const [isDesktopViewport, setIsDesktopViewport] = useState(false);
 
@@ -216,6 +216,11 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
   };
 
   const academicActive = academicItems.some((item) => isActiveHref(item.href));
+  const academicExpanded = academicOpen ?? academicActive;
+
+  useEffect(() => {
+    setAcademicOpen(null);
+  }, [pathname]);
 
   const desktopSidebarWidth = desktopCollapsed ? "w-[88px]" : "w-72";
 
@@ -322,7 +327,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
           <div className="pt-1">
             <button
               type="button"
-              onClick={() => setAcademicOpen((prev) => !prev)}
+              onClick={() => setAcademicOpen((prev) => !(prev ?? academicActive))}
               className={cn(
                 "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-dark-700 transition-colors hover:bg-dark-50 dark:text-dark-200 dark:hover:bg-dark-800",
                 academicActive && "bg-primary-50 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300",
@@ -336,12 +341,12 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
               </span>
               {!desktopCollapsed && (
                 <span className="text-xs text-dark-500 dark:text-dark-400">
-                  {academicOpen ? "−" : "+"}
+                  {academicExpanded ? "−" : "+"}
                 </span>
               )}
             </button>
 
-            {academicOpen && (
+            {academicExpanded && (
               <div className="mt-1 space-y-1 pl-3">
                 {academicItems.map((item) => {
                   const Icon = item.icon;
@@ -355,7 +360,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                         desktopCollapsed ? "justify-center px-2" : "",
                         isActive
-                          ? "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
+                          ? "bg-blue-50 font-semibold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
                           : "text-dark-600 hover:bg-dark-50 hover:text-dark-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-dark-100"
                       )}
                       title={desktopCollapsed ? item.label : undefined}
@@ -580,7 +585,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                 <div className="pt-1">
                   <button
                     type="button"
-                    onClick={() => setAcademicOpen((prev) => !prev)}
+                    onClick={() => setAcademicOpen((prev) => !(prev ?? academicActive))}
                     className={cn(
                       "flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-dark-700 transition-colors hover:bg-dark-50 dark:text-dark-200 dark:hover:bg-dark-800",
                       academicActive && "bg-primary-50 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300"
@@ -591,11 +596,11 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                       Academic
                     </span>
                     <span className="text-xs text-dark-500 dark:text-dark-400">
-                      {academicOpen ? "−" : "+"}
+                      {academicExpanded ? "−" : "+"}
                     </span>
                   </button>
 
-                  {academicOpen && (
+                  {academicExpanded && (
                     <div className="mt-1 space-y-1 pl-3">
                       {academicItems.map((item) => {
                         const Icon = item.icon;
@@ -608,7 +613,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                             className={cn(
                               "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
                               isActive
-                                ? "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
+                                ? "bg-blue-50 font-semibold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
                                 : "text-dark-600 hover:bg-dark-50 hover:text-dark-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-dark-100"
                             )}
                           >
