@@ -7,6 +7,8 @@ import { createAuditLog } from "@/server/audit";
 import { uploadToCloudinary, deleteFromCloudinary } from "@/server/storage/cloudinary";
 import { KYC_STORAGE_FOLDER } from "@/server/kyc/validation";
 import { sendOwnerApprovalEmail } from "@/lib/email";
+import { addMonths } from "date-fns";
+import { FREE_TIER_MONTHS } from "@/server/tenant/subscription";
 
 export interface CreateOwnerApplicationInput {
   userId: string;
@@ -277,6 +279,8 @@ export async function approveOwnerApplication(
             slug: classSlug,
             customSlug: customSlugToUse,
             status: "ACTIVE",
+            subscriptionPlan: "FREE",
+            subscriptionEndsAt: addMonths(new Date(), FREE_TIER_MONTHS),
           },
           include: {
             memberships: {

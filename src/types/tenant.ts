@@ -10,6 +10,7 @@ export type CmsRole =
   | "SECRETARY";
 
 export type TenantStatus = "ACTIVE" | "SUSPENDED" | "ARCHIVED";
+export type SubscriptionPlan = "FREE" | "PAID";
 
 export type OwnerApplicationStatus =
   | "PENDING_EMAIL"
@@ -45,6 +46,9 @@ export interface Tenant {
   name: string;
   slug: string;
   status: TenantStatus;
+  subscriptionPlan: SubscriptionPlan;
+  subscriptionEndsAt: Date | null;
+  subscriptionGraceEndsAt: Date | null;
   university: University;
   program: StudyProgram;
   createdAt: Date;

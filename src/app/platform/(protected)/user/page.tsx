@@ -1,6 +1,7 @@
 import { getAllOwners } from "@/actions/platform-owners";
 import DeletePlatformOwnerButton from "@/components/cms/DeletePlatformOwnerButton";
 import PageBackground from "@/components/ui/PageBackground";
+import SubscriptionControl from "@/components/platform/SubscriptionControl";
 import { Eye } from "lucide-react";
 import Link from "next/link";
 
@@ -48,7 +49,7 @@ export default async function PlatformUsersPage() {
                     Status Aplikasi
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wider">
-                    KYC
+                    Subscription
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wider">
                     Aksi
@@ -93,6 +94,9 @@ export default async function PlatformUsersPage() {
                               </p>
                             </div>
                           </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {owner.tenantId && <SubscriptionControl tenantId={owner.tenantId} plan={owner.subscriptionPlan} endsAt={owner.subscriptionEndsAt} />}
                         </td>
                         <td className="px-6 py-4">
                           <div className="min-w-0">

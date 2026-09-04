@@ -58,7 +58,7 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
     const scheduleWhere = tenantId ? { tenantId } : {};
     const transactionWhere = tenantId ? { tenantId } : {};
 
-    const [tasks, schedules, allUsers, transactions, latestInfo, upcomingSeminars] = await Promise.all([
+    const [tasks, schedules, allUsers, transactions, latestInfo, subscription, upcomingSeminars] = await Promise.all([
       findTasksForTenant(tenantId!, {}),
 
       prisma.schedule.findMany({
@@ -96,6 +96,11 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
             select: { name: true }
           }
         },
+      }),
+
+      prisma.tenant.findUnique({
+        where: { id: tenantId! },
+        select: { subscriptionEndsAt: true },
       }),
 
       listSeminarsInNext7Days(tenantId!),
@@ -141,6 +146,11 @@ export default async function TenantHomePage({ params }: TenantHomePageProps) {
                 {currentUser.role &&
                   ` (${currentUser.role === "OWNER" ? "Owner" : currentUser.role})`}
               </p>
+              {(currentUser.role === "OWNER" || currentUser.cmsRole) && subscription?.subscriptionEndsAt && (
+                <p className="mt-3 inline-block rounded-md bg-primary-50 px-3 py-2 text-sm font-medium text-primary-800">
+                  Subscribe until {subscription.subscriptionEndsAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                </p>
+              )}
             </div>
 
             <div className="mb-6">

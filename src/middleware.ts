@@ -23,6 +23,7 @@ async function resolveTenantFromPath(pathname: string): Promise<{
   universitySlug: string;
   programSlug: string;
   classSlug: string;
+  subscriptionGraceEndsAt: Date | null;
 } | null> {
   const parts = pathname.split('/').filter(Boolean);
   if (parts.length < 1) return null;
@@ -43,6 +44,7 @@ async function resolveTenantFromPath(pathname: string): Promise<{
         slug: true,
         university: { select: { slug: true } },
         program: { select: { slug: true } },
+        subscriptionGraceEndsAt: true,
       },
     });
 
@@ -52,6 +54,7 @@ async function resolveTenantFromPath(pathname: string): Promise<{
           universitySlug: tenant.university.slug,
           programSlug: tenant.program.slug,
           classSlug: tenant.slug,
+          subscriptionGraceEndsAt: tenant.subscriptionGraceEndsAt,
         }
       : null;
   } catch (error) {
@@ -95,14 +98,8 @@ export async function middleware(req: NextRequest) {
 
   const isTenantRoute = tenantContext !== null;
 
-  // Landing `/{slug}` and member portfolios (`/{slug}/portofolio/...`) are
-  // public for guests/anonymous visitors. Every other tenant subpage
-  // (`/home`, `/dashboard`, `/tasks`, `/seminar`, `/information`, `/profil`)
-  // stays protected and only authenticated members of the tenant may access it.
   const pathSegments = pathname.split('/').filter(Boolean);
   const isTenantLandingPath = isTenantRoute && pathSegments.length === 1;
-  // Public tenant-facing pages: the landing `/{slug}` and member portfolios
-  // (`/{slug}/portofolio/...`) are viewable by guests/anonymous visitors.
   const isTenantPublicPath = isTenantLandingPath || pathname.includes('/portofolio');
 
   const isProtectedPath = isTenantRoute && !isTenantPublicPath;
@@ -157,6 +154,13 @@ export async function middleware(req: NextRequest) {
     if (tenantContext && !hasTenantMembership(sessionUser, tenantContext.tenantId)) {
       const url = req.nextUrl.clone();
       url.pathname = '/unauthorized';
+      return setNoStore(NextResponse.redirect(url));
+    }
+
+    if (tenantContext?.subscriptionGraceEndsAt && tenantContext.subscriptionGraceEndsAt <= new Date()) {
+      const url = req.nextUrl.clone();
+      url.pathname = '/unauthorized';
+      url.searchParams.set('reason', 'subscription-expired');
       return setNoStore(NextResponse.redirect(url));
     }
 
