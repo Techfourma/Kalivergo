@@ -38,6 +38,7 @@ model User {
   address         String?            @db.Text
   phone           String?
   ktpStorageKey   String?
+  selfieStorageKey String?
   kycStatus       KycAdminStatus     @default(PENDING)
 
   // Portfolio fields

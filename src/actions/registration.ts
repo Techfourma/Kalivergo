@@ -356,7 +356,7 @@ export async function registerOwnerClass(formData: FormData) {
       });
 
       applicationId = result.applicationId;
-      revalidatePath("/platform/kyc");
+      revalidatePath("/platform/kyc/user");
       revalidatePath("/platform");
     } catch (error: any) {
       await deleteSelfieFromKYC(upload.publicId);
