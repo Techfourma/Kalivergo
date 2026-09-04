@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { getInformationFeed, markAsRead, addReaction, removeReaction, addComment } from '@/actions/cms/information';
+import { getInformationFeed, markAsRead, addReaction, removeReaction, addComment, deleteInformation } from '@/actions/cms/information';
 import { InformationType } from '@prisma/client';
 import Avatar from '@/components/ui/Avatar';
 import {
@@ -12,6 +12,7 @@ import {
   Laugh,
   MessageCircle,
   Share2,
+  Trash2,
   ThumbsUp,
   type LucideIcon,
 } from 'lucide-react';
@@ -77,6 +78,15 @@ const REACTION_LABELS: Record<string, string> = {
 };
 const reactionEntries = Object.entries(REACTION_ICONS) as [string, LucideIcon][];
 
+function getDisplayedReaction(
+  post: InformationPost,
+  overrides: Record<string, string | null>
+): string | null {
+  return Object.prototype.hasOwnProperty.call(overrides, post.id)
+    ? overrides[post.id]
+    : post.userReaction;
+}
+
 function formatJakartaTime(date: Date): string {
   const jakartaDate = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
   const now = new Date();
@@ -120,7 +130,7 @@ function formatJakartaDateTime(date: Date): string {
   });
 }
 
-export default function InformationFeed({ tenantId, sharePostId, currentUser }: InformationFeedProps) {
+export default function InformationFeed({ tenantId, sharePostId, currentUserId }: InformationFeedProps) {
   const [posts, setPosts] = useState<InformationPost[]>([]);
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const [hasMore, setHasMore] = useState(true);
@@ -129,6 +139,9 @@ export default function InformationFeed({ tenantId, sharePostId, currentUser }: 
   const [newComment, setNewComment] = useState<Record<string, string>>({});
   const [showAllComments, setShowAllComments] = useState<Record<string, boolean>>({});
   const [reactionPickerOpen, setReactionPickerOpen] = useState<string | null>(null);
+  const [reactionOverrides, setReactionOverrides] = useState<Record<string, string | null>>({});
+  const [deletePostId, setDeletePostId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const reactionPickerRef = useRef<HTMLDivElement>(null);
@@ -230,41 +243,67 @@ export default function InformationFeed({ tenantId, sharePostId, currentUser }: 
     const post = posts.find((p) => p.id === postId);
     if (!post) return;
 
-    if (post.userReaction === type) {
-      await removeReaction(postId);
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.id === postId
-            ? {
-                ...p,
-                userReaction: null,
-                reactionCounts: {
-                  ...p.reactionCounts,
-                  [type]: Math.max(0, (p.reactionCounts[type] || 0) - 1),
-                },
-              }
-            : p
-        )
-      );
-    } else {
-      if (post.userReaction) {
-        await removeReaction(postId);
+    const previousReaction = Object.prototype.hasOwnProperty.call(reactionOverrides, postId)
+      ? reactionOverrides[postId]
+      : post.userReaction;
+    const nextReaction = previousReaction === type ? null : type;
+
+    setReactionOverrides((prev) => ({ ...prev, [postId]: nextReaction }));
+
+    // Update the button immediately; the server action below persists it.
+    setPosts((prev) => prev.map((p) => {
+      if (p.id !== postId) return p;
+
+      const reactionCounts = { ...p.reactionCounts };
+      if (previousReaction) {
+        reactionCounts[previousReaction] = Math.max(0, (reactionCounts[previousReaction] || 0) - 1);
       }
-      await addReaction(postId, type);
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.id === postId
-            ? {
-                ...p,
-                userReaction: type,
-                reactionCounts: {
-                  ...p.reactionCounts,
-                  [type]: (p.reactionCounts[type] || 0) + 1,
-                },
-              }
-            : p
-        )
-      );
+      if (nextReaction) {
+        reactionCounts[nextReaction] = (reactionCounts[nextReaction] || 0) + 1;
+      }
+
+      return {
+        ...p,
+        userReaction: nextReaction,
+        reactionCounts,
+        _count: {
+          ...p._count,
+          reactions: Math.max(0, p._count.reactions - (previousReaction ? 1 : 0) + (nextReaction ? 1 : 0)),
+        },
+      };
+    }));
+
+    try {
+      const result = nextReaction
+        ? await addReaction(postId, nextReaction)
+        : await removeReaction(postId);
+      if (!result.success) throw new Error(result.error || 'Failed to save reaction');
+    } catch (error) {
+      console.error('Error saving reaction:', error);
+      setPosts((prev) => prev.map((p) => {
+        if (p.id !== postId) return p;
+        const reactionCounts = { ...p.reactionCounts };
+        if (nextReaction) {
+          reactionCounts[nextReaction] = Math.max(0, (reactionCounts[nextReaction] || 0) - 1);
+        }
+        if (previousReaction) {
+          reactionCounts[previousReaction] = (reactionCounts[previousReaction] || 0) + 1;
+        }
+        return {
+          ...p,
+          userReaction: previousReaction,
+          reactionCounts,
+          _count: {
+            ...p._count,
+            reactions: Math.max(0, p._count.reactions - (nextReaction ? 1 : 0) + (previousReaction ? 1 : 0)),
+          },
+        };
+      }));
+      setReactionOverrides((prev) => {
+        const next = { ...prev };
+        delete next[postId];
+        return next;
+      });
     }
   };
 
@@ -288,6 +327,19 @@ export default function InformationFeed({ tenantId, sharePostId, currentUser }: 
     } catch {
       return;
     }
+  };
+
+  const handleDelete = async () => {
+    if (!deletePostId || deleting) return;
+    setDeleting(true);
+    const result = await deleteInformation(deletePostId);
+    if (result.success) {
+      setPosts((prev) => prev.filter((post) => post.id !== deletePostId));
+      setDeletePostId(null);
+    } else {
+      window.alert(result.error || 'Failed to delete post.');
+    }
+    setDeleting(false);
   };
 
   const handleAddComment = async (postId: string, parentId?: string) => {
@@ -509,6 +561,17 @@ export default function InformationFeed({ tenantId, sharePostId, currentUser }: 
                   {formatJakartaTime(post.createdAt)}
                 </p>
               </div>
+              {post.user.id === currentUserId && (
+                <button
+                  type="button"
+                  onClick={() => setDeletePostId(post.id)}
+                  aria-label="Delete post"
+                  title="Delete post"
+                  className="rounded-full p-2 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
+              )}
             </div>
 
             {/* Content: Title → Text → Media */}
@@ -545,17 +608,23 @@ export default function InformationFeed({ tenantId, sharePostId, currentUser }: 
             <div className="px-2 py-1 flex items-center justify-around border-b border-gray-100 relative">
               <div className="relative" ref={reactionPickerRef}>
                 <button
+                  type="button"
                   onClick={() => setReactionPickerOpen(reactionPickerOpen === post.id ? null : post.id)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex-1 justify-center ${
                     post.userReaction ? 'text-blue-600' : 'text-gray-600'
                   }`}
                 >
                   {(() => {
-                    const Icon = post.userReaction ? REACTION_ICONS[post.userReaction] || ThumbsUp : ThumbsUp;
+                    const reaction = getDisplayedReaction(post, reactionOverrides);
+                    const selectedReaction = reaction?.toUpperCase();
+                    const Icon = selectedReaction ? REACTION_ICONS[selectedReaction] || ThumbsUp : ThumbsUp;
                     return <Icon className="w-5 h-5" />;
                   })()}
                   <span className="text-sm font-medium">
-                    {post.userReaction ? REACTION_LABELS[post.userReaction] || 'Like' : 'Like'}
+                    {(() => {
+                      const reaction = getDisplayedReaction(post, reactionOverrides)?.toUpperCase();
+                      return reaction ? REACTION_LABELS[reaction] || 'Like' : 'Like';
+                    })()}
                   </span>
                 </button>
                 
@@ -564,13 +633,14 @@ export default function InformationFeed({ tenantId, sharePostId, currentUser }: 
                     {reactionEntries.map(([type, Icon]) => (
                       <button
                         key={type}
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleReaction(post.id, type);
+                          void handleReaction(post.id, type);
                           setReactionPickerOpen(null);
                         }}
                         className={`w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-all hover:scale-110 ${
-                          post.userReaction === type ? 'bg-blue-100' : ''
+                          getDisplayedReaction(post, reactionOverrides) === type ? 'bg-blue-100' : ''
                         }`}
                       >
                         <Icon className="w-5 h-5" />
@@ -668,6 +738,20 @@ export default function InformationFeed({ tenantId, sharePostId, currentUser }: 
           <p className="text-gray-500">No posts yet. Be the first to share something!</p>
         </div>
       )}
+
+      {deletePostId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true" aria-labelledby="delete-post-title">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-dark-900">
+            <h2 id="delete-post-title" className="text-lg font-semibold text-gray-900 dark:text-white">Delete post</h2>
+            <p className="mt-2 text-sm text-gray-600 dark:text-dark-300">Apakah Anda yakin ingin menghapus postingan ini?</p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button type="button" onClick={() => setDeletePostId(null)} disabled={deleting} className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-50">Cancel</button>
+              <button type="button" onClick={handleDelete} disabled={deleting} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50">{deleting ? 'Deleting...' : 'Delete'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
