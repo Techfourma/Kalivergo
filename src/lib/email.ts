@@ -211,6 +211,41 @@ export async function sendMemberApprovalEmail(
   }
 }
 
+async function sendSubscriptionNotice(
+  to: string,
+  name: string,
+  subject: string,
+  heading: string,
+  className: string,
+  graceEndsAt: Date
+): Promise<void> {
+  const apiKey = env.brevoApiKey;
+  if (!apiKey) throw new Error("BREVO_API_KEY tidak ditemukan di environment variables (.env)");
+  const safeName = escapeHtml(name);
+  const safeClass = escapeHtml(className);
+  const graceDate = escapeHtml(graceEndsAt.toLocaleDateString("id-ID", { dateStyle: "long" }));
+  const from = parseFromAddress(env.emailFrom ?? "Kalivergo <noreply@smtp-brevo.com>");
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: { accept: "application/json", "content-type": "application/json", "api-key": apiKey },
+    body: JSON.stringify({
+      sender: { name: from.name, email: from.email },
+      to: [{ email: to, name }],
+      subject,
+      htmlContent: `<div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto;"><h2>${heading}</h2><p>Halo ${safeName},</p><p>Masa akses kelas <strong>${safeClass}</strong> telah berakhir.</p><p>Akses tetap tersedia selama masa tenggang hingga <strong>${graceDate}</strong>. Silakan perpanjang sebelum tanggal tersebut agar data tidak dihapus otomatis.</p></div>`,
+    }),
+  });
+  if (!response.ok) throw new Error(`Gagal mengirim email subscription (Status: ${response.status})`);
+}
+
+export function sendFreeTierExpiredEmail(to: string, name: string, className: string, graceEndsAt: Date) {
+  return sendSubscriptionNotice(to, name, "Batas Free Tier Kalivergo Terlewati", "Batas Free Tier Terlewati", className, graceEndsAt);
+}
+
+export function sendSubscriptionExpiredEmail(to: string, name: string, className: string, graceEndsAt: Date) {
+  return sendSubscriptionNotice(to, name, "Subscription Kalivergo Telah Berakhir", "Subscription Telah Berakhir", className, graceEndsAt);
+}
+
 export async function sendForgotPasswordVerificationEmail(
   email: string,
   verificationLink: string

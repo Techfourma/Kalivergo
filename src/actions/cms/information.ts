@@ -123,6 +123,7 @@ export async function getInformationFeed(tenantId: string, cursor?: string, limi
       orderBy: { createdAt: 'desc' },
       take: limit + 1,
       cursor: cursor ? { id: cursor } : undefined,
+      skip: cursor ? 1 : undefined,
       include: {
         user: {
           select: {

@@ -20,6 +20,9 @@ export interface PlatformOwner {
   tenantName: string | null;
   tenantSlug: string | null;
   tenantStatus: string | null;
+  subscriptionPlan: string;
+  subscriptionEndsAt: string | null;
+  subscriptionGraceEndsAt: string | null;
   universityName: string;
   programName: string;
   className: string;
@@ -79,6 +82,9 @@ export async function getAllOwners(): Promise<{
             name: true,
             slug: true,
             status: true,
+            subscriptionPlan: true,
+            subscriptionEndsAt: true,
+            subscriptionGraceEndsAt: true,
           },
         },
       },
@@ -104,6 +110,9 @@ export async function getAllOwners(): Promise<{
         tenantName: m.tenant.name,
         tenantSlug: m.tenant.slug,
         tenantStatus: m.tenant.status,
+        subscriptionPlan: m.tenant.subscriptionPlan,
+        subscriptionEndsAt: m.tenant.subscriptionEndsAt?.toISOString() || null,
+        subscriptionGraceEndsAt: m.tenant.subscriptionGraceEndsAt?.toISOString() || null,
         universityName: app?.universityName || "-",
         programName: app?.programName || "-",
         className: app?.className || "-",
