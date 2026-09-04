@@ -423,6 +423,7 @@ model VerificationToken {
   expiresAt       DateTime?
   createdAt       DateTime @default(now())
   newPasswordHash String?
+  purpose         String   @default("MEMBER_PASSWORD_RESET")
 
   @@map("verification_tokens")
 }
