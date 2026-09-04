@@ -71,7 +71,6 @@ export async function registerPlatformAdmin(
     const phone = (formData.get("phone")?.toString() || "").trim();
     const ktpFile = formData.get("ktpFile");
     const selfieFile = formData.get("selfieFile");
-    const registrationCode = (formData.get("registrationCode")?.toString() || "").trim();
 
     if (name.length < 2) return { error: "Nama lengkap minimal 2 karakter." };
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Format email tidak valid." };
@@ -83,11 +82,6 @@ export async function registerPlatformAdmin(
     if (!(selfieFile instanceof File) || selfieFile.size === 0) return { error: "Foto selfie wajib diunggah." };
     if (!["image/jpeg", "image/png", "image/webp"].includes(selfieFile.type)) return { error: "Foto selfie harus berformat JPEG, PNG, atau WebP." };
     if (selfieFile.size > 5 * 1024 * 1024) return { error: "Foto selfie maksimal 5MB." };
-
-    const expectedCode = env.platformAdminRegistrationCode;
-    if (expectedCode && registrationCode !== expectedCode) {
-      return { error: "Kode registrasi salah." };
-    }
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) return { error: "Email sudah terdaftar. Silakan login." };

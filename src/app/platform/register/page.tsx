@@ -300,20 +300,6 @@ export default function PlatformRegisterPage() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1">
-              Kode Registrasi{" "}
-              <span className="text-xs text-dark-400 dark:text-dark-500 font-normal">(opsional)</span>
-            </label>
-            <input
-              type="text"
-              name="registrationCode"
-              disabled={isLoading || !!success}
-              className="w-full px-3 py-2 bg-white dark:bg-dark-700 border border-dark-300 dark:border-dark-600 rounded-lg text-dark-900 dark:text-dark-100 placeholder-dark-400 dark:placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
-              placeholder="Isi jika diatur oleh tim kalivergo"
-            />
-          </div>
-
           <button
             type="submit"
             disabled={isLoading || !!success}
