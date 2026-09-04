@@ -22,6 +22,8 @@ interface TaskSubmissionManagerProps {
   submissionCount: number;
 }
 
+type SubmissionFilter = "all" | "submitted" | "not-submitted";
+
 export default function TaskSubmissionManager({
   taskId,
   taskTitle,
@@ -35,17 +37,25 @@ export default function TaskSubmissionManager({
     new Set(submittedUserIds)
   );
   const [search, setSearch] = useState("");
+  const [submissionFilter, setSubmissionFilter] = useState<SubmissionFilter>("all");
   const [isPending, startTransition] = useTransition();
   const [savedCount, setSavedCount] = useState(initialCount);
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
 
-  const filtered = useMemo(
-    () =>
-      allUsers.filter((u) =>
-        u.name.toLowerCase().includes(search.toLowerCase())
-      ),
-    [allUsers, search]
-  );
+  const filtered = useMemo(() => {
+    const query = search.toLowerCase().trim();
+
+    return allUsers.filter((user) => {
+      const matchesSearch = user.name.toLowerCase().includes(query);
+      const isSubmitted = selected.has(user.id);
+      const matchesStatus =
+        submissionFilter === "all" ||
+        (submissionFilter === "submitted" && isSubmitted) ||
+        (submissionFilter === "not-submitted" && !isSubmitted);
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [allUsers, search, selected, submissionFilter]);
 
   const toggle = (userId: string) => {
     setSelected((prev) => {
@@ -131,6 +141,21 @@ export default function TaskSubmissionManager({
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 border border-dark-200 dark:border-dark-600 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-50 placeholder:text-dark-400 dark:placeholder:text-dark-500 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
+            </div>
+            <div>
+              <label htmlFor={`submission-filter-${taskId}`} className="sr-only">
+                Filter status submission
+              </label>
+              <select
+                id={`submission-filter-${taskId}`}
+                value={submissionFilter}
+                onChange={(e) => setSubmissionFilter(e.target.value as SubmissionFilter)}
+                className="w-full border border-dark-200 dark:border-dark-600 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-50 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
+              >
+                <option value="all">Semua Data</option>
+                <option value="submitted">Sudah Submit</option>
+                <option value="not-submitted">Belum Submit</option>
+              </select>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs text-dark-500 dark:text-dark-400">
@@ -253,6 +278,7 @@ export default function TaskSubmissionManager({
         onClick={() => {
           setSelected(new Set(submittedUserIds));
           setSearch("");
+          setSubmissionFilter("all");
           setIsOpen(true);
         }}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-700/50 text-blue-700 dark:text-blue-300 text-sm font-medium transition-all hover:scale-105 active:scale-95"
