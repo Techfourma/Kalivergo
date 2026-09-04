@@ -393,10 +393,10 @@ export default function InformationFeed({ tenantId, sharePostId }: InformationFe
             size="sm"
           />
           <div className="flex-1">
-            <div className="bg-gray-100 rounded-2xl px-4 py-2">
+            <div className="bg-gray-100 dark:bg-dark-800 rounded-2xl px-4 py-2">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-sm">{comment.user.name}</span>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-gray-500 dark:text-dark-400">
                   {formatJakartaTime(comment.createdAt)}
                 </span>
               </div>
@@ -405,7 +405,7 @@ export default function InformationFeed({ tenantId, sharePostId }: InformationFe
             <div className="flex items-center gap-3 mt-1 ml-2">
               <button
                 onClick={() => setExpandedComments((prev) => ({ ...prev, [replyKey]: !prev[replyKey] }))}
-                className="text-xs text-gray-500 hover:text-gray-700 font-medium"
+                className="text-xs text-gray-500 hover:text-gray-700 dark:text-dark-400 dark:hover:text-dark-200 font-medium"
               >
                 Reply
               </button>
@@ -424,7 +424,7 @@ export default function InformationFeed({ tenantId, sharePostId }: InformationFe
                       handleAddComment(postId, comment.id);
                     }
                   }}
-                  className="flex-1 px-3 py-1.5 border rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-3 py-1.5 border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-dark-700 dark:bg-dark-900 dark:text-dark-100 dark:placeholder:text-dark-500"
                 />
                 <button
                   onClick={() => handleAddComment(postId, comment.id)}

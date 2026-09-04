@@ -29,12 +29,65 @@ export const env = {
   get geminiModel(): string | undefined {
     return process.env.GEMINI_MODEL;
   },
+  get groqApiKey(): string | undefined {
+    return process.env.GROQ_API_KEY;
+  },
+  get groqModel(): string | undefined {
+    return process.env.GROQ_MODEL;
+  },
+  get cerebrasApiKey(): string | undefined {
+    return process.env.CEREBBRAS_API_KEY;
+  },
+  get cerebrasModel(): string | undefined {
+    return process.env.CEREBBRAS_MODEL;
+  },
+  get openRouterApiKey(): string | undefined {
+    return process.env.OPENROUTER_API_KEY;
+  },
+  get openRouterModel(): string | undefined {
+    return process.env.OPENROUTER_MODEL;
+  },
   get knowledgeBaseDir(): string | undefined {
     return process.env.KNOWLEDGE_BASE_DIR;
   },
   get aiMaxOutputTokens(): number {
     const value = Number(process.env.AI_MAX_OUTPUT_TOKENS);
     return Number.isFinite(value) && value > 0 ? value : 3000;
+  },
+  get aiMaxInputChars(): number {
+    const value = Number(process.env.AI_MAX_INPUT_CHARS);
+    return Number.isFinite(value) && value > 0 ? value : 6000;
+  },
+  get aiMaxHistoryMessages(): number {
+    const value = Number(process.env.AI_MAX_HISTORY_MESSAGES);
+    return Number.isFinite(value) && value > 0 ? value : 6;
+  },
+  get aiMaxMemoriesInContext(): number {
+    const value = Number(process.env.AI_MAX_MEMORIES_IN_CONTEXT);
+    return Number.isFinite(value) && value > 0 ? value : 5;
+  },
+  get aiMaxRequestsPerMinute(): number {
+    const value = Number(process.env.AI_MAX_REQUESTS_PER_MINUTE);
+    return Number.isFinite(value) && value > 0 ? value : 5;
+  },
+  get aiMaxRequestsPerHour(): number {
+    const value = Number(process.env.AI_MAX_REQUESTS_PER_HOUR);
+    return Number.isFinite(value) && value > 0 ? value : 30;
+  },
+  get aiMaxServerQueue(): number {
+    const value = Number(process.env.AI_MAX_SERVER_QUEUE);
+    return Number.isFinite(value) && value > 0 ? value : 2;
+  },
+  get aiMaxRetries(): number {
+    const value = Number(process.env.AI_MAX_RETRIES);
+    return Number.isFinite(value) && value >= 0 ? value : 2;
+  },
+  get aiRequestTimeoutMs(): number {
+    const value = Number(process.env.AI_REQUEST_TIMEOUT_MS);
+    return Number.isFinite(value) && value > 0 ? value : 60000;
+  },
+  get aiMockMode(): boolean {
+    return process.env.AI_MOCK_MODE === "true";
   },
   get brevoApiKey(): string | undefined {
     return process.env.BREVO_API_KEY;
