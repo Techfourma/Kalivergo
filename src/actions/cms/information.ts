@@ -29,7 +29,7 @@ function getUploadErrorMessage(error: unknown): string {
     message.includes('file size') ||
     message.includes('payload')
   ) {
-    return 'Ukuran file melebihi batas maksimal 10 MB.';
+    return 'Ukuran file melebihi batas maksimal 50 MB.';
   }
 
   if (
@@ -72,7 +72,7 @@ export async function createInformation(formData: FormData) {
     const file = formData.get('file') as File | null;
     if (file && file.size > 0) {
       if (file.size > MAX_INFORMATION_FILE_SIZE) {
-        return { error: 'Ukuran file melebihi batas maksimal 10 MB.' };
+        return { error: 'Ukuran file melebihi batas maksimal 50 MB.' };
       }
 
       if (!isSupportedInformationFile(file, type)) {
