@@ -5,6 +5,10 @@ import { createInformation } from '@/actions/cms/information';
 import { InformationType } from '@prisma/client';
 import Avatar from '@/components/ui/Avatar';
 import { FileText, Image, Video } from 'lucide-react';
+import {
+  isSupportedInformationFile,
+  MAX_INFORMATION_FILE_SIZE,
+} from '@/shared/information-file';
 
 interface CreatePostFormProps {
   tenantId: string;
@@ -77,7 +81,7 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
       }
     } catch (err) {
       console.error('Error creating post:', err);
-      setError('Failed to create post');
+      setError('Post gagal dibuat. Silakan coba lagi.');
     } finally {
       setIsSubmitting(false);
     }
@@ -86,13 +90,40 @@ export default function CreatePostForm({ tenantId, currentUser, onSuccess }: Cre
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      setFile(selectedFile);
+      if (selectedFile.size > MAX_INFORMATION_FILE_SIZE) {
+        setFile(null);
+        setError('Ukuran file melebihi batas maksimal 50 MB.');
+        e.target.value = '';
+        return;
+      }
 
-      if (selectedFile.type.startsWith('image/')) {
+      const selectedType = selectedFile.type.startsWith('image/')
+        ? InformationType.IMAGE
+        : selectedFile.type.startsWith('video/')
+        ? InformationType.VIDEO
+        : selectedFile.type === 'application/pdf'
+        ? InformationType.PDF
+        : null;
+
+      if (!selectedType || !isSupportedInformationFile(selectedFile, selectedType)) {
+        setFile(null);
+        setError(
+          selectedFile.type.startsWith('video/')
+            ? 'Format video tidak didukung. Gunakan file MP4, WebM, atau OGG.'
+            : 'Format file tidak didukung.'
+        );
+        e.target.value = '';
+        return;
+      }
+
+      setFile(selectedFile);
+      setError(null);
+
+      if (selectedType === InformationType.IMAGE) {
         setType(InformationType.IMAGE);
-      } else if (selectedFile.type.startsWith('video/')) {
+      } else if (selectedType === InformationType.VIDEO) {
         setType(InformationType.VIDEO);
-      } else if (selectedFile.type === 'application/pdf') {
+      } else if (selectedType === InformationType.PDF) {
         setType(InformationType.PDF);
       }
     }
