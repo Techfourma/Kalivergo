@@ -298,16 +298,25 @@ export default function InformationFeed({ tenantId, sharePostId }: InformationFe
         prev.map((p) => {
           if (p.id === postId) {
             if (parentId) {
-              const updatedComments = p.comments.map((c) => {
-                if (c.id === parentId) {
-                  return {
-                    ...c,
-                    replies: [...(c.replies || []), result.data],
-                  };
-                }
-                return c;
-              });
-              return { ...p, comments: updatedComments };
+              const appendReply = (comments: Comment[]): Comment[] =>
+                comments.map((comment) => {
+                  if (comment.id === parentId) {
+                    return {
+                      ...comment,
+                      replies: [...(comment.replies || []), result.data],
+                    };
+                  }
+
+                  return comment.replies?.length
+                    ? { ...comment, replies: appendReply(comment.replies) }
+                    : comment;
+                });
+
+              return {
+                ...p,
+                comments: appendReply(p.comments),
+                _count: { ...p._count, comments: p._count.comments + 1 },
+              };
             } else {
               return {
                 ...p,
@@ -322,6 +331,7 @@ export default function InformationFeed({ tenantId, sharePostId }: InformationFe
 
       if (parentId) {
         setNewComment((prev) => ({ ...prev, [`${postId}-${parentId}`]: '' }));
+        setExpandedComments((prev) => ({ ...prev, [`${postId}-${parentId}`]: false }));
       } else {
         setNewComment((prev) => ({ ...prev, [postId]: '' }));
       }
@@ -444,6 +454,11 @@ export default function InformationFeed({ tenantId, sharePostId }: InformationFe
       </div>
     );
   };
+
+  const hasActiveReply = (postId: string) =>
+    Object.keys(expandedComments).some(
+      (key) => key.startsWith(`${postId}-`) && expandedComments[key]
+    );
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -605,38 +620,39 @@ export default function InformationFeed({ tenantId, sharePostId }: InformationFe
                   </div>
                 )}
 
-                {/* Add Comment */}
-                <div className="flex gap-2 mt-3">
-                  <Avatar
-                    src={null}
-                    name="You"
-                    id="current-user"
-                    size="sm"
-                  />
-                  <div className="flex-1 flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Write a comment..."
-                      value={newComment[post.id] || ''}
-                      onChange={(e) =>
-                        setNewComment((prev) => ({ ...prev, [post.id]: e.target.value }))
-                      }
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          handleAddComment(post.id);
-                        }
-                      }}
-                      className="flex-1 px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                {!hasActiveReply(post.id) && (
+                  <div className="flex gap-2 mt-3">
+                    <Avatar
+                      src={null}
+                      name="You"
+                      id="current-user"
+                      size="sm"
                     />
-                    <button
-                      onClick={() => handleAddComment(post.id)}
-                      disabled={!newComment[post.id]?.trim()}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-full text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Post
-                    </button>
+                    <div className="flex-1 flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Write a comment..."
+                        value={newComment[post.id] || ''}
+                        onChange={(e) =>
+                          setNewComment((prev) => ({ ...prev, [post.id]: e.target.value }))
+                        }
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            handleAddComment(post.id);
+                          }
+                        }}
+                        className="flex-1 px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      />
+                      <button
+                        onClick={() => handleAddComment(post.id)}
+                        disabled={!newComment[post.id]?.trim()}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-full text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Post
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>
