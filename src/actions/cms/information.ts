@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { getCurrentSessionUser } from '@/server/auth/session';
-import { requireTenantMembership } from '@/lib/tenant';
+import { requireTenantMembership, requireTenantCmsAccess } from '@/lib/tenant';
 import { revalidatePath } from 'next/cache';
 import { uploadToCloudinary, deleteFromCloudinary } from '@/lib/cloudinary';
 import { InformationType } from '@prisma/client';
@@ -438,15 +438,10 @@ export async function deleteInformation(informationId: string) {
       return { error: 'Information not found' };
     }
 
-    await requireTenantMembership(session.id, information.tenantId);
+    const membership = await requireTenantCmsAccess(session.id, information.tenantId);
 
-    if (information.userId !== session.id) {
-      const membership = await prisma.tenantMembership.findFirst({
-        where: { userId: session.id, tenantId: information.tenantId },
-      });
-      if (!membership || membership.role !== 'OWNER') {
-        return { error: 'Unauthorized to delete this information' };
-      }
+    if (information.userId !== session.id && membership.role !== 'OWNER' && !membership.cmsRole) {
+      return { error: 'Unauthorized to delete this information' };
     }
 
     if (information.mediaPublicId) {
