@@ -153,7 +153,7 @@ export async function acceptUser(formData: FormData) {
       'PEOPLE',
       'APPROVE',
       `Menerima anggota dengan ID: ${userId}`,
-      session.id,
+      undefined,
       {
         userId,
         tenantId,
@@ -235,7 +235,7 @@ export async function rejectUser(formData: FormData) {
       'PEOPLE',
       'REJECT',
       `Menolak anggota dengan ID: ${userId}`,
-      session.id,
+      undefined,
       {
         userId,
         tenantId,
@@ -293,7 +293,7 @@ export async function updateUserRole(formData: FormData) {
       'PEOPLE',
       'UPDATE_ROLE',
       `Mengubah jabatan ${membership.user.name} menjadi ${role}`,
-      session.id,
+      undefined,
       { userId, tenantId, oldRole: membership.cmsRole, newRole: role }
     );
 
@@ -429,7 +429,7 @@ export async function deleteUser(formData: FormData) {
       'PEOPLE',
       'DELETE',
       `Menghapus anggota: ${user.name} (${user.email}) dari kelas`,
-      session.id,
+      undefined,
       {
         userId: user.id,
         tenantId,
