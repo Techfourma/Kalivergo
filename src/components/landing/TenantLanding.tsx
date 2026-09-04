@@ -251,7 +251,7 @@ function Navbar({
   onLoginClick?: () => void;
 }) {
   return (
-    <nav className="border-b border-dark-200/60 dark:border-dark-800 backdrop-blur-md sticky top-0 z-50 bg-dark-50 dark:bg-dark-950/80">
+    <nav className="fixed inset-x-0 top-0 z-50 w-full border-b border-dark-200/60 bg-dark-50/95 backdrop-blur-md dark:border-dark-800 dark:bg-dark-950/95">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           <button

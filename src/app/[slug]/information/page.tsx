@@ -60,7 +60,11 @@ export default async function InformationPage({
         <div className="max-w-3xl mx-auto px-4 py-6">
           <CreatePostForm tenantId={tenant.id} currentUser={currentUser} />
 
-          <InformationFeed tenantId={tenant.id} sharePostId={queryParams.post} />
+          <InformationFeed
+            tenantId={tenant.id}
+            sharePostId={queryParams.post}
+            currentUserId={session.id}
+          />
         </div>
       </div>
     </>
