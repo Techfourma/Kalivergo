@@ -52,6 +52,11 @@ interface InformationPost {
 interface InformationFeedProps {
   tenantId: string;
   sharePostId?: string;
+  currentUser: {
+    id: string;
+    name: string;
+    image?: string | null;
+  };
 }
 
 const REACTION_ICONS: Record<string, LucideIcon> = {
@@ -115,7 +120,7 @@ function formatJakartaDateTime(date: Date): string {
   });
 }
 
-export default function InformationFeed({ tenantId, sharePostId }: InformationFeedProps) {
+export default function InformationFeed({ tenantId, sharePostId, currentUser }: InformationFeedProps) {
   const [posts, setPosts] = useState<InformationPost[]>([]);
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const [hasMore, setHasMore] = useState(true);
@@ -322,6 +327,7 @@ export default function InformationFeed({ tenantId, sharePostId }: InformationFe
 
       if (parentId) {
         setNewComment((prev) => ({ ...prev, [`${postId}-${parentId}`]: '' }));
+        setExpandedComments((prev) => ({ ...prev, [`${postId}-${parentId}`]: false }));
       } else {
         setNewComment((prev) => ({ ...prev, [postId]: '' }));
       }
@@ -444,6 +450,11 @@ export default function InformationFeed({ tenantId, sharePostId }: InformationFe
       </div>
     );
   };
+
+  const hasActiveReply = (postId: string) =>
+    Object.entries(expandedComments).some(
+      ([key, isExpanded]) => key.startsWith(`${postId}-`) && isExpanded
+    );
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -605,38 +616,39 @@ export default function InformationFeed({ tenantId, sharePostId }: InformationFe
                   </div>
                 )}
 
-                {/* Add Comment */}
-                <div className="flex gap-2 mt-3">
-                  <Avatar
-                    src={null}
-                    name="You"
-                    id="current-user"
-                    size="sm"
-                  />
-                  <div className="flex-1 flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Write a comment..."
-                      value={newComment[post.id] || ''}
-                      onChange={(e) =>
-                        setNewComment((prev) => ({ ...prev, [post.id]: e.target.value }))
-                      }
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          handleAddComment(post.id);
-                        }
-                      }}
-                      className="flex-1 px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                {!hasActiveReply(post.id) && (
+                  <div className="flex gap-2 mt-3">
+                    <Avatar
+                      src={currentUser.image}
+                      name={currentUser.name}
+                      id={currentUser.id}
+                      size="md"
                     />
-                    <button
-                      onClick={() => handleAddComment(post.id)}
-                      disabled={!newComment[post.id]?.trim()}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-full text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Post
-                    </button>
+                    <div className="flex-1 flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Write a comment..."
+                        value={newComment[post.id] || ''}
+                        onChange={(e) =>
+                          setNewComment((prev) => ({ ...prev, [post.id]: e.target.value }))
+                        }
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            handleAddComment(post.id);
+                          }
+                        }}
+                        className="flex-1 px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      />
+                      <button
+                        onClick={() => handleAddComment(post.id)}
+                        disabled={!newComment[post.id]?.trim()}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-full text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Post
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>
