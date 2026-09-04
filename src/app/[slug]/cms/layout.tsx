@@ -5,7 +5,7 @@ import { requireTenantCmsAccess, resolveTenantFromRoute } from "@/lib/tenant";
 import { prisma } from "@/lib/db";
 import type { CmsRole } from "@/types";
 
-import Sidebar from "@/components/layout/Sidebar";
+import TenantNavbar from "@/components/layout/TenantNavbar";
 import CacheGuard from "@/components/security/CacheGuard";
 import { getCurrentSessionUser } from "@/server/auth/session";
 
@@ -73,14 +73,22 @@ export default async function TenantCmsLayout({
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-dark-950" suppressHydrationWarning>
       <CacheGuard redirectTo="/unauthorized" />
-      <Sidebar
-        variant="cms"
-        userRole={membership.cmsRole ?? membership.role}
-        tenantPath={tenantPath}
-        cmsModules={cmsModules}
-      />
+      <div className="fixed top-0 left-0 right-0 z-50 nav-shell">
+        <TenantNavbar
+          user={{
+            name: session.name ?? "User",
+            email: session.email,
+            image: session.image,
+            role: membership.role,
+            cmsRole: membership.cmsRole,
+            canAccessCms: true,
+          }}
+          tenantPath={tenantPath}
+          cmsModules={cmsModules}
+        />
+      </div>
 
-      <main className="flex-1 p-8 overflow-auto">{children}</main>
+      <main className="flex-1 p-8 pt-24 overflow-auto lg:pl-[18rem] lg:pt-8">{children}</main>
     </div>
   );
 }
