@@ -223,7 +223,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
     <>
       <aside
         className={cn(
-          "hidden lg:flex fixed left-0 top-0 h-screen flex-col border-r border-dark-200 bg-white/95 backdrop-blur-xl transition-all duration-300 ease-in-out dark:border-dark-800 dark:bg-dark-950/95",
+          "hidden lg:flex fixed left-0 top-0 z-40 h-screen flex-col border-r border-dark-200 bg-white/95 backdrop-blur-xl transition-all duration-300 ease-in-out dark:border-dark-800 dark:bg-dark-950/95",
           desktopSidebarWidth,
           isDesktopViewport ? "visible" : "hidden"
         )}

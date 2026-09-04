@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { X, MessageSquare } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { ChatMessage } from "./ChatMessage";
@@ -29,12 +28,15 @@ export function ChatWindow({ isOpen, onClose }: ChatWindowProps) {
     }
   }, [messages]);
 
- 
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
     }
   }, [isOpen]);
+
+  const buildHistory = (): Array<{ role: "user" | "assistant"; content: string }> => {
+    return messages.map((m) => ({ role: m.role, content: m.content }));
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -54,18 +56,30 @@ export function ChatWindow({ isOpen, onClose }: ChatWindowProps) {
       timestamp: Date.now(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    const assistantMessage: AIAssistantMessage = {
+      role: 'assistant',
+      content: '',
+      timestamp: Date.now(),
+    };
+
+    setMessages((prev) => [...prev, userMessage, assistantMessage]);
     setStatus('loading');
     setError(null);
 
-    
     e.currentTarget.reset();
     if (inputRef.current) {
       inputRef.current.style.height = 'auto';
     }
 
+    await streamResponse(trimmedMessage, assistantMessage);
+  };
+
+  const streamResponse = async (
+    trimmedMessage: string,
+    assistantMessage: AIAssistantMessage
+  ) => {
     try {
-      const response = await fetch('/api/ai-assistant/chat', {
+      const response = await fetch('/api/ai-assistant/chat/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,34 +87,118 @@ export function ChatWindow({ isOpen, onClose }: ChatWindowProps) {
         body: JSON.stringify({
           message: trimmedMessage,
           conversationId,
+          history: buildHistory(),
         }),
       });
 
-      const data = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.error?.message || 'Terjadi masalah saat memproses pertanyaan.');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        const errorMessage = errorData?.error?.message || 'Terjadi masalah saat memproses pertanyaan.';
+        throw new Error(errorMessage);
       }
 
-      if (data.data?.conversationId) {
-        setConversationId(data.data.conversationId);
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('Streaming tidak didukung oleh server.');
       }
 
-     
-      const assistantMessage: AIAssistantMessage = {
-        role: 'assistant',
-        content: data.data.response,
-        timestamp: Date.now(),
+      let accumulatedText = '';
+      const decoder = new TextDecoder();
+      let eventBuffer = '';
+      let streamEnded = false;
+      let streamError: string | null = null;
+
+      const processEvent = (event: string) => {
+        const lines = event.split(/\r?\n/);
+        const eventName = lines.find((line) => line.startsWith('event:'))?.slice(6).trim();
+        const dataLine = lines.find((line) => line.startsWith('data:'));
+        if (!eventName || !dataLine) return;
+
+        const data = dataLine.slice(5).trim();
+
+        if (eventName === 'conversationId') {
+          try {
+            setConversationId(JSON.parse(data));
+          } catch {
+            // ignore malformed id
+          }
+        } else if (eventName === 'chunk') {
+          try {
+            const text = JSON.parse(data);
+            if (typeof text === 'string' && text.length > 0) {
+              accumulatedText += text;
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m === assistantMessage ? { ...m, content: accumulatedText } : m
+                )
+              );
+            }
+          } catch {
+            // ignore malformed chunk
+          }
+        } else if (eventName === 'error') {
+          try {
+            streamError = JSON.parse(data);
+          } catch {
+            streamError = data;
+          }
+          streamEnded = true;
+        } else if (eventName === 'done') {
+          streamEnded = true;
+        }
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          eventBuffer += decoder.decode();
+          if (eventBuffer.trim()) processEvent(eventBuffer);
+          break;
+        }
+
+        eventBuffer += decoder.decode(value, { stream: true });
+        const events = eventBuffer.split(/\r?\n\r?\n/);
+        eventBuffer = events.pop() ?? '';
+
+        for (const event of events) {
+          if (event.trim()) processEvent(event);
+        }
+
+        if (streamEnded) break;
+      }
+
+      reader.releaseLock();
+
+      // If the stream failed mid-way we keep the partial answer that was
+      // already received instead of discarding it (the previous behaviour
+      // removed the whole assistant message).
+      if (streamError) {
+        const message = streamError.trim() || 'Terjadi masalah saat memproses pertanyaan.';
+        if (accumulatedText.trim().length > 0) {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m === assistantMessage
+                ? { ...m, content: `${accumulatedText}\n\n⚠️ _Respon terputus._ ${message}` }
+                : m
+            )
+          );
+        }
+        setError(message);
+        setStatus('error');
+        return;
+      }
+
+      if (accumulatedText.trim().length === 0) {
+        throw new Error('AI tidak menghasilkan respons.');
+      }
+
       setStatus('success');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Terjadi masalah saat memproses pertanyaan.';
       setError(errorMessage);
       setStatus('error');
 
-      setMessages((prev) => prev.slice(0, -1));
+      setMessages((prev) => prev.filter((m) => m !== assistantMessage));
     }
   };
 
@@ -119,7 +217,6 @@ export function ChatWindow({ isOpen, onClose }: ChatWindowProps) {
   return (
     <div className="fixed !bottom-20 !right-4 !top-auto !left-auto w-[calc(100%-2rem)] max-w-md z-50">
       <div className="bg-dark-900 border border-dark-700 rounded-2xl shadow-2xl shadow-primary-950/60 ring-1 ring-primary-500/5 overflow-hidden">
-      
         <div className="flex items-center justify-between px-4 py-3 bg-dark-800 border-b border-dark-700">
           <div className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5 text-primary-400" />
@@ -134,7 +231,6 @@ export function ChatWindow({ isOpen, onClose }: ChatWindowProps) {
           </button>
         </div>
 
-        
         <div className="h-[400px] overflow-y-auto p-4 space-y-3 bg-dark-900/50">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center">

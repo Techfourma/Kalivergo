@@ -3,21 +3,21 @@ import { getCurrentSessionUser } from '@/server/auth/session';
 import { requireTenantMembership } from '@/lib/tenant';
 import { InformationType } from '@prisma/client';
 import PageBackground from '@/components/ui/PageBackground';
+import { redirect } from 'next/navigation';
 
 export default async function InformationPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ post?: string }>;
 }) {
   const routeParams = await params;
+  const queryParams = await searchParams;
   const session = await getCurrentSessionUser();
 
   if (!session?.id) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Please login to view information</p>
-      </div>
-    );
+    redirect('/unauthorized');
   }
 
   const tenant = await prisma.tenant.findFirst({
@@ -36,11 +36,7 @@ export default async function InformationPage({
   try {
     await requireTenantMembership(session.id, tenant.id);
   } catch {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Access denied</p>
-      </div>
-    );
+    redirect('/unauthorized');
   }
 
   const CreatePostForm = (await import('@/components/information/CreatePostForm')).default;
@@ -60,11 +56,11 @@ export default async function InformationPage({
   return (
     <>
       <PageBackground />
-      <div className="relative z-10">
+      <div className="relative z-10 lg:pl-[18rem] xl:pl-[20rem]">
         <div className="max-w-3xl mx-auto px-4 py-6">
           <CreatePostForm tenantId={tenant.id} currentUser={currentUser} />
 
-          <InformationFeed tenantId={tenant.id} />
+          <InformationFeed tenantId={tenant.id} sharePostId={queryParams.post} />
         </div>
       </div>
     </>
