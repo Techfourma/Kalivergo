@@ -170,7 +170,7 @@ export default function Sidebar({ variant, userRole, tenantPath, cmsModules }: S
                 const normalize = (p: string) => p?.replace(/\/$/, "") || "";
                 const np = normalize(pathname);
                 const nh = normalize(href);
-                const isActive = np === nh || np.startsWith(nh + "/");
+                const isActive = item.href === "/cms" ? np === nh : np === nh || np.startsWith(nh + "/");
                 return (
                   <Link
                     key={item.href}
