@@ -24,6 +24,8 @@ import {
   BarChart3,
   PanelLeftClose,
   PanelLeftOpen,
+  FileText,
+  Shield,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import ThemeToggle from "@/components/ui/ThemeToggle";
@@ -41,6 +43,7 @@ interface TenantNavbarProps {
   onSignIn?: () => void;
   onSignOut?: () => void;
   tenantPath: string;
+  cmsModules?: string[];
 }
 
 interface NavItem {
@@ -48,9 +51,11 @@ interface NavItem {
   label: string;
   icon: any;
   requiresAuth?: boolean;
+  module?: string;
+  ownerOnly?: boolean;
 }
 
-export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: TenantNavbarProps) {
+export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath, cmsModules }: TenantNavbarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -112,58 +117,77 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
     }
   };
 
-  const navItems: NavItem[] = [
-    { href: `${tenantPath}/home`, label: "Home", icon: Home },
-    {
-      href: `${tenantPath}/tasks`,
-      label: "Tasks",
-      icon: ClipboardList,
-      requiresAuth: true
-    },
-    {
-      href: `${tenantPath}/schedule`,
-      label: "Schedule",
-      icon: Calendar,
-      requiresAuth: true
-    },
-    {
-      href: `${tenantPath}/information`,
-      label: "Information",
-      icon: Newspaper,
-      requiresAuth: true
-    },
-    {
-      href: `${tenantPath}/dashboard`,
-      label: "Dashboard",
-      icon: LayoutDashboard,
-      requiresAuth: true
-    },
-    {
-      href: `${tenantPath}/statistics`,
-      label: "Statistics",
-      icon: BarChart3,
-      requiresAuth: true
-    },
-    {
-      href: `${tenantPath}/seminar`,
-      label: "Seminar",
-      icon: Presentation,
-      requiresAuth: true
-    },
-    {
-      href: `${tenantPath}/profil`,
-      label: "Profil",
-      icon: User,
-      requiresAuth: true
-    },
-  ];
+  const isCms = cmsModules !== undefined;
+  const navItems: NavItem[] = isCms
+    ? [
+        { href: `${tenantPath}/home`, label: "Home", icon: Home },
+        { href: `${tenantPath}/cms`, label: "Overview", icon: LayoutDashboard },
+        { href: `${tenantPath}/cms/tasks`, label: "Manage Tasks", icon: ClipboardList, module: "tasks" },
+        { href: `${tenantPath}/cms/people`, label: "People Management", icon: User, module: "people" },
+        { href: `${tenantPath}/cms/finance`, label: "Finance", icon: Wallet, module: "finance" },
+        { href: `${tenantPath}/cms/schedule`, label: "Schedule", icon: Calendar, module: "schedule" },
+        { href: `${tenantPath}/cms/seminar`, label: "Seminar", icon: GraduationCap, module: "seminar" },
+        { href: `${tenantPath}/cms/information`, label: "Information", icon: Newspaper, module: "information" },
+        { href: `${tenantPath}/cms/audit`, label: "Audit Log", icon: FileText, module: "audit" },
+        { href: `${tenantPath}/cms/access`, label: "Access Control", icon: Shield, ownerOnly: true },
+      ].filter((item) => {
+        if (item.label === "Home" || item.label === "Overview") return true;
+        if (user?.role === "OWNER") return true;
+        if (item.ownerOnly) return false;
+        return !!item.module && cmsModules.includes(item.module);
+      })
+    : [
+        { href: `${tenantPath}/home`, label: "Home", icon: Home },
+        {
+          href: `${tenantPath}/tasks`,
+          label: "Tasks",
+          icon: ClipboardList,
+          requiresAuth: true
+        },
+        {
+          href: `${tenantPath}/schedule`,
+          label: "Schedule",
+          icon: Calendar,
+          requiresAuth: true
+        },
+        {
+          href: `${tenantPath}/information`,
+          label: "Information",
+          icon: Newspaper,
+          requiresAuth: true
+        },
+        {
+          href: `${tenantPath}/dashboard`,
+          label: "Dashboard",
+          icon: LayoutDashboard,
+          requiresAuth: true
+        },
+        {
+          href: `${tenantPath}/statistics`,
+          label: "Statistics",
+          icon: BarChart3,
+          requiresAuth: true
+        },
+        {
+          href: `${tenantPath}/seminar`,
+          label: "Seminar",
+          icon: Presentation,
+          requiresAuth: true
+        },
+        {
+          href: `${tenantPath}/profil`,
+          label: "Profil",
+          icon: User,
+          requiresAuth: true
+        },
+      ];
 
   const canAccessCms =
     !!user &&
     (user.canAccessCms === true ||
       user.role === "OWNER" ||
       !!user.cmsRole);
-  if (canAccessCms) {
+  if (!isCms && canAccessCms) {
     navItems.push({
       href: `${tenantPath}/cms`,
       label: "CMS",
@@ -210,6 +234,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
     const np = normalize(current);
     const nh = normalize(href);
     if (np === nh) return true;
+    if (isCms && nh === normalize(`${tenantPath}/cms`)) return false;
     if (nh !== "/" && nh !== `${tenantPath}/home` && np.startsWith(nh + "/")) return true;
     if (nh === `${tenantPath}/home` && np === tenantPath) return true;
     return false;
@@ -324,7 +349,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
             );
           })}
 
-          <div className="pt-1">
+          {!isCms && <div className="pt-1">
             <button
               type="button"
               onClick={() => setAcademicOpen((prev) => !(prev ?? academicActive))}
@@ -372,7 +397,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                 })}
               </div>
             )}
-          </div>
+          </div>}
 
           {topLevelMenuItems.map((item) => {
             const Icon = item.icon;
@@ -582,7 +607,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                   );
                 })}
 
-                <div className="pt-1">
+                {!isCms && <div className="pt-1">
                   <button
                     type="button"
                     onClick={() => setAcademicOpen((prev) => !(prev ?? academicActive))}
@@ -624,7 +649,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath }: 
                       })}
                     </div>
                   )}
-                </div>
+                </div>}
 
                 {topLevelMenuItems.map((item) => {
                   const Icon = item.icon;
