@@ -107,7 +107,7 @@ export async function middleware(req: NextRequest) {
   const sessionUser = parseSessionCookie(req.cookies.get('kalivergo_user')?.value);
 
   if (isPlatformPath) {
-    if (pathname === '/platform/login' || pathname === '/platform/register') {
+    if (pathname === '/platform/login' || pathname === '/platform/register' || pathname === '/platform/forgot-password') {
       return setNoStore(response);
     }
 
