@@ -36,6 +36,7 @@ interface NavbarProps {
   } | null;
   onSignIn?: () => void;
   onSignOut?: () => void;
+  homeHref?: string;
 }
 
 interface NavItem {
@@ -58,7 +59,7 @@ const navItems: NavItem[] = [
   { href: "/cms/seminar", label: "Seminar", icon: GraduationCap, requiresCMS: true },
 ];
 
-export default function Navbar({ user, onSignIn, onSignOut }: NavbarProps) {
+export default function Navbar({ user, onSignIn, onSignOut, homeHref = "/home" }: NavbarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -110,7 +111,7 @@ export default function Navbar({ user, onSignIn, onSignOut }: NavbarProps) {
     }
 
     const items: NavItem[] = [
-      { href: "/home", label: "Home", icon: Home },
+      { href: homeHref, label: "Home", icon: Home },
       { href: "/seminar", label: "Seminar", icon: GraduationCap, requiresAuth: true },
       { href: "/dashboard", label: "Dashboard", icon: Wallet, requiresAuth: true },
       { href: "/profil", label: "Profil", icon: User, requiresAuth: true },
@@ -144,8 +145,8 @@ export default function Navbar({ user, onSignIn, onSignOut }: NavbarProps) {
     const np = normalize(current);
     const nh = normalize(href);
     if (np === nh) return true;
-    if (nh !== "/" && nh !== "/home" && nh !== "/cms" && np.startsWith(nh + "/")) return true;
-    if (nh === "/home" && np === "/") return true;
+    if (nh !== "/" && nh !== homeHref && nh !== "/cms" && np.startsWith(nh + "/")) return true;
+    if (nh === homeHref && np === "/") return true;
     return false;
   };
 

@@ -86,41 +86,41 @@ export default function EditTaskButton({ task }: EditTaskButtonProps) {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-dark-700 mb-1.5">Judul Tugas</label>
+              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1.5">Judul Tugas</label>
               <input
                 type="text"
                 name="title"
                 defaultValue={task.title}
-                className="w-full rounded-xl border border-dark-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-100 placeholder:text-dark-400 dark:placeholder:text-dark-500 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-dark-700 mb-1.5">Deskripsi</label>
+              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1.5">Deskripsi</label>
               <textarea
                 name="description"
                 rows={3}
                 defaultValue={task.description}
-                className="w-full rounded-xl border border-dark-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                className="w-full rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-100 placeholder:text-dark-400 dark:placeholder:text-dark-500 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-dark-700 mb-1.5">URL</label>
+              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1.5">URL</label>
               <input
                 type="url"
                 name="url"
                 defaultValue={task.url ?? ""}
-                className="w-full rounded-xl border border-dark-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-100 placeholder:text-dark-400 dark:placeholder:text-dark-500 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="Contoh: https://mentari.unpam.ac.id/tugas/1"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-dark-700 mb-1.5">Kategori</label>
+              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1.5">Kategori</label>
               <select
                 name="category"
                 defaultValue={task.category ?? "E_LEARNING"}
-                className="w-full rounded-xl border border-dark-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
+                className="w-full rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
               >
                 <option value="E_LEARNING">E-Learning</option>
                 <option value="TATAP_MUKA">Tatap Muka</option>
@@ -128,22 +128,22 @@ export default function EditTaskButton({ task }: EditTaskButtonProps) {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-dark-700 mb-1.5">Start Date Time</label>
+                <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1.5">Start Date Time</label>
                 <input
                   type="datetime-local"
                   name="startDate"
                   defaultValue={formatDateTimeLocal(task.startDate)}
-                  className="w-full rounded-xl border border-dark-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-dark-700 mb-1.5">Deadline</label>
+                <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-1.5">Deadline</label>
                 <input
                   type="datetime-local"
                   name="deadline"
                   defaultValue={formatDateTimeLocal(task.deadline)}
-                  className="w-full rounded-xl border border-dark-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                   required
                 />
               </div>
@@ -164,7 +164,7 @@ export default function EditTaskButton({ task }: EditTaskButtonProps) {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button type="button" onClick={() => setIsOpen(false)} className="flex-1 px-4 py-2 border border-dark-200 rounded-xl text-sm font-medium hover:bg-dark-50 transition-colors">
+              <button type="button" onClick={() => setIsOpen(false)} className="flex-1 px-4 py-2 border border-dark-200 dark:border-dark-700 text-dark-700 dark:text-dark-200 rounded-xl text-sm font-medium hover:bg-dark-50 dark:hover:bg-dark-800 transition-colors">
                 Batal
               </button>
               <button type="submit" disabled={isLoading} className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-xl text-sm font-medium hover:bg-primary-700 disabled:opacity-50 transition-colors">

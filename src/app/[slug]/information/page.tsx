@@ -70,7 +70,7 @@ export default async function InformationPage({
       <div className="fixed top-0 left-0 right-0 z-50 nav-shell">
         <TenantNavbar user={currentUser} tenantPath={tenantPath} />
       </div>
-      <main className="relative z-10 pt-24 pb-8 lg:pl-[18rem] xl:pl-[20rem]">
+      <main className="tenant-content-offset relative z-10 pt-28 pb-8">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
           <CreatePostForm tenantId={tenant.id} currentUser={currentUser} />
 
