@@ -1,6 +1,5 @@
-"use client";
-import { useRouter } from "next/navigation";
-import { logoutUser } from "@/actions/cms";
+import { getNavbarHomeHref } from "@/lib/navbar-home";
+import { defaultSignOut, redirectToLogin } from "@/actions/navbar-actions";
 import Navbar from "./Navbar";
 
 interface NavbarWrapperProps {
@@ -11,44 +10,25 @@ interface NavbarWrapperProps {
     role?: string;
     isVerified?: boolean;
   } | null;
-  onSignIn?: () => void;
+  onSignIn?: () => void | Promise<void>;
   onSignOut?: () => void | Promise<void>;
+  homeHref?: string;
 }
 
-export default function NavbarWrapper({ user, onSignIn, onSignOut }: NavbarWrapperProps) {
-  const router = useRouter();
-
-  const handleSignIn = () => {
-    if (onSignIn) {
-      onSignIn();
-    } else {
-      router.push("/login");
-    }
-  };
-
-  const handleSignOut = async () => {
-    if (onSignOut) {
-      await onSignOut();
-    }
-
-    try {
-      await logoutUser();
-    } catch (e) {
-      console.error("Gagal memanggil logoutUser:", e);
-    }
-
-
-    document.cookie =
-      "kalivergo_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
-
-    window.location.replace("/login");
-  };
+export default async function NavbarWrapper({
+  user,
+  onSignIn,
+  onSignOut,
+  homeHref,
+}: NavbarWrapperProps) {
+  const computedHomeHref = homeHref ?? await getNavbarHomeHref();
 
   return (
     <Navbar
       user={user}
-      onSignIn={handleSignIn}
-      onSignOut={handleSignOut}
+      onSignIn={onSignIn ?? redirectToLogin}
+      onSignOut={onSignOut ?? defaultSignOut}
+      homeHref={computedHomeHref}
     />
   );
 }
