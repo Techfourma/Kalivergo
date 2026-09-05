@@ -179,6 +179,17 @@
     @apply border-b border-dark-200 bg-dark-50/80 backdrop-blur-md dark:border-dark-800 dark:bg-dark-950/80;
   }
 
+  .tenant-content-offset {
+    margin-left: var(--tenant-sidebar-width, 18rem);
+    transition: margin-left 300ms ease-in-out;
+  }
+
+  @media (max-width: 1023px) {
+    .tenant-content-offset {
+      margin-left: 0;
+    }
+  }
+
   .footer-shell {
     @apply border-t border-dark-200 bg-dark-50 text-dark-500 dark:border-dark-800 dark:bg-dark-950;
   }

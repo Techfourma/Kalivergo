@@ -401,7 +401,7 @@ export default function PlatformLandingPage() {
               <h2 className="relative text-3xl sm:text-4xl font-bold font-display text-slate-950 dark:text-white">
                 Siap Membawa Kelasmu ke Era Digital?
               </h2>
-              <p className="relative mt-4 text-slate-700 dark:text-slate-300 max-w-xl mx-auto">
+              <p className="relative mt-4 text-slate-900 dark:text-slate-200 font-medium max-w-xl mx-auto">
                 Bergabunglah dengan Kalivergo dan rasakan kemudahan mengelola
                 tugas, keuangan, dan kegiatan kelas dalam satu platform.
               </p>
