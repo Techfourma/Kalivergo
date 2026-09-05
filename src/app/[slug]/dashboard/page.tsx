@@ -216,7 +216,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       <TenantNavbar user={currentUser} tenantPath={tenantPath} />
     </div>
 
-    <main className="relative z-10 pt-[120px] pb-8 lg:pl-[18rem] xl:pl-[20rem]">
+    <main className="tenant-content-offset relative z-10 pt-28 pb-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
         <div className="mb-8">
