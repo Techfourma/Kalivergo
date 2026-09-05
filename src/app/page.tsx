@@ -236,7 +236,7 @@ export default function PlatformLandingPage() {
             </h1>
 
             <p className="mt-6 text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto animate-fade-in-up [animation-delay:160ms]">
-              Platform terpadu untuk manajemen kelas — tracking tugas, kelola
+              Platform terpadu untuk manajemen kelas, tracking tugas, kelola
               keuangan, dan pantau kegiatan seminar dalam satu tempat. Dirancang
               untuk universitas, program studi, dan setiap kelas kampus.
             </p>
