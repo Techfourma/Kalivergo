@@ -81,6 +81,17 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath, cm
   }, []);
 
   useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--tenant-sidebar-width",
+      desktopCollapsed ? "5.5rem" : "18rem"
+    );
+
+    return () => {
+      document.documentElement.style.removeProperty("--tenant-sidebar-width");
+    };
+  }, [desktopCollapsed]);
+
+  useEffect(() => {
     if (mobileOpen) {
       document.body.style.overflow = 'hidden';
     } else {
@@ -216,7 +227,9 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath, cm
 
   const homeItems = filteredNavItems.filter((item) => item.label === "Home");
   const topLevelMenuItems = filteredNavItems.filter(
-    (item) => !["Home", "Tasks", "Schedule", "Seminar"].includes(item.label)
+    (item) =>
+      !["Home", "Tasks", "Seminar"].includes(item.label) &&
+      (isCms || item.label !== "Schedule")
   );
   const academicItems = filteredNavItems.filter((item) =>
     ["Tasks", "Schedule", "Seminar"].includes(item.label)
