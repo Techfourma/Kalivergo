@@ -88,7 +88,7 @@ export default async function TenantCmsLayout({
         />
       </div>
 
-      <main className="flex-1 p-8 pt-24 overflow-auto lg:pl-[18rem] lg:pt-8">{children}</main>
+      <main className="tenant-content-offset flex-1 overflow-auto p-8 pt-28 lg:pt-12">{children}</main>
     </div>
   );
 }

@@ -29,7 +29,7 @@ export default async function PlatformProtectedLayout({
     <>
       <PlatformNavbar adminName={admin.name} adminRole={admin.platformRole} adminImage={admin.image} />
 
-      <main className="min-w-0 flex-1 w-full overflow-x-hidden pt-16 md:ml-72 md:w-auto md:pt-0">{children}</main>
+      <main className="min-w-0 flex-1 w-full overflow-x-hidden pt-20 md:ml-72 md:w-auto md:pt-8">{children}</main>
     </>
   );
 }
