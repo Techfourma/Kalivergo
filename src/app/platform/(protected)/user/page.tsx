@@ -64,15 +64,6 @@ export default async function PlatformUsersPage() {
                 ) : (
                   owners.map((owner) => {
                     const appStatus = statusConfig[owner.applicationStatus] || statusConfig.NO_APPLICATION;
-                    const kycStatusLabel =
-                      owner.kycStatus === "APPROVED"
-                        ? "Disetujui"
-                        : owner.kycStatus === "REJECTED"
-                        ? "Ditolak"
-                        : owner.kycStatus === "PENDING"
-                        ? "Menunggu"
-                        : owner.kycStatus || "-";
-
                     return (
                       <tr key={owner.userId} className="hover:bg-dark-50/50 dark:hover:bg-dark-900/30 transition-colors">
                         <td className="px-6 py-4">
@@ -133,19 +124,6 @@ export default async function PlatformUsersPage() {
                             className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${appStatus.className}`}
                           >
                             {appStatus.label}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
-                              owner.kycStatus === "APPROVED"
-                                ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700/40"
-                                : owner.kycStatus === "REJECTED"
-                                  ? "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700/40"
-                                  : "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700/40"
-                            }`}
-                          >
-                            {kycStatusLabel}
                           </span>
                         </td>
                         <td className="px-6 py-4">

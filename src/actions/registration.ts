@@ -566,13 +566,30 @@ export interface RegistrationUniversity {
 async function loadRegistrationData(): Promise<RegistrationUniversity[]> {
   try {
     const universities = await prisma.university.findMany({
-      where: { tenants: { some: { status: "ACTIVE" } } },
+      where: {
+        tenants: {
+          some: {
+            status: "ACTIVE",
+            memberships: { some: { role: "OWNER" } },
+          },
+        },
+      },
       include: {
         programs: {
-          where: { tenants: { some: { status: "ACTIVE" } } },
+          where: {
+            tenants: {
+              some: {
+                status: "ACTIVE",
+                memberships: { some: { role: "OWNER" } },
+              },
+            },
+          },
           include: {
             tenants: {
-              where: { status: "ACTIVE" },
+              where: {
+                status: "ACTIVE",
+                memberships: { some: { role: "OWNER" } },
+              },
               select: {
                 id: true,
                 name: true,
