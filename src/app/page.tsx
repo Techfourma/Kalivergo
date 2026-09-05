@@ -326,7 +326,7 @@ export default function PlatformLandingPage() {
                 Aktifkan Kelasmu dalam 3 Langkah
               </h2>
               <p className="mt-4 text-slate-600 dark:text-slate-300">
-                Proses onboarding yang cepat dan aman — dengan verifikasi KYC
+                Proses onboarding yang cepat dan aman, dengan verifikasi KYC
                 oleh platform untuk menjaga kualitas dan keamanan setiap kelas.
               </p>
             </div>
