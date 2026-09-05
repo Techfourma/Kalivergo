@@ -326,7 +326,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath, cm
         )}
 
         <nav
-          className={cn("no-scrollbar flex-1 space-y-2 overflow-y-hidden p-3", desktopCollapsed && "px-2")}
+          className={cn("no-scrollbar flex-1 space-y-2 overflow-y-auto p-3", desktopCollapsed && "px-2")}
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {homeItems.map((item) => {
@@ -587,7 +587,7 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath, cm
               </div>
             </div>
 
-            <div className="no-scrollbar flex-1 overflow-y-hidden" style={{ scrollbarWidth: 'none' } as React.CSSProperties}>
+            <div className="no-scrollbar flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none' } as React.CSSProperties}>
               <div className="p-4 space-y-1">
                 {homeItems.map((item) => {
                   const Icon = item.icon;
