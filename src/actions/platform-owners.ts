@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
 import { requirePlatformAdmin } from "@/lib/tenant/require-tenant-access";
 import { prisma } from "@/lib/prisma";
 import { getCurrentSessionUserId } from "@/server/auth/session";
@@ -137,6 +138,9 @@ export async function getAllOwners(): Promise<{
 }
 
 export async function deletePlatformOwner(formData: FormData) {
+  // DESTRUCTIVE: deletes the tenant, all its data, all member accounts on it,
+  // and each member's personal data (submissions, payments, comments, etc.)
+  // via FK cascade. Intended behavior per deletion-of-owner spec.
   try {
     const userId = formData.get("userId") as string;
     const tenantId = formData.get("tenantId") as string;
@@ -167,6 +171,7 @@ export async function deletePlatformOwner(formData: FormData) {
         ownerApplications: {
           where: { tenantId },
           select: {
+            id: true,
             selfieStorageKey: true,
             ktmStorageKey: true,
           },
@@ -180,57 +185,72 @@ export async function deletePlatformOwner(formData: FormData) {
 
     const cloudName = env.cloudinaryCloudName;
 
-    if (user.image && cloudName) {
-      const publicId = extractPublicIdFromUrl(user.image);
-      if (publicId) {
-        try {
-          await deleteFromCloudinary(publicId, "image");
-        } catch (err) {
-          console.error("Failed to delete profile image:", err);
-        }
-      }
-    }
+    // Defense in depth: TenantMembership is unique on (userId, tenantId), so an
+    // owner should not appear with role "MEMBER" on the same tenant. The `not`
+    // guard protects against any future schema drift that could allow dual roles.
+    const memberUsers = await prisma.user.findMany({
+      where: {
+        tenantMemberships: { some: { tenantId, role: "MEMBER" } },
+        id: { not: userId },
+      },
+      select: {
+        id: true,
+        name: true,
+        image: true,
+        ktpStorageKey: true,
+        memberApplications: {
+          where: { tenantId },
+          select: {
+            profilePhotoStorageKey: true,
+            ktmPhotoStorageKey: true,
+          },
+        },
+      },
+    });
 
-    if (user.ktpStorageKey && cloudName) {
+    const cleanupAsset = async (key: string | null | undefined) => {
+      if (!key || !cloudName) return;
       try {
-        await deleteFromCloudinary(user.ktpStorageKey, "image");
+        await deleteFromCloudinary(key, "image");
       } catch (err) {
-        console.error("Failed to delete KTP:", err);
+        console.error("Failed to delete cloudinary asset:", err);
       }
-    }
+    };
 
+    await cleanupAsset(user.image ? extractPublicIdFromUrl(user.image) : null);
+    await cleanupAsset(user.ktpStorageKey);
     for (const app of user.ownerApplications) {
-      if (app.selfieStorageKey && cloudName) {
-        try {
-          await deleteFromCloudinary(app.selfieStorageKey, "image");
-        } catch (err) {
-          console.error("Failed to delete selfie:", err);
-        }
-      }
-      if (app.ktmStorageKey && cloudName) {
-        try {
-          await deleteFromCloudinary(app.ktmStorageKey, "image");
-        } catch (err) {
-          console.error("Failed to delete KTM:", err);
-        }
+      await cleanupAsset(app.selfieStorageKey);
+      await cleanupAsset(app.ktmStorageKey);
+    }
+
+    for (const member of memberUsers) {
+      await cleanupAsset(member.image ? extractPublicIdFromUrl(member.image) : null);
+      await cleanupAsset(member.ktpStorageKey);
+      for (const app of member.memberApplications) {
+        await cleanupAsset(app.profilePhotoStorageKey);
+        await cleanupAsset(app.ktmPhotoStorageKey);
       }
     }
 
-    await prisma.tenantMembership.deleteMany({
-      where: { userId, tenantId },
-    });
+    const memberIds = memberUsers.map((m) => m.id);
 
-    await prisma.ownerApplication.deleteMany({
-      where: { userId, tenantId },
-    });
+    await prisma.$transaction([
+      ...(memberIds.length > 0
+        ? [prisma.user.deleteMany({ where: { id: { in: memberIds } } })]
+        : []),
+      prisma.tenantMembership.deleteMany({ where: { tenantId } }),
+      prisma.ownerApplication.deleteMany({ where: { tenantId } }),
+      prisma.memberApplication.deleteMany({ where: { tenantId } }),
+      prisma.tenant.delete({ where: { id: tenantId } }),
+      prisma.user.delete({ where: { id: userId } }),
+    ]);
 
-    await prisma.memberApplication.deleteMany({
-      where: { userId, tenantId },
-    });
-
-    await prisma.user.delete({
-      where: { id: userId },
-    });
+    try {
+      revalidateTag("registration-data", "max");
+    } catch (err) {
+      console.error("Failed to revalidate registration-data tag:", err);
+    }
 
     return { success: `Akun owner ${user.name} berhasil dihapus.` };
   } catch (error) {
