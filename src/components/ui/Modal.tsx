@@ -48,16 +48,16 @@ export default function Modal({
       />
       <div
         className={cn(
-          "relative w-full sm:my-auto sm:w-full rounded-t-2xl sm:rounded-2xl bg-white shadow-2xl animate-slide-up max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]",
+          "relative w-full sm:my-auto sm:w-full rounded-t-2xl sm:rounded-2xl bg-white dark:bg-dark-900 shadow-2xl animate-slide-up max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]",
           sizes[size]
         )}
       >
         {title && (
-          <div className="flex items-center justify-between border-b border-dark-200 px-4 py-3 sm:px-6 sm:py-4 sticky top-0 bg-white z-10">
-            <h3 className="text-base sm:text-lg font-semibold text-dark-900">{title}</h3>
+          <div className="flex items-center justify-between border-b border-dark-200 dark:border-dark-700 px-4 py-3 sm:px-6 sm:py-4 sticky top-0 bg-white dark:bg-dark-900 z-10">
+            <h3 className="text-base sm:text-lg font-semibold text-dark-900 dark:text-dark-50">{title}</h3>
             <button
               onClick={onClose}
-              className="rounded-lg p-1.5 text-dark-400 hover:bg-dark-100 hover:text-dark-600 transition-colors"
+              className="rounded-lg p-1.5 text-dark-400 hover:bg-dark-100 hover:text-dark-600 dark:hover:bg-dark-800 dark:hover:text-dark-200 transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
