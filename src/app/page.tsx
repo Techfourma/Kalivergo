@@ -22,6 +22,7 @@ import {
 import Loading from "@/components/layout/Loading";
 import { cn } from "@/lib/utils";
 import PageBackground from "@/components/ui/PageBackground";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 const FEATURES = [
   {
@@ -154,6 +155,7 @@ export default function PlatformLandingPage() {
             </div>
 
             <div className="hidden md:flex items-center gap-3">
+              <ThemeToggle />
               <button
                 onClick={() => handleNavClick("/platform/login")}
                 className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white transition-all duration-200"
@@ -201,7 +203,8 @@ export default function PlatformLandingPage() {
                 {item.label}
               </button>
             ))}
-            <div className="flex gap-3 pt-3">
+            <div className="flex gap-3 pt-3 items-center">
+              <ThemeToggle className="h-9 w-9 shrink-0" />
               <button
                 onClick={() => handleNavClick("/login")}
                 className="flex-1 rounded-xl border border-dark-300 dark:border-dark-700 bg-dark-100/80 dark:bg-dark-800/70 px-4 py-2 text-sm font-medium text-slate-900 dark:text-white hover:bg-dark-200/60 dark:hover:bg-dark-800 transition-all duration-200"
@@ -326,7 +329,7 @@ export default function PlatformLandingPage() {
                 Aktifkan Kelasmu dalam 3 Langkah
               </h2>
               <p className="mt-4 text-slate-600 dark:text-slate-300">
-                Proses onboarding yang cepat dan aman — dengan verifikasi KYC
+                Proses onboarding yang cepat dan aman, dengan verifikasi KYC
                 oleh platform untuk menjaga kualitas dan keamanan setiap kelas.
               </p>
             </div>

@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import PageBackground from "@/components/ui/PageBackground";
 import Loading from "@/components/layout/Loading";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -69,6 +70,9 @@ export default function LoginPage() {
       />
       <div className="min-h-screen flex items-center justify-center bg-dark-50 dark:bg-dark-950 relative p-4">
         <PageBackground />
+        <div className="absolute top-4 right-4 z-30">
+          <ThemeToggle />
+        </div>
         <div className="relative z-10 surface-card p-8 rounded-2xl shadow-2xl w-full max-w-md">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">

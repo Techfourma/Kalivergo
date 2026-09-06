@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import PageBackground from "@/components/ui/PageBackground";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -38,6 +39,9 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-dark-50 dark:bg-dark-950 relative p-4">
       <PageBackground />
+      <div className="absolute top-4 right-4 z-30">
+        <ThemeToggle />
+      </div>
 
       <div className="relative z-10 bg-white/80 dark:bg-dark-800/70 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-md border border-dark-200/60 dark:border-dark-700">
         <div className="text-center mb-8">

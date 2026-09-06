@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import PageBackground from "@/components/ui/PageBackground";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import {
   type OrgMember,
   convertUserToOrgMember,
@@ -274,6 +275,7 @@ function Navbar({
           </button>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <button
               onClick={onLoginClick ?? (() => router.push("/login"))}
               className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 px-4 py-2 text-sm font-medium text-dark-900 dark:text-white hover:shadow-lg hover:shadow-primary-500/30 transition-all"
