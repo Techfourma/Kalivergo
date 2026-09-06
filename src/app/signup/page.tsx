@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Eye, EyeOff, CheckCircle2, Mail, ArrowLeft, Upload, University } from "lucide-react";
 import Loading from "@/components/layout/Loading";
 import PageBackground from "@/components/ui/PageBackground";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 type OwnerSignupValues = {
   fullName: string;
@@ -139,6 +140,9 @@ export default function SignupPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-dark-50 p-4 dark:bg-dark-950">
       <PageBackground />
+      <div className="absolute top-4 right-4 z-30">
+        <ThemeToggle />
+      </div>
       <Loading
         isVisible={isLoading}
         message="Mendaftarkan kelas"

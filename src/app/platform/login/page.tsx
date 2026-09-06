@@ -7,6 +7,7 @@ import { ArrowLeft, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { loginPlatformAdmin } from "@/actions/platform-auth";
 import Loading from "@/components/layout/Loading";
 import PageBackground from "@/components/ui/PageBackground";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 export default function PlatformLoginPage() {
   const router = useRouter();
@@ -49,6 +50,9 @@ export default function PlatformLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-dark-50 dark:bg-dark-950 p-4 relative">
       <PageBackground />
+      <div className="absolute top-4 right-4 z-30">
+        <ThemeToggle />
+      </div>
 
       <Loading
         isVisible={isLoading}

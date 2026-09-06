@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Shield, Eye, Share2, Lock, UserCheck, Mail, Database, Cookie, ArrowUp, Menu, X } from "lucide-react";
 import PageBackground from "@/components/ui/PageBackground";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 export default function PrivacyPage() {
   const [activeSection, setActiveSection] = useState("");
@@ -61,7 +62,10 @@ export default function PrivacyPage() {
 
       <div className="relative z-10 flex flex-col min-h-screen">
         <div className="relative z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
+            <div className="absolute top-6 right-4 sm:right-8 z-20">
+              <ThemeToggle />
+            </div>
             <div className="flex items-center gap-4 mb-4">
               <div className="p-3 bg-dark-100/80 dark:bg-dark-800/70 backdrop-blur-sm rounded-xl">
                 <Shield className="h-8 w-8 text-dark-900 dark:text-white" />
