@@ -95,7 +95,7 @@ export default function TermsPage() {
                         onClick={() => scrollToSection(section.id)}
                         className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
                           activeSection === section.id
-                            ? "bg-accent-50 text-accent-300 font-medium"
+                            ? "bg-accent-100 text-accent-700 font-medium dark:bg-accent-500/20 dark:text-accent-300"
                             : "text-muted hover:bg-dark-100/80 dark:bg-dark-800/70 hover:text-dark-900 dark:text-white"
                         }`}
                       >
@@ -161,7 +161,7 @@ export default function TermsPage() {
                       Dengan mengakses atau menggunakan platform Kalivergo, Anda menyatakan telah membaca, memahami, dan menyetujui untuk terikat dengan Syarat dan Ketentuan ini. Jika Anda tidak menyetujui syarat ini, mohon untuk tidak menggunakan layanan kami.
                     </p>
                     <div className="bg-amber-500/10 border-l-4 border-amber-500/50 p-4 rounded-r-lg">
-                      <p className="text-amber-200 text-sm">
+                      <p className="text-amber-800 dark:text-amber-200 text-sm">
                         <strong>Penting:</strong> Syarat ini merupakan perjanjian hukum yang mengikat antara Anda dan Kalivergo.
                       </p>
                     </div>
@@ -182,10 +182,10 @@ export default function TermsPage() {
                     <p className="mb-4">Layanan ini hanya tersedia untuk:</p>
                     <div className="space-y-3">
                       {[
-                        { title: "Anggota Terdaftar", desc: "Hanya anggota kelas Kalivergo yang terdaftar" },
-                        { title: "Usia Minimal", desc: "Berusia minimal 17 tahun atau memiliki izin orang tua/wali" },
-                        { title: "Akun Google Valid", desc: "Memiliki akun Google yang aktif dan valid" },
-                        { title: "Informasi Akurat", desc: "Memberikan data yang benar saat pendaftaran" },
+                        { title: "Anggota Kelas Terdaftar", desc: "Anggota kelas (tenant) yang telah disetujui oleh pengurus atau pemilik kelas" },
+                        { title: "Pemilik Kelas (Owner)", desc: "Pemilik kelas yang pendaftarannya lulus verifikasi KYC oleh tim platform" },
+                        { title: "Kredensial Aktif", desc: "Memiliki NIM/email terdaftar untuk login dengan NIM/email dan password" },
+                        { title: "Informasi Akurat", desc: "Memberikan data yang benar dan lengkap saat pendaftaran" },
                       ].map((item, idx) => (
                         <div key={idx} className="flex items-start gap-3 p-4 bg-dark-100/80 dark:bg-dark-800/70 rounded-lg border border-dark-200/60 dark:border-dark-800">
                           <div className="w-8 h-8 bg-primary-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -215,10 +215,11 @@ export default function TermsPage() {
                     <p className="mb-4">Anda setuju untuk:</p>
                     <ul className="space-y-3">
                       {[
-                        "Memberikan informasi yang akurat dan lengkap saat pendaftaran",
-                        "Menjaga kerahasiaan akun dan kata sandi Anda",
+                        "Memberikan informasi yang akurat dan lengkap saat pendaftaran, termasuk dokumen KYC/KTM yang sah",
+                        "Menjaga kerahasiaan kredensial akun (NIM/email dan kata sandi)",
                         "Tidak membagikan akun kepada pihak lain",
-                        "Menggunakan platform sesuai tujuan akademik",
+                        "Menggunakan platform sesuai tujuan akademik dan manajemen kelas",
+                        "Hanya mengunggah dokumen pribadi pada alur yang ditujukan untuk itu",
                         "Menghormati privasi dan hak anggota lain",
                         "Melaporkan aktivitas mencurigakan atau pelanggaran",
                       ].map((item, idx) => (
@@ -245,15 +246,16 @@ export default function TermsPage() {
                     <p className="mb-4">Penggunaan yang diperbolehkan termasuk:</p>
                     <div className="grid gap-3">
                       {[
-                        "Mengelola dan melacak tugas kelas",
-                        "Monitoring keuangan kas kelas",
-                        "Komunikasi antar anggota kelas",
-                        "Pendaftaran dan manajemen seminar",
-                        "Akses materi dan sumber daya kelas",
+                        "Mengelola dan melacak tugas, pertemuan, dan pengumpulan (submission)",
+                        "Monitoring keuangan, uang kas, dan tunggakan kelas",
+                        "Berbagi informasi, berkomentar, dan memberi reaksi pada feed kelas",
+                        "Pendaftaran dan manajemen seminar serta jadwal kelas",
+                        "Mengelola profil dan portofolio anggota",
+                        "Menggunakan asisten AI untuk bertanya seputar penggunaan platform",
                       ].map((item, idx) => (
                         <div key={idx} className="flex items-center gap-3 p-3 bg-green-500/10 rounded-lg border border-green-500/30">
                           <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0" />
-                          <span className="text-green-100">{item}</span>
+                          <span className="text-green-800 dark:text-green-100">{item}</span>
                         </div>
                       ))}
                     </div>
@@ -275,13 +277,13 @@ export default function TermsPage() {
                     <ul className="space-y-3">
                       {[
                         "Menggunakan platform untuk tujuan ilegal atau melanggar hukum",
+                        "Menyalahgunakan akses atau peran (role) yang dimiliki",
+                        "Mengakses data kelas (tenant) lain tanpa izin",
+                        "Mengunggah data pribadi atau dokumen KYC/KTM pada fitur yang tidak ditujukan untuk itu",
                         "Mengirim konten yang menyinggung, melecehkan, atau merugikan",
                         "Mencoba mengakses akun orang lain tanpa izin",
                         "Menggunakan bot, scraper, atau sistem otomatis",
-                        "Mengganggu atau membebani infrastruktur server",
-                        "Menyebarkan malware atau konten berbahaya",
-                        "Melakukan reverse engineering pada platform",
-                        "Menjual atau menyewakan akses ke platform",
+                        "Menyebarkan malware, melakukan reverse engineering, atau tindakan penipuan",
                       ].map((item, idx) => (
                         <li key={idx} className="flex items-start gap-3">
                           <XCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
@@ -290,7 +292,7 @@ export default function TermsPage() {
                       ))}
                     </ul>
                     <div className="mt-4 bg-red-500/10 border-l-4 border-red-500/50 p-4 rounded-r-lg">
-                      <p className="text-red-200 text-sm">
+                      <p className="text-red-700 dark:text-red-200 text-sm">
                         <strong>Peringatan:</strong> Pelanggaran terhadap ketentuan ini dapat mengakibatkan penangguhan atau pengakhiran akun.
                       </p>
                     </div>
@@ -312,7 +314,7 @@ export default function TermsPage() {
                       <div className="border-l-4 border-primary-500/50 pl-4">
                         <h3 className="font-semibold text-dark-900 dark:text-white mb-2">Kepemilikan Platform</h3>
                         <p className="text-sm text-muted">
-                          Semua konten, fitur, desain, dan kode platform Kalivergo adalah milik Kalivergo dan dilindungi oleh hukum hak cipta serta kekayaan intelektual.
+                          Semua konten, fitur, desain, kode, knowledge base, dan jawaban asisten AI pada platform Kalivergo adalah milik Kalivergo dan dilindungi oleh hukum hak cipta serta kekayaan intelektual.
                         </p>
                       </div>
                       <div className="border-l-4 border-accent-500/50 pl-4">
@@ -343,7 +345,7 @@ export default function TermsPage() {
                   </div>
                   <div className="text-muted leading-relaxed">
                     <div className="bg-yellow-500/10 border-l-4 border-yellow-500/50 p-4 rounded-r-lg mb-4">
-                      <p className="text-yellow-200 font-medium">
+                      <p className="text-yellow-800 dark:text-yellow-200 font-medium">
                         Platform ini disediakan "sebagaimana adanya" (as-is) tanpa jaminan apapun.
                       </p>
                     </div>
@@ -355,6 +357,7 @@ export default function TermsPage() {
                         "Konten yang diposting oleh pengguna lain",
                         "Kerugian tidak langsung atau konsekuensial",
                         "Akses yang tidak sah oleh pihak ketiga",
+                        "Jawaban asisten AI yang bersifat bantuan dan tidak dijamin akurat 100%",
                       ].map((item, idx) => (
                         <li key={idx} className="flex items-start gap-3">
                           <AlertTriangle className="h-5 w-5 text-yellow-400 flex-shrink-0 mt-0.5" />
@@ -414,7 +417,7 @@ export default function TermsPage() {
                       Kami dapat mengubah syarat dan ketentuan ini sewaktu-waktu. Perubahan akan efektif setelah dipublikasikan di platform.
                     </p>
                     <div className="bg-indigo-500/10 border-l-4 border-indigo-500/50 p-4 rounded-r-lg">
-                      <p className="text-indigo-200 text-sm">
+                      <p className="text-indigo-800 dark:text-indigo-200 text-sm">
                         <strong>Notifikasi:</strong> Perubahan material akan diberitahukan melalui email atau notifikasi di platform.
                       </p>
                     </div>
@@ -473,11 +476,11 @@ export default function TermsPage() {
                       Untuk pertanyaan tentang syarat dan ketentuan ini, hubungi kami di:
                     </p>
                     <a
-                      href="mailto:jundulloh2109@gmail.com"
+                      href="mailto:kalivergo.id@gmail.com"
                       className="inline-flex items-center gap-2 px-6 py-3 bg-accent-600 text-dark-900 dark:text-white rounded-lg hover:bg-accent-700 transition-colors font-medium"
                     >
                       <Mail className="h-4 w-4" />
-                      jundulloh2109@gmail.com
+                      kalivergo.id@gmail.com
                     </a>
                     <p className="text-sm text-faint mt-4">
                       Kami akan merespon pertanyaan Anda dalam waktu 30 hari.

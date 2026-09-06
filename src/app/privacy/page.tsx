@@ -94,7 +94,7 @@ export default function PrivacyPage() {
                         onClick={() => scrollToSection(section.id)}
                         className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
                           activeSection === section.id
-                            ? "bg-primary-50 text-primary-300 font-medium"
+                            ? "bg-primary-100 text-primary-700 font-medium dark:bg-primary-500/20 dark:text-primary-300"
                             : "text-muted hover:bg-dark-100/80 dark:bg-dark-800/70 hover:text-dark-900 dark:text-white"
                         }`}
                       >
@@ -159,7 +159,7 @@ export default function PrivacyPage() {
                       Selamat datang di Kalivergo. Kami menghargai kepercayaan Anda dan berkomitmen untuk melindungi privasi data pribadi Anda. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi Anda saat menggunakan platform kami.
                     </p>
                     <div className="bg-amber-500/10 border-l-4 border-amber-500/50 p-4 rounded-r-lg">
-                      <p className="text-amber-500 text-sm">
+                      <p className="text-amber-700 dark:text-amber-200 text-sm">
                         <strong>Penting:</strong> Dengan menggunakan Kalivergo, Anda menyetujui pengumpulan dan penggunaan informasi sesuai dengan kebijakan ini.
                       </p>
                     </div>
@@ -184,10 +184,12 @@ export default function PrivacyPage() {
                     <div className="grid gap-3">
                       {[
                         { label: "Nama Lengkap", desc: "Untuk identifikasi dan komunikasi" },
-                        { label: "Alamat Email", desc: "Untuk login dan notifikasi" },
+                        { label: "Alamat Email", desc: "Untuk login, verifikasi email, dan notifikasi" },
                         { label: "Nomor Induk Mahasiswa (NIM)", desc: "Untuk verifikasi keanggotaan kelas" },
-                        { label: "Foto Profil", desc: "Opsional, untuk personalisasi akun" },
-                        { label: "Data Akademik", desc: "Informasi tugas dan aktivitas kelas" },
+                        { label: "Nomor Telepon / WhatsApp", desc: "Untuk komunikasi pendaftaran kelas (owner)" },
+                        { label: "Foto Profil", desc: "Untuk personalisasi akun" },
+                        { label: "Dokumen KYC dan KTM", desc: "KTP dan selfie (owner) serta KTM (member) untuk verifikasi" },
+                        { label: "Data Aktivitas Kelas", desc: "Tugas, submission, jadwal, seminar, informasi, dan transaksi" },
                       ].map((item, idx) => (
                         <div key={idx} className="flex items-start gap-3 p-3 bg-dark-100/80 dark:bg-dark-800/70 rounded-lg border border-dark-200/60 dark:border-dark-800">
                           <div className="w-2 h-2 bg-primary-400 rounded-full mt-2 flex-shrink-0" />
@@ -217,10 +219,10 @@ export default function PrivacyPage() {
                     <p className="mb-4">Informasi Anda digunakan untuk:</p>
                     <ul className="space-y-3">
                       {[
-                        "Mengelola tugas dan kegiatan kelas",
-                        "Monitoring keuangan kas kelas",
-                        "Komunikasi antar anggota kelas",
-                        "Verifikasi keanggotaan",
+                        "Menyediakan fitur kelas: tugas, jadwal, seminar, informasi, dan portofolio",
+                        "Mengelola keuangan, uang kas, dan tunggakan kelas",
+                        "Verifikasi identitas dan persetujuan keanggotaan (email, KYC owner, KTM member)",
+                        "Menjalankan asisten AI berdasarkan knowledge base internal",
                         "Meningkatkan pengalaman pengguna",
                       ].map((item, idx) => (
                         <li key={idx} className="flex items-start gap-3">
@@ -246,7 +248,7 @@ export default function PrivacyPage() {
                   </div>
                   <div className="text-muted leading-relaxed">
                     <div className="bg-red-500/10 border-l-4 border-red-500/50 p-4 rounded-r-lg mb-4">
-                      <p className="text-red-400 font-medium">
+                      <p className="text-red-700 dark:text-red-300 font-medium">
                         Kami TIDAK menjual atau menyewakan data pribadi Anda kepada pihak ketiga.
                       </p>
                     </div>
@@ -256,7 +258,13 @@ export default function PrivacyPage() {
                         <div className="w-5 h-5 bg-primary-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                           <div className="w-2 h-2 bg-primary-400 rounded-full" />
                         </div>
-                        <span>Anggota kelas Kalivergo untuk keperluan akademik</span>
+                        <span>Anggota kelas (tenant) Kalivergo untuk keperluan akademik</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <div className="w-5 h-5 bg-primary-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <div className="w-2 h-2 bg-primary-400 rounded-full" />
+                        </div>
+                        <span>Penyedia layanan pihak ketiga (storage, email, AI) untuk keperluan operasional</span>
                       </li>
                       <li className="flex items-start gap-3">
                         <div className="w-5 h-5 bg-primary-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -275,18 +283,20 @@ export default function PrivacyPage() {
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold text-dark-900 dark:text-white">Keamanan Data</h2>
-                      <p className="text-faint text-dark-500 text-semibold mt-1">Langkah perlindungan yang kami ambil</p>
+                      <p className="text-faint font-semibold mt-1">Langkah perlindungan yang kami ambil</p>
                     </div>
                   </div>
                   <div className="text-muted leading-relaxed">
-                    <p className="text *:mb-4">
+                    <p className="mb-4">
                       Kami menggunakan enkripsi dan langkah keamanan standar industri untuk melindungi data Anda:
                     </p>
                     <div className="grid sm:grid-cols-2 gap-3">
                       {[
                         { title: "Enkripsi SSL/TLS", desc: "Data dikirim dengan aman" },
-                        { title: "Database Terenkripsi", desc: "Penyimpanan yang aman" },
-                        { title: "Autentikasi Credentials", desc: "Login via NIM & Password" },
+                        { title: "Password dan Token di-hash", desc: "Password diproses dengan bcrypt, token verifikasi sebagai hash" },
+                        { title: "Akses Berbasis Role & Tenant", desc: "Sesi, role, dan tenant membatasi akses data" },
+                        { title: "Validasi Input di Server", desc: "Input diverifikasi sebelum diproses" },
+                        { title: "Secret Management", desc: "Secret disimpan pada environment variable" },
                         { title: "Backup Berkala", desc: "Data selalu tersedia" },
                       ].map((item, idx) => (
                         <div key={idx} className="p-4 bg-dark-100/80 dark:bg-dark-800/70 rounded-lg border border-dark-200/60 dark:border-dark-800">
@@ -348,6 +358,9 @@ export default function PrivacyPage() {
                       {[
                         { name: "Vercel", purpose: "Hosting dan deployment aplikasi" },
                         { name: "Neon/PostgreSQL", purpose: "Penyimpanan database" },
+                        { name: "Cloudinary", purpose: "Penyimpanan foto profil dan dokumen KYC/KTM" },
+                        { name: "Brevo", purpose: "Pengiriman email verifikasi dan reset password" },
+                        { name: "Provider AI (Gemini, Groq, dll)", purpose: "Pemrosesan pertanyaan asisten AI" },
                         { name: "bcryptjs", purpose: "Enkripsi password" },
                       ].map((item, idx) => (
                         <div key={idx} className="flex items-center justify-between p-4 bg-dark-100/80 dark:bg-dark-800/70 rounded-lg border border-dark-200/60 dark:border-dark-800">
@@ -379,23 +392,23 @@ export default function PrivacyPage() {
                         <div className="w-5 h-5 bg-primary-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                           <div className="w-2 h-2 bg-primary-400 rounded-full" />
                         </div>
-                        <span>Session management (status login)</span>
+                        <span>Session management melalui cookie status login (kalivergo_user, kalivergo_tenant)</span>
                       </li>
                       <li className="flex items-start gap-3">
                         <div className="w-5 h-5 bg-primary-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                           <div className="w-2 h-2 bg-primary-400 rounded-full" />
                         </div>
-                        <span>Preferensi pengguna</span>
+                        <span>Konteks kelas (tenant) yang sedang diakses</span>
                       </li>
                       <li className="flex items-start gap-3">
                         <div className="w-5 h-5 bg-primary-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                           <div className="w-2 h-2 bg-primary-400 rounded-full" />
                         </div>
-                        <span>Keamanan dan autentikasi</span>
+                        <span>Keamanan, autentikasi, dan preferensi pengguna</span>
                       </li>
                     </ul>
-                    <p className="text-dark-500 dark:text-white mt-4 text-sm text-faint">
-                      Anda dapat mengontrol cookies melalui pengaturan browser Anda.
+                    <p className="text-faint mt-4 text-sm">
+                      Data sensitif seperti password atau dokumen KYC/KTM tidak disimpan pada cookie yang dapat dibaca JavaScript. Anda dapat mengontrol cookies melalui pengaturan browser Anda.
                     </p>
                   </div>
                 </section>
@@ -416,7 +429,7 @@ export default function PrivacyPage() {
                       {[
                         { title: "Akses Data", desc: "Melihat data pribadi yang kami simpan" },
                         { title: "Koreksi Data", desc: "Meminta perbaikan data yang tidak akurat" },
-                        { title: "Hapus Akun", desc: "Menghapus akun dan data Anda" },
+                        { title: "Hapus Akun", desc: "Menghapus akun dan data Anda sesuai ketentuan yang berlaku" },
                         { title: "Export Data", desc: "Mendapatkan salinan data Anda" },
                       ].map((item, idx) => (
                         <div key={idx} className="flex items-center gap-4 p-4 bg-dark-100/80 dark:bg-dark-800/70 rounded-lg border border-dark-200/60 dark:border-dark-800">
