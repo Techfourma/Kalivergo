@@ -132,6 +132,8 @@ export default async function FinancePage({
   const allCategories = [...incomeCategories, ...expenseCategories];
   const categoryMap = new Map(allCategories.map((cat) => [cat.id, cat.name]));
 
+  const userMap = new Map(users.map((user) => [user.id, user.name]));
+
   const { totalIncome, totalExpense, balance } = summary;
 
   return (
@@ -281,6 +283,11 @@ export default async function FinancePage({
                     <p className="text-base font-semibold text-dark-900 dark:text-dark-50">
                       {transaction.description}
                     </p>
+                    {transaction.userId && userMap.get(transaction.userId) ? (
+                      <p className="text-sm text-dark-500 dark:text-dark-400">
+                        Anggota: {userMap.get(transaction.userId)}
+                      </p>
+                    ) : null}
                     {transaction.categoryId && (
                       <p className="text-sm text-dark-500 dark:text-dark-400">
                         Kategori: {categoryMap.get(transaction.categoryId) ?? "Kategori tidak tersedia"}

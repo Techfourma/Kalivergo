@@ -228,8 +228,8 @@ export default function TenantNavbar({ user, onSignIn, onSignOut, tenantPath, cm
   const homeItems = filteredNavItems.filter((item) => item.label === "Home");
   const topLevelMenuItems = filteredNavItems.filter(
     (item) =>
-      !["Home", "Tasks", "Seminar"].includes(item.label) &&
-      (isCms || item.label !== "Schedule")
+      !["Home", "Tasks"].includes(item.label) &&
+      (isCms || (item.label !== "Schedule" && item.label !== "Seminar"))
   );
   const academicItems = filteredNavItems.filter((item) =>
     ["Tasks", "Schedule", "Seminar"].includes(item.label)
