@@ -9,7 +9,7 @@ import { getUangKasSchedules } from "@/features/finance/services/uang-kas.servic
 import UangKasSettingsCard from "@/components/cms/UangKasSettingsCard";
 import { notFound, redirect } from "next/navigation";
 import type { CmsRole } from "@prisma/client";
-import { TrendingUp, TrendingDown, Wallet } from "lucide-react";
+import { TrendingUp, TrendingDown, Wallet, Search } from "lucide-react";
 
 import PageBackground from '@/components/ui/PageBackground';
 
@@ -27,7 +27,7 @@ export default async function FinancePage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ startDate?: string; endDate?: string }>;
+  searchParams: Promise<{ startDate?: string; endDate?: string; search?: string }>;
 }) {
   const routeParams = await params;
   const tenantContext = await resolveTenantFromRoute(routeParams);
@@ -85,6 +85,7 @@ export default async function FinancePage({
   const endDateParam = resolvedSearchParams?.endDate;
   const startDate = startDateParam ? new Date(startDateParam) : undefined;
   const endDate = endDateParam ? new Date(endDateParam) : undefined;
+  const searchParam = resolvedSearchParams?.search?.trim();
 
   const categoryWhere = { tenantId };
   const { transactions, summary } = await getTransactionsWithSummary(tenantId, startDate, endDate);
@@ -135,6 +136,17 @@ export default async function FinancePage({
   const userMap = new Map(users.map((user) => [user.id, user.name]));
 
   const { totalIncome, totalExpense, balance } = summary;
+
+  const normalizedSearch = searchParam?.toLowerCase() ?? "";
+  const displayedTransactions = normalizedSearch
+    ? transactions.filter((t) => {
+        const memberName = (t.userId ? userMap.get(t.userId) : "") ?? "";
+        return (
+          (t.description?.toLowerCase() ?? "").includes(normalizedSearch) ||
+          memberName.toLowerCase().includes(normalizedSearch)
+        );
+      })
+    : transactions;
 
   return (
     <>
@@ -224,7 +236,19 @@ export default async function FinancePage({
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-400/60 to-transparent" />
           <div className="p-6 border-b border-dark-100 dark:border-dark-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 className="text-lg font-semibold text-dark-900 dark:text-dark-50">Riwayat Transaksi</h2>
-            <form className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+            <form className="flex flex-col sm:items-center gap-3">
+              <div className="relative w-full sm:w-72">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-dark-400" />
+                <input
+                  type="text"
+                  id="searchTransaction"
+                  name="search"
+                  defaultValue={searchParam}
+                  placeholder="Cari nama anggota atau nama transaksi..."
+                  className="w-full pl-9 pr-4 py-2 border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900/60 text-dark-900 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
               <div className="flex items-center gap-2">
                 <label className="text-xs font-medium text-dark-600 dark:text-dark-300" htmlFor="startDate">Dari:</label>
                 <input
@@ -252,7 +276,7 @@ export default async function FinancePage({
                 >
                   Filter
                 </button>
-                {(startDateParam || endDateParam) && (
+                {(startDateParam || endDateParam || searchParam) && (
                   <a
                     href={`/${routeParams.slug}/cms/finance`}
                     className="px-3 py-2 text-sm font-medium bg-dark-100 dark:bg-dark-700 text-dark-700 dark:text-dark-200 rounded-lg hover:bg-dark-200 dark:hover:bg-dark-600 transition-colors"
@@ -261,13 +285,18 @@ export default async function FinancePage({
                   </a>
                 )}
               </div>
+              </div>
             </form>
           </div>
           <div className="divide-y divide-dark-100 dark:divide-dark-700/60">
-            {transactions.length === 0 ? (
-              <div className="p-6 text-dark-500 dark:text-dark-400">Belum ada transaksi.</div>
+            {displayedTransactions.length === 0 ? (
+              <div className="p-6 text-dark-500 dark:text-dark-400">
+                {normalizedSearch && transactions.length > 0
+                  ? "Tidak ada transaksi yang sesuai pencarian."
+                  : "Belum ada transaksi."}
+              </div>
             ) : (
-              transactions.map((transaction) => (
+              displayedTransactions.map((transaction) => (
                 <div
                   key={transaction.id}
                   className="p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3 hover:bg-dark-50 dark:hover:bg-dark-800/40 transition-colors"
