@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     ],
   },
   other: {
-    'google-site-verification': 'LBWjCyn1qERTzpox2QxknNvONJCw8YZyET0bBTp_sLE',
+    'google-site-verification': 'u94i_pyiSb7x5VIiOMTs2oLlC-vFrj39MBPmS7HVuPw',
   },
 };
 
