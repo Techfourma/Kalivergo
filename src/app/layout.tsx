@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   title: "Kalivergo - Class Management System",
   description: "Platform manajemen kelas Kalivergo untuk tracking tugas, keuangan, dan kegiatan kelas",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo.jpg",
     apple: "/logo.jpg", 
   },
   openGraph: {
@@ -48,7 +48,7 @@ export default function RootLayout({
   return (
     <html lang="id" className={`${inter.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/logo.jpg" />
         <link rel="apple-touch-icon" href="/logo.jpg" />
         <link rel="shortcut icon" href="/logo.jpg" />
       </head>
